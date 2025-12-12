@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Footer() {
   return (
@@ -116,9 +117,15 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-neutral-800">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <span className="text-xl font-bold text-red-500">AnyTradesman</span>
-            </div>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/Logo - FINAL PNG.png"
+                alt="AnyTradesman"
+                width={40}
+                height={40}
+                className="h-10 w-auto"
+              />
+            </Link>
 
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="hover:text-white transition-colors">

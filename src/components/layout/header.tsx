@@ -66,7 +66,7 @@ export function Header() {
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center gap-2">
+            <Link href="/" className="flex-shrink-0">
               <Image
                 src="/Logo - FINAL PNG.png"
                 alt="AnyTradesman"
@@ -74,7 +74,6 @@ export function Header() {
                 height={40}
                 className="h-10 w-auto"
               />
-              <span className="text-xl font-bold text-red-500">AnyTradesman</span>
             </Link>
           </div>
 
