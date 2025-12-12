@@ -46,10 +46,41 @@ export default async function DashboardPage() {
 
   const isBusinessOwner = profile.role === 'business_owner';
 
-  // For now, show placeholder counts - these will be populated when the database is set up
-  const serviceRequestCount = 0;
-  const quoteCount = 0;
+  // Fetch actual counts
+  let serviceRequestCount = 0;
+  let quoteCount = 0;
   const messageCount = 0;
+
+  if (isBusinessOwner) {
+    // For business owners, count leads (open service requests in their area)
+    const { count: leadCount } = await supabase
+      .from('service_requests')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'open');
+    serviceRequestCount = leadCount || 0;
+  } else {
+    // For customers, count their service requests
+    const { count: requestCount } = await supabase
+      .from('service_requests')
+      .select('*', { count: 'exact', head: true })
+      .eq('customer_id', user.id);
+    serviceRequestCount = requestCount || 0;
+
+    // Count quotes received on their requests
+    const { data: userRequests } = await supabase
+      .from('service_requests')
+      .select('id')
+      .eq('customer_id', user.id);
+
+    if (userRequests && userRequests.length > 0) {
+      const requestIds = userRequests.map(r => r.id);
+      const { count: quotesReceived } = await supabase
+        .from('quotes')
+        .select('*', { count: 'exact', head: true })
+        .in('service_request_id', requestIds);
+      quoteCount = quotesReceived || 0;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-neutral-950">
@@ -87,7 +118,7 @@ export default async function DashboardPage() {
                   </CardContent>
                 </Card>
               </Link>
-              <Link href="/quotes">
+              <Link href="/leads">
                 <Card className="hover:border-neutral-700 transition-all cursor-pointer">
                   <CardContent className="pt-6">
                     <div className="flex items-center">
@@ -154,7 +185,7 @@ export default async function DashboardPage() {
             </Card>
           </Link>
 
-          <Link href="/quotes">
+          <Link href={isBusinessOwner ? "/my-quotes" : "/my-requests"}>
             <Card className="hover:border-neutral-700 transition-all cursor-pointer">
               <CardContent className="pt-6">
                 <div className="flex items-center">
@@ -162,8 +193,12 @@ export default async function DashboardPage() {
                     <Star className="w-6 h-6 text-yellow-400" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-neutral-400">Quotes</p>
-                    <p className="text-lg font-semibold text-white">{quoteCount}</p>
+                    <p className="text-sm font-medium text-neutral-400">
+                      {isBusinessOwner ? 'My Quotes' : 'My Requests'}
+                    </p>
+                    <p className="text-lg font-semibold text-white">
+                      {isBusinessOwner ? quoteCount : serviceRequestCount}
+                    </p>
                   </div>
                 </div>
               </CardContent>
