@@ -61,7 +61,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/10">
+    <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b border-white/20">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -79,23 +79,23 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-8">
-            <Link href="/search" className="text-neutral-300 hover:text-white font-medium">
+            <Link href="/search" className="text-neutral-700 hover:text-neutral-900 font-medium">
               Find a Pro
             </Link>
-            <Link href="/categories" className="text-neutral-300 hover:text-white font-medium">
+            <Link href="/categories" className="text-neutral-700 hover:text-neutral-900 font-medium">
               Services
             </Link>
-            <Link href="/how-it-works" className="text-neutral-300 hover:text-white font-medium">
+            <Link href="/how-it-works" className="text-neutral-700 hover:text-neutral-900 font-medium">
               How It Works
             </Link>
 
             {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-neutral-700 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-neutral-300 animate-pulse" />
             ) : user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 text-neutral-300 hover:text-white"
+                  className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900"
                 >
                   <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white font-medium">
                     {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
@@ -155,7 +155,7 @@ export function Header() {
             ) : (
               <div className="flex items-center space-x-4">
                 <Link href="/login">
-                  <Button variant="ghost" className="text-neutral-300 hover:text-white hover:bg-neutral-800">Sign in</Button>
+                  <Button variant="ghost" className="text-neutral-700 hover:text-neutral-900 hover:bg-neutral-200">Sign in</Button>
                 </Link>
                 <Link href="/register">
                   <Button>Get Started</Button>
@@ -168,7 +168,7 @@ export function Header() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-neutral-300 hover:text-white"
+              className="text-neutral-700 hover:text-neutral-900"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -177,24 +177,24 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 space-y-2">
+          <div className="md:hidden py-4 space-y-2 bg-white/90 rounded-lg mt-2">
             <Link
               href="/search"
-              className="block px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg"
+              className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
               Find a Pro
             </Link>
             <Link
               href="/categories"
-              className="block px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg"
+              className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
               Services
             </Link>
             <Link
               href="/how-it-works"
-              className="block px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg"
+              className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
               How It Works
@@ -204,7 +204,7 @@ export function Header() {
               <>
                 <Link
                   href="/dashboard"
-                  className="block px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg"
+                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
@@ -214,15 +214,15 @@ export function Header() {
                     handleSignOut();
                     setIsMenuOpen(false);
                   }}
-                  className="block w-full text-left px-4 py-2 text-red-400 hover:bg-neutral-800 rounded-lg"
+                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-neutral-100 rounded-lg"
                 >
                   Sign out
                 </button>
               </>
             ) : (
-              <div className="pt-4 space-y-2">
+              <div className="pt-4 space-y-2 px-4">
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full border-neutral-600 text-neutral-300 hover:bg-neutral-800">Sign in</Button>
+                  <Button variant="outline" className="w-full border-neutral-300 text-neutral-700 hover:bg-neutral-100">Sign in</Button>
                 </Link>
                 <Link href="/register" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full">Get Started</Button>
