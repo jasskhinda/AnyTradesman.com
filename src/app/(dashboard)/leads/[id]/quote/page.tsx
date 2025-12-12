@@ -234,7 +234,7 @@ export default function SendQuotePage() {
                     min="0"
                     step="0.01"
                     required
-                    className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 pl-10 pr-3 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 pl-10 pr-3 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                   />
                 </div>
                 <p className="text-xs text-neutral-500 mt-1">
@@ -254,7 +254,7 @@ export default function SendQuotePage() {
                     value={formData.estimated_duration}
                     onChange={(e) => setFormData({ ...formData, estimated_duration: e.target.value })}
                     placeholder="e.g., 2-3 hours, 1 day, 1 week"
-                    className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                   />
                 </div>
               </div>
@@ -268,7 +268,7 @@ export default function SendQuotePage() {
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   rows={5}
-                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="Introduce yourself and explain why you're the best fit for this job. Include:
 • Your relevant experience
 • What's included in your quote
@@ -300,8 +300,8 @@ export default function SendQuotePage() {
         </Card>
 
         {/* Tips */}
-        <div className="mt-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
-          <h3 className="font-medium text-blue-400 mb-2">Tips for a Winning Quote</h3>
+        <div className="mt-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+          <h3 className="font-medium text-red-400 mb-2">Tips for a Winning Quote</h3>
           <ul className="text-sm text-neutral-400 space-y-1">
             <li>• Be competitive but fair with your pricing</li>
             <li>• Clearly explain what&apos;s included in your quote</li>

@@ -56,7 +56,7 @@ interface ServiceRequest {
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   open: { label: 'Open', color: 'text-green-400 bg-green-500/20', icon: CheckCircle },
-  in_progress: { label: 'In Progress', color: 'text-blue-400 bg-blue-500/20', icon: Clock },
+  in_progress: { label: 'In Progress', color: 'text-red-400 bg-red-500/20', icon: Clock },
   completed: { label: 'Completed', color: 'text-neutral-400 bg-neutral-500/20', icon: CheckCircle },
   cancelled: { label: 'Cancelled', color: 'text-red-400 bg-red-500/20', icon: XCircle },
 };
@@ -270,7 +270,7 @@ export default function RequestDetailsPage() {
                 <CardTitle className="text-white flex items-center gap-2">
                   Quotes Received
                   {quotes.length > 0 && (
-                    <span className="text-sm font-normal px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">
+                    <span className="text-sm font-normal px-2 py-0.5 rounded bg-red-500/20 text-red-400">
                       {quotes.length}
                     </span>
                   )}
@@ -297,7 +297,7 @@ export default function RequestDetailsPage() {
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium text-white">{quote.businesses.name}</h4>
                               {quote.businesses.is_verified && (
-                                <CheckCircle className="w-4 h-4 text-blue-400" />
+                                <CheckCircle className="w-4 h-4 text-red-400" />
                               )}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-neutral-400">

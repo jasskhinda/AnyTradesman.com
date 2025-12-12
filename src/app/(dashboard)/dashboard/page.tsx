@@ -107,8 +107,8 @@ export default async function DashboardPage() {
                 <Card className="hover:border-neutral-700 transition-all cursor-pointer">
                   <CardContent className="pt-6">
                     <div className="flex items-center">
-                      <div className="p-3 rounded-lg bg-blue-500/20">
-                        <Building2 className="w-6 h-6 text-blue-400" />
+                      <div className="p-3 rounded-lg bg-red-500/20">
+                        <Building2 className="w-6 h-6 text-red-400" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-neutral-400">My Business</p>
@@ -140,8 +140,8 @@ export default async function DashboardPage() {
                 <Card className="hover:border-neutral-700 transition-all cursor-pointer">
                   <CardContent className="pt-6">
                     <div className="flex items-center">
-                      <div className="p-3 rounded-lg bg-blue-500/20">
-                        <Search className="w-6 h-6 text-blue-400" />
+                      <div className="p-3 rounded-lg bg-red-500/20">
+                        <Search className="w-6 h-6 text-red-400" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-neutral-400">Find Pros</p>
@@ -277,13 +277,13 @@ export default async function DashboardPage() {
 
             {/* Upgrade CTA for free tier */}
             {isBusinessOwner && (
-              <Card className="mt-6 bg-gradient-to-br from-blue-600 to-blue-700 text-white border-0">
+              <Card className="mt-6 bg-gradient-to-br from-red-600 to-red-700 text-white border-0">
                 <CardContent className="pt-6">
                   <h3 className="font-semibold text-lg">Upgrade to Pro</h3>
-                  <p className="mt-2 text-blue-100 text-sm">
+                  <p className="mt-2 text-red-100 text-sm">
                     Get more leads, priority placement, and advanced analytics.
                   </p>
-                  <Button className="mt-4 bg-white text-blue-600 hover:bg-neutral-100 w-full">
+                  <Button className="mt-4 bg-white text-red-600 hover:bg-neutral-100 w-full">
                     View Plans
                   </Button>
                 </CardContent>

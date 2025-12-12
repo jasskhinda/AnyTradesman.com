@@ -127,7 +127,7 @@ export default function AdminBusinessesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-xl font-bold text-blue-600">
+              <Link href="/" className="text-xl font-bold text-red-600">
                 AnyTradesman
               </Link>
               <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded">
@@ -176,7 +176,7 @@ export default function AdminBusinessesPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && fetchBusinesses()}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
               </div>
               <select
@@ -185,7 +185,7 @@ export default function AdminBusinessesPage() {
                   setVerifiedFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               >
                 <option value="all">All Businesses</option>
                 <option value="verified">Verified Only</option>
@@ -209,7 +209,7 @@ export default function AdminBusinessesPage() {
           <CardContent>
             {loading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
                 <p className="mt-2 text-gray-500">Loading businesses...</p>
               </div>
             ) : businesses.length === 0 ? (

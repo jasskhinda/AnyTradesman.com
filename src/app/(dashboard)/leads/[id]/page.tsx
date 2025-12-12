@@ -165,7 +165,7 @@ export default function LeadDetailsPage() {
                 </span>
               )}
               {existingQuote && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-400">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-500/20 text-red-400">
                   <CheckCircle className="w-3 h-3" />
                   You&apos;ve Quoted
                 </span>
@@ -253,10 +253,10 @@ export default function LeadDetailsPage() {
 
             {/* Existing Quote */}
             {existingQuote && (
-              <Card className="border-blue-500/30">
+              <Card className="border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-blue-400" />
+                    <CheckCircle className="w-5 h-5 text-red-400" />
                     Your Quote
                   </CardTitle>
                 </CardHeader>

@@ -58,10 +58,10 @@ export function CategoryCard({ name, slug, icon, description }: CategoryCardProp
   return (
     <Link
       href={`/search?category=${slug}`}
-      className="group flex flex-col items-center p-6 bg-neutral-900 rounded-xl border border-neutral-800 hover:border-blue-500 hover:bg-neutral-800 transition-all"
+      className="group flex flex-col items-center p-6 bg-neutral-900 rounded-xl border border-neutral-800 hover:border-red-500 hover:bg-neutral-800 transition-all"
     >
-      <div className="w-14 h-14 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 group-hover:bg-blue-500/30 transition-colors">
-        <IconComponent className="w-7 h-7 text-blue-400" />
+      <div className="w-14 h-14 rounded-full bg-red-500/20 flex items-center justify-center mb-4 group-hover:bg-red-500/30 transition-colors">
+        <IconComponent className="w-7 h-7 text-red-400" />
       </div>
       <h3 className="text-lg font-semibold text-white text-center">{name}</h3>
       {description && (

@@ -160,7 +160,7 @@ export default function ServiceRequestPage() {
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full ${
                     currentStep >= step.id
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-red-600 text-white'
                       : 'bg-neutral-800 text-neutral-500'
                   }`}
                 >
@@ -173,7 +173,7 @@ export default function ServiceRequestPage() {
                 {index < steps.length - 1 && (
                   <div
                     className={`w-12 h-0.5 mx-2 ${
-                      currentStep > step.id ? 'bg-blue-600' : 'bg-neutral-800'
+                      currentStep > step.id ? 'bg-red-600' : 'bg-neutral-800'
                     }`}
                   />
                 )}
@@ -217,7 +217,7 @@ export default function ServiceRequestPage() {
                     onClick={() => setFormData({ ...formData, category_id: category.id })}
                     className={`p-4 rounded-lg border text-left transition-colors ${
                       formData.category_id === category.id
-                        ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                        ? 'border-red-500 bg-red-500/20 text-red-400'
                         : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
                     }`}
                   >
@@ -234,8 +234,8 @@ export default function ServiceRequestPage() {
             {currentStep === 2 && (
               <div className="space-y-4">
                 {selectedCategory && (
-                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                    <p className="text-sm text-blue-400">
+                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                    <p className="text-sm text-red-400">
                       Selected: <span className="font-medium">{selectedCategory.name}</span>
                     </p>
                   </div>
@@ -254,7 +254,7 @@ export default function ServiceRequestPage() {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={5}
-                    className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="Describe your project in detail. Include:
 • What needs to be done
 • Current condition or issues
@@ -316,7 +316,7 @@ export default function ServiceRequestPage() {
                         onChange={(e) => setFormData({ ...formData, budget_min: e.target.value })}
                         placeholder="Min"
                         min="0"
-                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                       />
                     </div>
                     <div className="relative">
@@ -327,7 +327,7 @@ export default function ServiceRequestPage() {
                         onChange={(e) => setFormData({ ...formData, budget_max: e.target.value })}
                         placeholder="Max"
                         min="0"
-                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                       />
                     </div>
                   </div>
@@ -356,7 +356,7 @@ export default function ServiceRequestPage() {
                         onClick={() => setFormData({ ...formData, urgency: option.value })}
                         className={`p-3 rounded-lg border text-center transition-colors ${
                           formData.urgency === option.value
-                            ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                            ? 'border-red-500 bg-red-500/20 text-red-400'
                             : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
                         }`}
                       >

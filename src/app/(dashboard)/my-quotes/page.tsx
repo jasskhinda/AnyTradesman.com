@@ -202,7 +202,7 @@ export default function MyQuotesPage() {
               onClick={() => setFilter(status)}
               className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                 filter === status
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-red-600 text-white'
                   : 'bg-neutral-800 text-neutral-400 hover:text-white'
               }`}
             >

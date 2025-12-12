@@ -204,7 +204,7 @@ export default function BusinessSetupPage() {
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full ${
                     currentStep >= step.id
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-red-600 text-white'
                       : 'bg-neutral-800 text-neutral-500'
                   }`}
                 >
@@ -217,7 +217,7 @@ export default function BusinessSetupPage() {
                 {index < steps.length - 1 && (
                   <div
                     className={`w-16 h-0.5 mx-2 ${
-                      currentStep > step.id ? 'bg-blue-600' : 'bg-neutral-800'
+                      currentStep > step.id ? 'bg-red-600' : 'bg-neutral-800'
                     }`}
                   />
                 )}
@@ -266,7 +266,7 @@ export default function BusinessSetupPage() {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
-                    className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="Tell customers about your business, experience, and what makes you stand out..."
                   />
                 </div>
@@ -353,7 +353,7 @@ export default function BusinessSetupPage() {
                       onClick={() => toggleCategory(category.id)}
                       className={`p-3 rounded-lg border text-left text-sm transition-colors ${
                         formData.selectedCategories.includes(category.id)
-                          ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                          ? 'border-red-500 bg-red-500/20 text-red-400'
                           : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
                       }`}
                     >

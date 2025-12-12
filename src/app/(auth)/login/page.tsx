@@ -55,7 +55,7 @@ function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <Link href="/" className="inline-block mb-4">
-          <span className="text-2xl font-bold text-blue-500">AnyTradesman</span>
+          <span className="text-2xl font-bold text-red-500">AnyTradesman</span>
         </Link>
         <CardTitle className="text-white">Welcome back</CardTitle>
         <CardDescription>Sign in to your account to continue</CardDescription>
@@ -90,10 +90,10 @@ function LoginForm() {
 
           <div className="flex items-center justify-between">
             <label className="flex items-center">
-              <input type="checkbox" className="rounded border-neutral-600 bg-neutral-800 text-blue-600 focus:ring-blue-500" />
+              <input type="checkbox" className="rounded border-neutral-600 bg-neutral-800 text-red-600 focus:ring-red-500" />
               <span className="ml-2 text-sm text-neutral-400">Remember me</span>
             </label>
-            <Link href="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300">
+            <Link href="/forgot-password" className="text-sm text-red-400 hover:text-red-300">
               Forgot password?
             </Link>
           </div>
@@ -143,7 +143,7 @@ function LoginForm() {
 
         <p className="mt-6 text-center text-sm text-neutral-400">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-blue-400 hover:text-blue-300 font-medium">
+          <Link href="/register" className="text-red-400 hover:text-red-300 font-medium">
             Sign up
           </Link>
         </p>

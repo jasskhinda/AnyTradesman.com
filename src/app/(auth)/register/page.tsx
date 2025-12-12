@@ -92,7 +92,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="inline-block mb-4">
-            <span className="text-2xl font-bold text-blue-500">AnyTradesman</span>
+            <span className="text-2xl font-bold text-red-500">AnyTradesman</span>
           </Link>
           <CardTitle className="text-white">Create your account</CardTitle>
           <CardDescription>Get started with AnyTradesman today</CardDescription>
@@ -109,7 +109,7 @@ export default function RegisterPage() {
                 onClick={() => setAccountType('customer')}
                 className={`p-4 rounded-lg border-2 text-center transition-colors ${
                   accountType === 'customer'
-                    ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                    ? 'border-red-500 bg-red-500/20 text-red-400'
                     : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
                 }`}
               >
@@ -123,7 +123,7 @@ export default function RegisterPage() {
                 onClick={() => setAccountType('business_owner')}
                 className={`p-4 rounded-lg border-2 text-center transition-colors ${
                   accountType === 'business_owner'
-                    ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                    ? 'border-red-500 bg-red-500/20 text-red-400'
                     : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
                 }`}
               >
@@ -186,15 +186,15 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 required
-                className="mt-1 rounded border-neutral-600 bg-neutral-800 text-blue-600 focus:ring-blue-500"
+                className="mt-1 rounded border-neutral-600 bg-neutral-800 text-red-600 focus:ring-red-500"
               />
               <span className="ml-2 text-sm text-neutral-400">
                 I agree to the{' '}
-                <Link href="/terms" className="text-blue-400 hover:text-blue-300">
+                <Link href="/terms" className="text-red-400 hover:text-red-300">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
+                <Link href="/privacy" className="text-red-400 hover:text-red-300">
                   Privacy Policy
                 </Link>
               </span>
@@ -207,7 +207,7 @@ export default function RegisterPage() {
 
           <p className="mt-6 text-center text-sm text-neutral-400">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
+            <Link href="/login" className="text-red-400 hover:text-red-300 font-medium">
               Sign in
             </Link>
           </p>

@@ -212,11 +212,11 @@ export default function SubscriptionPage() {
 
         {/* Current Subscription Status */}
         {subscription && (
-          <Card className="mb-8 bg-blue-500/10 border-blue-500/30">
+          <Card className="mb-8 bg-red-500/10 border-red-500/30">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Crown className="w-5 h-5 text-blue-400" />
+                  <Crown className="w-5 h-5 text-red-400" />
                   <div>
                     <p className="font-medium text-white">
                       Current Plan: {subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}
@@ -238,7 +238,7 @@ export default function SubscriptionPage() {
         )}
 
         {/* Early Bird Banner */}
-        <Card className="mb-8 bg-gradient-to-r from-green-500/20 to-blue-500/20 border-green-500/30">
+        <Card className="mb-8 bg-gradient-to-r from-green-500/20 to-red-500/20 border-green-500/30">
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
               <div className="p-3 rounded-full bg-green-500/20">
@@ -264,7 +264,7 @@ export default function SubscriptionPage() {
                 tier.highlight
                   ? 'border-green-500 bg-green-500/5'
                   : tier.popular
-                  ? 'border-blue-500 bg-blue-500/5'
+                  ? 'border-red-500 bg-red-500/5'
                   : ''
               }`}
             >
@@ -274,7 +274,7 @@ export default function SubscriptionPage() {
                 </div>
               )}
               {tier.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium text-white bg-blue-500">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium text-white bg-red-500">
                   Most Popular
                 </div>
               )}

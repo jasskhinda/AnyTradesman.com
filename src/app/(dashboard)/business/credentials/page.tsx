@@ -201,12 +201,12 @@ export default function CredentialsPage() {
         </div>
 
         {/* Info Card */}
-        <Card className="mb-6 bg-blue-500/10 border-blue-500/30">
+        <Card className="mb-6 bg-red-500/10 border-red-500/30">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+              <Shield className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-medium text-blue-400">Why add credentials?</h3>
+                <h3 className="font-medium text-red-400">Why add credentials?</h3>
                 <p className="text-sm text-neutral-400 mt-1">
                   Verified businesses receive a badge on their profile and appear higher in search results.
                   Customers trust verified professionals more, leading to more leads and jobs.
@@ -237,7 +237,7 @@ export default function CredentialsPage() {
                 <select
                   value={newCredential.credential_type}
                   onChange={(e) => setNewCredential({ ...newCredential, credential_type: e.target.value })}
-                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                   {credentialTypes.map((type) => (
                     <option key={type.value} value={type.value}>

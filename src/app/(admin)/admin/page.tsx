@@ -102,7 +102,7 @@ export default async function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-xl font-bold text-blue-500">
+              <Link href="/" className="text-xl font-bold text-red-500">
                 AnyTradesman
               </Link>
               <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-medium rounded">
@@ -149,8 +149,8 @@ export default async function AdminDashboard() {
                   <p className="text-3xl font-bold text-white">{stats.totalUsers}</p>
                   <p className="text-sm text-green-400 mt-1">+{stats.newUsersToday} today</p>
                 </div>
-                <div className="p-3 bg-blue-500/20 rounded-lg">
-                  <Users className="w-6 h-6 text-blue-400" />
+                <div className="p-3 bg-red-500/20 rounded-lg">
+                  <Users className="w-6 h-6 text-red-400" />
                 </div>
               </div>
             </CardContent>
@@ -208,7 +208,7 @@ export default async function AdminDashboard() {
           <Link href="/admin/users">
             <Card className="hover:border-neutral-700 transition-colors cursor-pointer h-full">
               <CardContent className="pt-6 flex items-center gap-4">
-                <Users className="w-8 h-8 text-blue-400" />
+                <Users className="w-8 h-8 text-red-400" />
                 <div>
                   <p className="font-medium text-white">Manage Users</p>
                   <p className="text-sm text-neutral-400">View, edit, suspend</p>
@@ -261,7 +261,7 @@ export default async function AdminDashboard() {
                   <CardTitle className="text-white">Recent Users</CardTitle>
                   <CardDescription>Latest user registrations</CardDescription>
                 </div>
-                <Link href="/admin/users" className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1">
+                <Link href="/admin/users" className="text-red-400 hover:text-red-300 text-sm font-medium flex items-center gap-1">
                   View all <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -303,7 +303,7 @@ export default async function AdminDashboard() {
                   <CardTitle className="text-white">Recent Businesses</CardTitle>
                   <CardDescription>Latest business registrations</CardDescription>
                 </div>
-                <Link href="/admin/businesses" className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1">
+                <Link href="/admin/businesses" className="text-red-400 hover:text-red-300 text-sm font-medium flex items-center gap-1">
                   View all <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

@@ -26,7 +26,7 @@ export function BusinessCard({ business }: BusinessCardProps) {
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-700" />
+          <div className="w-full h-full bg-gradient-to-br from-red-600 to-red-700" />
         )}
 
         {/* Logo */}
@@ -41,7 +41,7 @@ export function BusinessCard({ business }: BusinessCardProps) {
                 className="object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
+              <div className="w-full h-full bg-red-600 flex items-center justify-center text-white text-xl font-bold">
                 {business.name.charAt(0)}
               </div>
             )}
@@ -59,7 +59,7 @@ export function BusinessCard({ business }: BusinessCardProps) {
 
       {/* Content */}
       <div className="pt-8 pb-4 px-4">
-        <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+        <h3 className="text-lg font-semibold text-white group-hover:text-red-400 transition-colors">
           {business.name}
         </h3>
 

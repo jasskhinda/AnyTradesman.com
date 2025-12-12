@@ -74,7 +74,7 @@ export function Header() {
                 height={40}
                 className="h-10 w-auto"
               />
-              <span className="text-xl font-bold text-blue-500">AnyTradesman</span>
+              <span className="text-xl font-bold text-red-500">AnyTradesman</span>
             </Link>
           </div>
 
@@ -98,7 +98,7 @@ export function Header() {
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                   className="flex items-center space-x-2 text-neutral-300 hover:text-white"
                 >
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+                  <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white font-medium">
                     {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                   </div>
                 </button>

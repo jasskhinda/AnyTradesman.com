@@ -39,8 +39,8 @@ export default function ForgotPasswordPage() {
       <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mx-auto w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="inline-block mb-4">
-            <span className="text-2xl font-bold text-blue-500">AnyTradesman</span>
+            <span className="text-2xl font-bold text-red-500">AnyTradesman</span>
           </Link>
           <CardTitle className="text-white">Reset your password</CardTitle>
           <CardDescription>
@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
 
           <p className="mt-6 text-center text-sm text-neutral-400">
             Remember your password?{' '}
-            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
+            <Link href="/login" className="text-red-400 hover:text-red-300 font-medium">
               Sign in
             </Link>
           </p>

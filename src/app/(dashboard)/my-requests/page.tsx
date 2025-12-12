@@ -34,7 +34,7 @@ interface ServiceRequest {
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   open: { label: 'Open', color: 'text-green-400 bg-green-500/20', icon: CheckCircle },
-  in_progress: { label: 'In Progress', color: 'text-blue-400 bg-blue-500/20', icon: Clock },
+  in_progress: { label: 'In Progress', color: 'text-red-400 bg-red-500/20', icon: Clock },
   completed: { label: 'Completed', color: 'text-neutral-400 bg-neutral-500/20', icon: CheckCircle },
   cancelled: { label: 'Cancelled', color: 'text-red-400 bg-red-500/20', icon: XCircle },
 };
@@ -141,7 +141,7 @@ export default function MyRequestsPage() {
               onClick={() => setFilter(status)}
               className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                 filter === status
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-red-600 text-white'
                   : 'bg-neutral-800 text-neutral-400 hover:text-white'
               }`}
             >
@@ -218,7 +218,7 @@ export default function MyRequestsPage() {
 
                         <div className="flex items-center gap-4 ml-4">
                           {request.quote_count !== undefined && request.quote_count > 0 && (
-                            <div className="flex items-center gap-1 px-2 py-1 rounded bg-blue-500/20 text-blue-400 text-sm">
+                            <div className="flex items-center gap-1 px-2 py-1 rounded bg-red-500/20 text-red-400 text-sm">
                               <MessageSquare className="w-4 h-4" />
                               <span>{request.quote_count} quote{request.quote_count !== 1 ? 's' : ''}</span>
                             </div>

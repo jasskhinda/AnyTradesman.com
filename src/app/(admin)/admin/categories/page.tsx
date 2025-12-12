@@ -200,7 +200,7 @@ export default function AdminCategoriesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-xl font-bold text-blue-600">
+              <Link href="/" className="text-xl font-bold text-red-600">
                 AnyTradesman
               </Link>
               <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded">
@@ -263,7 +263,7 @@ export default function AdminCategoriesPage() {
                       name: e.target.value,
                       slug: generateSlug(e.target.value),
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="e.g., Plumbing"
                   />
                 </div>
@@ -275,7 +275,7 @@ export default function AdminCategoriesPage() {
                     type="text"
                     value={newCategory.slug}
                     onChange={(e) => setNewCategory({ ...newCategory, slug: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="e.g., plumbing"
                   />
                 </div>
@@ -287,7 +287,7 @@ export default function AdminCategoriesPage() {
                     type="text"
                     value={newCategory.description}
                     onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="Brief description of this category"
                   />
                 </div>
@@ -299,7 +299,7 @@ export default function AdminCategoriesPage() {
                     type="text"
                     value={newCategory.icon}
                     onChange={(e) => setNewCategory({ ...newCategory, icon: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="e.g., wrench, zap, home"
                   />
                 </div>
@@ -309,7 +309,7 @@ export default function AdminCategoriesPage() {
                       type="checkbox"
                       checked={newCategory.is_active}
                       onChange={(e) => setNewCategory({ ...newCategory, is_active: e.target.checked })}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">Active (visible on site)</span>
                   </label>
@@ -338,7 +338,7 @@ export default function AdminCategoriesPage() {
           <CardContent>
             {loading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
                 <p className="mt-2 text-gray-500">Loading categories...</p>
               </div>
             ) : categories.length === 0 ? (

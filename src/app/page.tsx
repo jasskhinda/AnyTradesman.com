@@ -85,7 +85,7 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-neutral-900 via-neutral-900 to-blue-950">
+        <section className="relative bg-gradient-to-br from-neutral-900 via-neutral-900 to-red-950">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
             <div className="text-center max-w-3xl mx-auto">
@@ -102,15 +102,15 @@ export default function HomePage() {
 
               <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-neutral-400">
                 <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1 text-blue-400" />
+                  <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
                   Free quotes
                 </span>
                 <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1 text-blue-400" />
+                  <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
                   Verified professionals
                 </span>
                 <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1 text-blue-400" />
+                  <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
                   Read real reviews
                 </span>
               </div>
@@ -124,7 +124,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-blue-400">
+                  <div className="text-3xl md:text-4xl font-bold text-red-400">
                     {stat.value}
                   </div>
                   <div className="mt-1 text-sm text-neutral-400">{stat.label}</div>
@@ -174,7 +174,7 @@ export default function HomePage() {
             <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {features.map((feature) => (
                 <div key={feature.title} className="text-center">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-500/20 text-blue-400">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-500/20 text-red-400">
                     <feature.icon className="w-7 h-7" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold text-white">
@@ -204,7 +204,7 @@ export default function HomePage() {
                     <div className="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-neutral-800" />
                   )}
                   <div className="relative flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
+                    <div className="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center text-2xl font-bold">
                       {item.step}
                     </div>
                     <h3 className="mt-4 text-lg font-semibold text-white">
@@ -219,14 +219,14 @@ export default function HomePage() {
         </section>
 
         {/* CTA for Businesses */}
-        <section className="bg-gradient-to-r from-blue-600 to-blue-700 py-16 md:py-24">
+        <section className="bg-gradient-to-r from-red-600 to-red-700 py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="md:flex md:items-center md:justify-between">
               <div className="max-w-2xl">
                 <h2 className="text-3xl font-bold text-white">
                   Are You a Service Professional?
                 </h2>
-                <p className="mt-4 text-lg text-blue-100">
+                <p className="mt-4 text-lg text-red-100">
                   Join thousands of contractors growing their business with AnyTradesman. Get matched with customers in your area and build your reputation.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-4">
@@ -248,7 +248,7 @@ export default function HomePage() {
                 <Link href="/register?type=business">
                   <Button
                     size="lg"
-                    className="bg-white text-blue-600 hover:bg-neutral-100"
+                    className="bg-white text-red-600 hover:bg-neutral-100"
                   >
                     Join as a Pro
                     <ArrowRight className="w-4 h-4 ml-2" />

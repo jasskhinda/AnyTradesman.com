@@ -186,8 +186,8 @@ export default function BusinessPage() {
       <div className="min-h-screen bg-neutral-950">
         <Header />
         <main className="max-w-2xl mx-auto px-4 py-16 text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-            <Building2 className="w-10 h-10 text-blue-400" />
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
+            <Building2 className="w-10 h-10 text-red-400" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-4">Set Up Your Business Profile</h1>
           <p className="text-neutral-400 mb-8">
@@ -236,8 +236,8 @@ export default function BusinessPage() {
             <Card className="hover:border-neutral-700 transition-all cursor-pointer">
               <CardContent className="pt-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-blue-500/20">
-                    <FileCheck className="w-6 h-6 text-blue-400" />
+                  <div className="p-3 rounded-lg bg-red-500/20">
+                    <FileCheck className="w-6 h-6 text-red-400" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm text-neutral-400">Credentials</p>
@@ -328,7 +328,7 @@ export default function BusinessPage() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                 placeholder="Tell customers about your business, services, and experience..."
               />
             </div>
@@ -398,7 +398,7 @@ export default function BusinessPage() {
                     onClick={() => toggleCategory(category.id)}
                     className={`p-3 rounded-lg border text-left text-sm transition-colors ${
                       businessCategories.includes(category.id)
-                        ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                        ? 'border-red-500 bg-red-500/20 text-red-400'
                         : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
                     }`}
                   >

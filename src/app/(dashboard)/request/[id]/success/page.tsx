@@ -132,15 +132,15 @@ export default function RequestSuccessPage() {
               <h3 className="font-medium text-white mb-3">What happens next?</h3>
               <ul className="text-left space-y-2 text-sm text-neutral-400">
                 <li className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0 text-xs font-medium">1</span>
+                  <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-medium">1</span>
                   <span>Local professionals are notified of your request</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0 text-xs font-medium">2</span>
+                  <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-medium">2</span>
                   <span>Interested pros will send you quotes and contact info</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0 text-xs font-medium">3</span>
+                  <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-medium">3</span>
                   <span>Compare quotes and choose the best fit for your project</span>
                 </li>
               </ul>
