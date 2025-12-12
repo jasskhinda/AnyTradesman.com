@@ -122,7 +122,7 @@ export default function PricingPage() {
                   <Link href="/register" className="block mt-8">
                     <Button
                       className="w-full"
-                      variant={plan.popular ? 'default' : 'outline'}
+                      variant={plan.popular ? 'primary' : 'outline'}
                     >
                       {plan.cta}
                     </Button>
