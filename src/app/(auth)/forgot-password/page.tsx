@@ -36,22 +36,22 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mx-auto w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <CardTitle>Check your email</CardTitle>
+            <CardTitle className="text-white">Check your email</CardTitle>
             <CardDescription>
-              If an account exists for <strong>{email}</strong>, you&apos;ll receive a password reset link shortly.
+              If an account exists for <strong className="text-white">{email}</strong>, you&apos;ll receive a password reset link shortly.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/login">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white">
                 Back to login
               </Button>
             </Link>
@@ -62,13 +62,13 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="inline-block mb-4">
-            <span className="text-2xl font-bold text-blue-600">AnyTradesman</span>
+            <span className="text-2xl font-bold text-blue-500">AnyTradesman</span>
           </Link>
-          <CardTitle>Reset your password</CardTitle>
+          <CardTitle className="text-white">Reset your password</CardTitle>
           <CardDescription>
             Enter your email address and we&apos;ll send you a link to reset your password.
           </CardDescription>
@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+              <div className="p-3 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
                 {error}
               </div>
             )}
@@ -96,9 +96,9 @@ export default function ForgotPasswordPage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className="mt-6 text-center text-sm text-neutral-400">
             Remember your password?{' '}
-            <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
               Sign in
             </Link>
           </p>
