@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { stripe, PRICING_TIERS, PricingTierId } from '@/lib/stripe';
+import { getStripe, PRICING_TIERS, PricingTierId } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
@@ -39,6 +39,7 @@ export async function POST(request: Request) {
 
     const tier = PRICING_TIERS[tierId as PricingTierId];
     const customerEmail = business.email || business.profiles?.email;
+    const stripe = getStripe();
 
     // Get or create Stripe customer
     let customerId: string;

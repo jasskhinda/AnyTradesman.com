@@ -1,9 +1,30 @@
 import Stripe from 'stripe';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-  typescript: true,
-});
+// Lazy initialization to prevent build-time errors
+let _stripe: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not set');
+    }
+    _stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2025-11-17.clover',
+      typescript: true,
+    });
+  }
+  return _stripe;
+}
+
+// For backwards compatibility - but only use in API routes
+export const stripe = {
+  get customers() { return getStripe().customers; },
+  get subscriptions() { return getStripe().subscriptions; },
+  get checkout() { return getStripe().checkout; },
+  get webhooks() { return getStripe().webhooks; },
+  get prices() { return getStripe().prices; },
+};
 
 // Pricing configuration - matches client requirements
 export const PRICING_TIERS = {

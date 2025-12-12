@@ -92,7 +92,12 @@ export default function LeadsPage() {
 
         if (businessCategories) {
           const categories = businessCategories
-            .map((bc: { categories: Category | null }) => bc.categories)
+            .map((bc: { categories: Category | Category[] | null }) => {
+              if (Array.isArray(bc.categories)) {
+                return bc.categories[0] || null;
+              }
+              return bc.categories;
+            })
             .filter((c): c is Category => c !== null);
           setMyCategories(categories);
         }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
@@ -16,6 +16,7 @@ export async function POST(request: Request) {
   const signature = headersList.get('stripe-signature')!;
 
   let event: Stripe.Event;
+  const stripe = getStripe();
 
   try {
     event = stripe.webhooks.constructEvent(
@@ -43,7 +44,14 @@ export async function POST(request: Request) {
         if (session.mode === 'subscription') {
           // Create or update subscription
           const subscriptionId = session.subscription as string;
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId, {
+            expand: ['items.data'],
+          });
+
+          // Get period dates from the first subscription item
+          const firstItem = subscriptionData.items?.data?.[0];
+          const periodStart = firstItem?.current_period_start;
+          const periodEnd = firstItem?.current_period_end;
 
           await supabaseAdmin
             .from('subscriptions')
@@ -53,8 +61,8 @@ export async function POST(request: Request) {
               status: 'active',
               stripe_customer_id: session.customer as string,
               stripe_subscription_id: subscriptionId,
-              current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+              current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+              current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
             }, {
               onConflict: 'business_id',
             });
@@ -77,12 +85,17 @@ export async function POST(request: Request) {
           .single();
 
         if (existingSub) {
+          // Get period dates from the first subscription item
+          const firstItem = subscription.items?.data?.[0];
+          const periodStart = firstItem?.current_period_start;
+          const periodEnd = firstItem?.current_period_end;
+
           await supabaseAdmin
             .from('subscriptions')
             .update({
               status: mapStripeStatus(subscription.status),
-              current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+              current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+              current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
             })
             .eq('business_id', existingSub.business_id);
         }
