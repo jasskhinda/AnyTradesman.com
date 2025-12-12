@@ -61,7 +61,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800">
+    <header className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/10">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -70,9 +70,9 @@ export function Header() {
               <Image
                 src="/Logo - FINAL PNG.png"
                 alt="AnyTradesman"
-                width={40}
-                height={40}
-                className="h-10 w-auto"
+                width={56}
+                height={56}
+                className="h-14 w-auto"
               />
             </Link>
           </div>
