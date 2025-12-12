@@ -55,15 +55,15 @@ function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <Link href="/" className="inline-block mb-4">
-          <span className="text-2xl font-bold text-blue-600">AnyTradesman</span>
+          <span className="text-2xl font-bold text-blue-500">AnyTradesman</span>
         </Link>
-        <CardTitle>Welcome back</CardTitle>
+        <CardTitle className="text-white">Welcome back</CardTitle>
         <CardDescription>Sign in to your account to continue</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-4">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+            <div className="p-3 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
               {error}
             </div>
           )}
@@ -90,10 +90,10 @@ function LoginForm() {
 
           <div className="flex items-center justify-between">
             <label className="flex items-center">
-              <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-              <span className="ml-2 text-sm text-gray-600">Remember me</span>
+              <input type="checkbox" className="rounded border-neutral-600 bg-neutral-800 text-blue-600 focus:ring-blue-500" />
+              <span className="ml-2 text-sm text-neutral-400">Remember me</span>
             </label>
-            <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+            <Link href="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300">
               Forgot password?
             </Link>
           </div>
@@ -106,17 +106,17 @@ function LoginForm() {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t border-neutral-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              <span className="px-2 bg-neutral-900 text-neutral-500">Or continue with</span>
             </div>
           </div>
 
           <Button
             type="button"
             variant="outline"
-            className="w-full mt-4"
+            className="w-full mt-4 border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             onClick={handleGoogleLogin}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -141,9 +141,9 @@ function LoginForm() {
           </Button>
         </div>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-neutral-400">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-blue-600 hover:text-blue-500 font-medium">
+          <Link href="/register" className="text-blue-400 hover:text-blue-300 font-medium">
             Sign up
           </Link>
         </p>
@@ -154,16 +154,16 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4 py-12">
       <Suspense fallback={
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto" />
-              <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto" />
-              <div className="h-10 bg-gray-200 rounded" />
-              <div className="h-10 bg-gray-200 rounded" />
-              <div className="h-10 bg-gray-200 rounded" />
+              <div className="h-8 bg-neutral-800 rounded w-1/2 mx-auto" />
+              <div className="h-4 bg-neutral-800 rounded w-2/3 mx-auto" />
+              <div className="h-10 bg-neutral-800 rounded" />
+              <div className="h-10 bg-neutral-800 rounded" />
+              <div className="h-10 bg-neutral-800 rounded" />
             </div>
           </CardContent>
         </Card>

@@ -80,19 +80,19 @@ const howItWorks = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-neutral-950">
       <Header />
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white">
-          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+        <section className="relative bg-gradient-to-br from-neutral-900 via-neutral-900 to-blue-950">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
             <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
                 Find Trusted Local Pros for Any Job
               </h1>
-              <p className="mt-6 text-lg md:text-xl text-blue-100">
+              <p className="mt-6 text-lg md:text-xl text-neutral-300">
                 Connect with verified contractors, get free quotes, and hire the right professional for your home projects.
               </p>
 
@@ -100,17 +100,17 @@ export default function HomePage() {
                 <SearchBar size="large" />
               </div>
 
-              <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-blue-100">
+              <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-neutral-400">
                 <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1" />
+                  <CheckCircle className="w-4 h-4 mr-1 text-blue-400" />
                   Free quotes
                 </span>
                 <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1" />
+                  <CheckCircle className="w-4 h-4 mr-1 text-blue-400" />
                   Verified professionals
                 </span>
                 <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1" />
+                  <CheckCircle className="w-4 h-4 mr-1 text-blue-400" />
                   Read real reviews
                 </span>
               </div>
@@ -119,15 +119,15 @@ export default function HomePage() {
         </section>
 
         {/* Stats Section */}
-        <section className="bg-white border-b border-gray-200">
+        <section className="bg-neutral-900 border-b border-neutral-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-blue-600">
+                  <div className="text-3xl md:text-4xl font-bold text-blue-400">
                     {stat.value}
                   </div>
-                  <div className="mt-1 text-sm text-gray-500">{stat.label}</div>
+                  <div className="mt-1 text-sm text-neutral-400">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -135,11 +135,11 @@ export default function HomePage() {
         </section>
 
         {/* Categories Section */}
-        <section className="bg-gray-50 py-16 md:py-24">
+        <section className="bg-neutral-950 py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">Popular Services</h2>
-              <p className="mt-4 text-lg text-gray-600">
+              <h2 className="text-3xl font-bold text-white">Popular Services</h2>
+              <p className="mt-4 text-lg text-neutral-400">
                 Browse our most requested home service categories
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function HomePage() {
 
             <div className="mt-10 text-center">
               <Link href="/categories">
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white">
                   View All Services
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -162,11 +162,11 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section className="bg-white py-16 md:py-24">
+        <section className="bg-neutral-900 py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">Why Choose AnyTradesman?</h2>
-              <p className="mt-4 text-lg text-gray-600">
+              <h2 className="text-3xl font-bold text-white">Why Choose AnyTradesman?</h2>
+              <p className="mt-4 text-lg text-neutral-400">
                 We make finding and hiring professionals easy and safe
               </p>
             </div>
@@ -174,13 +174,13 @@ export default function HomePage() {
             <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {features.map((feature) => (
                 <div key={feature.title} className="text-center">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 text-blue-600">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-500/20 text-blue-400">
                     <feature.icon className="w-7 h-7" />
                   </div>
-                  <h3 className="mt-4 text-lg font-semibold text-gray-900">
+                  <h3 className="mt-4 text-lg font-semibold text-white">
                     {feature.title}
                   </h3>
-                  <p className="mt-2 text-gray-600">{feature.description}</p>
+                  <p className="mt-2 text-neutral-400">{feature.description}</p>
                 </div>
               ))}
             </div>
@@ -188,11 +188,11 @@ export default function HomePage() {
         </section>
 
         {/* How It Works Section */}
-        <section className="bg-gray-50 py-16 md:py-24">
+        <section className="bg-neutral-950 py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">How It Works</h2>
-              <p className="mt-4 text-lg text-gray-600">
+              <h2 className="text-3xl font-bold text-white">How It Works</h2>
+              <p className="mt-4 text-lg text-neutral-400">
                 Get your project done in 4 easy steps
               </p>
             </div>
@@ -201,16 +201,16 @@ export default function HomePage() {
               {howItWorks.map((item, index) => (
                 <div key={item.step} className="relative">
                   {index < howItWorks.length - 1 && (
-                    <div className="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-blue-200" />
+                    <div className="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-neutral-800" />
                   )}
                   <div className="relative flex flex-col items-center text-center">
                     <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
                       {item.step}
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold text-gray-900">
+                    <h3 className="mt-4 text-lg font-semibold text-white">
                       {item.title}
                     </h3>
-                    <p className="mt-2 text-gray-600">{item.description}</p>
+                    <p className="mt-2 text-neutral-400">{item.description}</p>
                   </div>
                 </div>
               ))}
@@ -219,7 +219,7 @@ export default function HomePage() {
         </section>
 
         {/* CTA for Businesses */}
-        <section className="bg-blue-600 py-16 md:py-24">
+        <section className="bg-gradient-to-r from-blue-600 to-blue-700 py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="md:flex md:items-center md:justify-between">
               <div className="max-w-2xl">
@@ -248,7 +248,7 @@ export default function HomePage() {
                 <Link href="/register?type=business">
                   <Button
                     size="lg"
-                    className="bg-white text-blue-600 hover:bg-gray-100"
+                    className="bg-white text-blue-600 hover:bg-neutral-100"
                   >
                     Join as a Pro
                     <ArrowRight className="w-4 h-4 ml-2" />
@@ -260,12 +260,12 @@ export default function HomePage() {
         </section>
 
         {/* Final CTA */}
-        <section className="bg-white py-16 md:py-24">
+        <section className="bg-neutral-900 py-16 md:py-24">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-3xl font-bold text-white">
               Ready to Get Started?
             </h2>
-            <p className="mt-4 text-lg text-gray-600">
+            <p className="mt-4 text-lg text-neutral-400">
               Find the perfect professional for your next home project. It&apos;s free and easy.
             </p>
             <div className="mt-8">

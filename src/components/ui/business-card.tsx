@@ -14,10 +14,10 @@ export function BusinessCard({ business }: BusinessCardProps) {
   return (
     <Link
       href={`/business/${business.slug}`}
-      className="group block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
+      className="group block bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden hover:border-neutral-700 transition-all"
     >
       {/* Cover Image */}
-      <div className="relative h-40 bg-gray-100">
+      <div className="relative h-40 bg-neutral-800">
         {business.cover_image_url ? (
           <Image
             src={business.cover_image_url}
@@ -26,12 +26,12 @@ export function BusinessCard({ business }: BusinessCardProps) {
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600" />
+          <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-700" />
         )}
 
         {/* Logo */}
         <div className="absolute -bottom-6 left-4">
-          <div className="w-16 h-16 rounded-lg bg-white shadow-md border border-gray-200 overflow-hidden">
+          <div className="w-16 h-16 rounded-lg bg-neutral-900 shadow-md border border-neutral-700 overflow-hidden">
             {business.logo_url ? (
               <Image
                 src={business.logo_url}
@@ -59,23 +59,23 @@ export function BusinessCard({ business }: BusinessCardProps) {
 
       {/* Content */}
       <div className="pt-8 pb-4 px-4">
-        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
           {business.name}
         </h3>
 
         {/* Rating */}
         <div className="flex items-center mt-1">
           <Star className="w-4 h-4 text-yellow-400 fill-current" />
-          <span className="ml-1 text-sm font-medium text-gray-900">
+          <span className="ml-1 text-sm font-medium text-white">
             {business.rating_average?.toFixed(1) || '0.0'}
           </span>
-          <span className="ml-1 text-sm text-gray-500">
+          <span className="ml-1 text-sm text-neutral-400">
             ({business.rating_count || 0} reviews)
           </span>
         </div>
 
         {/* Location */}
-        <div className="flex items-center mt-2 text-sm text-gray-500">
+        <div className="flex items-center mt-2 text-sm text-neutral-400">
           <MapPin className="w-4 h-4 mr-1" />
           <span>
             {business.city}, {business.state}
@@ -93,7 +93,7 @@ export function BusinessCard({ business }: BusinessCardProps) {
             {business.categories.slice(0, 3).map((category) => (
               <span
                 key={category.slug}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+                className="text-xs bg-neutral-800 text-neutral-300 px-2 py-1 rounded-full"
               >
                 {category.name}
               </span>
@@ -103,7 +103,7 @@ export function BusinessCard({ business }: BusinessCardProps) {
 
         {/* Description */}
         {business.description && (
-          <p className="mt-3 text-sm text-gray-600 line-clamp-2">
+          <p className="mt-3 text-sm text-neutral-400 line-clamp-2">
             {business.description}
           </p>
         )}

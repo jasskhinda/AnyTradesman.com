@@ -60,35 +60,35 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0">
-              <span className="text-xl font-bold text-blue-600">AnyTradesman</span>
+              <span className="text-xl font-bold text-blue-500">AnyTradesman</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-8">
-            <Link href="/search" className="text-gray-600 hover:text-gray-900 font-medium">
+            <Link href="/search" className="text-neutral-300 hover:text-white font-medium">
               Find a Pro
             </Link>
-            <Link href="/categories" className="text-gray-600 hover:text-gray-900 font-medium">
+            <Link href="/categories" className="text-neutral-300 hover:text-white font-medium">
               Services
             </Link>
-            <Link href="/how-it-works" className="text-gray-600 hover:text-gray-900 font-medium">
+            <Link href="/how-it-works" className="text-neutral-300 hover:text-white font-medium">
               How It Works
             </Link>
 
             {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-neutral-700 animate-pulse" />
             ) : user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                  className="flex items-center space-x-2 text-neutral-300 hover:text-white"
                 >
                   <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
                     {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
@@ -101,16 +101,16 @@ export function Header() {
                       className="fixed inset-0 z-10"
                       onClick={() => setIsProfileMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
-                      <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                    <div className="absolute right-0 mt-2 w-48 bg-neutral-800 rounded-lg shadow-lg border border-neutral-700 py-1 z-20">
+                      <div className="px-4 py-2 border-b border-neutral-700">
+                        <p className="text-sm font-medium text-white truncate">
                           {user.full_name || 'User'}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                        <p className="text-xs text-neutral-400 truncate">{user.email}</p>
                       </div>
                       <Link
                         href="/dashboard"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
                         <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -119,7 +119,7 @@ export function Header() {
                       {user.role === 'business_owner' && (
                         <Link
                           href="/business"
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
                           onClick={() => setIsProfileMenuOpen(false)}
                         >
                           <Building2 className="w-4 h-4 mr-2" />
@@ -128,7 +128,7 @@ export function Header() {
                       )}
                       <Link
                         href="/settings"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
                         <User className="w-4 h-4 mr-2" />
@@ -136,7 +136,7 @@ export function Header() {
                       </Link>
                       <button
                         onClick={handleSignOut}
-                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-neutral-700"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign out
@@ -148,7 +148,7 @@ export function Header() {
             ) : (
               <div className="flex items-center space-x-4">
                 <Link href="/login">
-                  <Button variant="ghost">Sign in</Button>
+                  <Button variant="ghost" className="text-neutral-300 hover:text-white hover:bg-neutral-800">Sign in</Button>
                 </Link>
                 <Link href="/register">
                   <Button>Get Started</Button>
@@ -161,7 +161,7 @@ export function Header() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-neutral-300 hover:text-white"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -173,21 +173,21 @@ export function Header() {
           <div className="md:hidden py-4 space-y-2">
             <Link
               href="/search"
-              className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="block px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
               Find a Pro
             </Link>
             <Link
               href="/categories"
-              className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="block px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
               Services
             </Link>
             <Link
               href="/how-it-works"
-              className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="block px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
               How It Works
@@ -197,7 +197,7 @@ export function Header() {
               <>
                 <Link
                   href="/dashboard"
-                  className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="block px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
@@ -207,7 +207,7 @@ export function Header() {
                     handleSignOut();
                     setIsMenuOpen(false);
                   }}
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 rounded-lg"
+                  className="block w-full text-left px-4 py-2 text-red-400 hover:bg-neutral-800 rounded-lg"
                 >
                   Sign out
                 </button>
@@ -215,7 +215,7 @@ export function Header() {
             ) : (
               <div className="pt-4 space-y-2">
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">Sign in</Button>
+                  <Button variant="outline" className="w-full border-neutral-600 text-neutral-300 hover:bg-neutral-800">Sign in</Button>
                 </Link>
                 <Link href="/register" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full">Get Started</Button>

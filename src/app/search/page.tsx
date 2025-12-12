@@ -47,7 +47,7 @@ async function SearchResults({ searchParams }: { searchParams: Awaited<SearchPag
     console.error('Search error:', error);
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">An error occurred while searching. Please try again.</p>
+        <p className="text-neutral-400">An error occurred while searching. Please try again.</p>
       </div>
     );
   }
@@ -62,8 +62,8 @@ async function SearchResults({ searchParams }: { searchParams: Awaited<SearchPag
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4">🔍</div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
-        <p className="text-gray-500 max-w-md mx-auto">
+        <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
+        <p className="text-neutral-400 max-w-md mx-auto">
           We couldn&apos;t find any professionals matching your search. Try adjusting your filters or search terms.
         </p>
       </div>
@@ -84,12 +84,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q, location, category } = resolvedSearchParams;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-neutral-950">
       <Header />
 
       <main className="flex-1">
         {/* Search Header */}
-        <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
+        <div className="bg-neutral-900 border-b border-neutral-800 sticky top-16 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <SearchBar showButton={true} />
           </div>
@@ -99,11 +99,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {/* Results Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-white">
                 {q ? `Results for "${q}"` : category ? `${category} Services` : 'All Professionals'}
               </h1>
               {location && (
-                <p className="mt-1 text-gray-500 flex items-center">
+                <p className="mt-1 text-neutral-400 flex items-center">
                   <MapPin className="w-4 h-4 mr-1" />
                   Near {location}
                 </p>
@@ -111,11 +111,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </div>
 
             <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white">
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white">
                 <SlidersHorizontal className="w-4 h-4 mr-2" />
                 Sort
               </Button>
@@ -127,12 +127,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             fallback={
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
-                    <div className="h-40 bg-gray-200" />
+                  <div key={i} className="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden animate-pulse">
+                    <div className="h-40 bg-neutral-800" />
                     <div className="p-4 space-y-3">
-                      <div className="h-4 bg-gray-200 rounded w-3/4" />
-                      <div className="h-3 bg-gray-200 rounded w-1/2" />
-                      <div className="h-3 bg-gray-200 rounded w-2/3" />
+                      <div className="h-4 bg-neutral-800 rounded w-3/4" />
+                      <div className="h-3 bg-neutral-800 rounded w-1/2" />
+                      <div className="h-3 bg-neutral-800 rounded w-2/3" />
                     </div>
                   </div>
                 ))}

@@ -52,16 +52,16 @@ export default async function DashboardPage() {
   const messageCount = 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-950">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-white">
             Welcome back, {profile.full_name?.split(' ')[0] || 'there'}!
           </h1>
-          <p className="mt-1 text-gray-500">
+          <p className="mt-1 text-neutral-400">
             {isBusinessOwner
               ? 'Manage your business and connect with customers.'
               : 'Find professionals and manage your projects.'}
@@ -73,30 +73,30 @@ export default async function DashboardPage() {
           {isBusinessOwner ? (
             <>
               <Link href="/business">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:border-neutral-700 transition-all cursor-pointer">
                   <CardContent className="pt-6">
                     <div className="flex items-center">
-                      <div className="p-3 rounded-lg bg-blue-100">
-                        <Building2 className="w-6 h-6 text-blue-600" />
+                      <div className="p-3 rounded-lg bg-blue-500/20">
+                        <Building2 className="w-6 h-6 text-blue-400" />
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-500">My Business</p>
-                        <p className="text-lg font-semibold text-gray-900">Edit Profile</p>
+                        <p className="text-sm font-medium text-neutral-400">My Business</p>
+                        <p className="text-lg font-semibold text-white">Edit Profile</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               <Link href="/quotes">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:border-neutral-700 transition-all cursor-pointer">
                   <CardContent className="pt-6">
                     <div className="flex items-center">
-                      <div className="p-3 rounded-lg bg-green-100">
-                        <FileText className="w-6 h-6 text-green-600" />
+                      <div className="p-3 rounded-lg bg-green-500/20">
+                        <FileText className="w-6 h-6 text-green-400" />
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-500">New Leads</p>
-                        <p className="text-lg font-semibold text-gray-900">{serviceRequestCount}</p>
+                        <p className="text-sm font-medium text-neutral-400">New Leads</p>
+                        <p className="text-lg font-semibold text-white">{serviceRequestCount}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -106,30 +106,30 @@ export default async function DashboardPage() {
           ) : (
             <>
               <Link href="/search">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:border-neutral-700 transition-all cursor-pointer">
                   <CardContent className="pt-6">
                     <div className="flex items-center">
-                      <div className="p-3 rounded-lg bg-blue-100">
-                        <Search className="w-6 h-6 text-blue-600" />
+                      <div className="p-3 rounded-lg bg-blue-500/20">
+                        <Search className="w-6 h-6 text-blue-400" />
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-500">Find Pros</p>
-                        <p className="text-lg font-semibold text-gray-900">Search Now</p>
+                        <p className="text-sm font-medium text-neutral-400">Find Pros</p>
+                        <p className="text-lg font-semibold text-white">Search Now</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               <Link href="/request">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:border-neutral-700 transition-all cursor-pointer">
                   <CardContent className="pt-6">
                     <div className="flex items-center">
-                      <div className="p-3 rounded-lg bg-green-100">
-                        <Plus className="w-6 h-6 text-green-600" />
+                      <div className="p-3 rounded-lg bg-green-500/20">
+                        <Plus className="w-6 h-6 text-green-400" />
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-500">New Request</p>
-                        <p className="text-lg font-semibold text-gray-900">Get Quotes</p>
+                        <p className="text-sm font-medium text-neutral-400">New Request</p>
+                        <p className="text-lg font-semibold text-white">Get Quotes</p>
                       </div>
                     </div>
                   </CardContent>
@@ -139,15 +139,15 @@ export default async function DashboardPage() {
           )}
 
           <Link href="/messages">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:border-neutral-700 transition-all cursor-pointer">
               <CardContent className="pt-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-purple-100">
-                    <MessageSquare className="w-6 h-6 text-purple-600" />
+                  <div className="p-3 rounded-lg bg-purple-500/20">
+                    <MessageSquare className="w-6 h-6 text-purple-400" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Messages</p>
-                    <p className="text-lg font-semibold text-gray-900">{messageCount}</p>
+                    <p className="text-sm font-medium text-neutral-400">Messages</p>
+                    <p className="text-lg font-semibold text-white">{messageCount}</p>
                   </div>
                 </div>
               </CardContent>
@@ -155,15 +155,15 @@ export default async function DashboardPage() {
           </Link>
 
           <Link href="/quotes">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:border-neutral-700 transition-all cursor-pointer">
               <CardContent className="pt-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-yellow-100">
-                    <Star className="w-6 h-6 text-yellow-600" />
+                  <div className="p-3 rounded-lg bg-yellow-500/20">
+                    <Star className="w-6 h-6 text-yellow-400" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Quotes</p>
-                    <p className="text-lg font-semibold text-gray-900">{quoteCount}</p>
+                    <p className="text-sm font-medium text-neutral-400">Quotes</p>
+                    <p className="text-lg font-semibold text-white">{quoteCount}</p>
                   </div>
                 </div>
               </CardContent>
@@ -177,7 +177,7 @@ export default async function DashboardPage() {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle className="text-white">Recent Activity</CardTitle>
                 <CardDescription>
                   {isBusinessOwner
                     ? 'Your latest leads and quotes'
@@ -185,8 +185,8 @@ export default async function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Bell className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center py-8 text-neutral-400">
+                  <Bell className="w-12 h-12 mx-auto mb-4 text-neutral-600" />
                   <p>No recent activity</p>
                   <p className="text-sm mt-1">
                     {isBusinessOwner
@@ -202,53 +202,53 @@ export default async function DashboardPage() {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>Quick Links</CardTitle>
+                <CardTitle className="text-white">Quick Links</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Link
                   href="/settings"
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800 transition-colors"
                 >
-                  <span className="text-gray-700">Account Settings</span>
-                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                  <span className="text-neutral-300">Account Settings</span>
+                  <ArrowRight className="w-4 h-4 text-neutral-500" />
                 </Link>
                 {isBusinessOwner && (
                   <>
                     <Link
                       href="/business/credentials"
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800 transition-colors"
                     >
-                      <span className="text-gray-700">Manage Credentials</span>
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
+                      <span className="text-neutral-300">Manage Credentials</span>
+                      <ArrowRight className="w-4 h-4 text-neutral-500" />
                     </Link>
                     <Link
                       href="/business/subscription"
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800 transition-colors"
                     >
-                      <span className="text-gray-700">Subscription</span>
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
+                      <span className="text-neutral-300">Subscription</span>
+                      <ArrowRight className="w-4 h-4 text-neutral-500" />
                     </Link>
                   </>
                 )}
                 <Link
                   href="/help"
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800 transition-colors"
                 >
-                  <span className="text-gray-700">Help & Support</span>
-                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                  <span className="text-neutral-300">Help & Support</span>
+                  <ArrowRight className="w-4 h-4 text-neutral-500" />
                 </Link>
               </CardContent>
             </Card>
 
             {/* Upgrade CTA for free tier */}
             {isBusinessOwner && (
-              <Card className="mt-6 bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+              <Card className="mt-6 bg-gradient-to-br from-blue-600 to-blue-700 text-white border-0">
                 <CardContent className="pt-6">
                   <h3 className="font-semibold text-lg">Upgrade to Pro</h3>
                   <p className="mt-2 text-blue-100 text-sm">
                     Get more leads, priority placement, and advanced analytics.
                   </p>
-                  <Button className="mt-4 bg-white text-blue-600 hover:bg-gray-100 w-full">
+                  <Button className="mt-4 bg-white text-blue-600 hover:bg-neutral-100 w-full">
                     View Plans
                   </Button>
                 </CardContent>

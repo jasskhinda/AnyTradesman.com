@@ -64,21 +64,21 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mx-auto w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <CardTitle>Check your email</CardTitle>
+            <CardTitle className="text-white">Check your email</CardTitle>
             <CardDescription>
-              We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to verify your account.
+              We&apos;ve sent a confirmation link to <strong className="text-white">{email}</strong>. Click the link to verify your account.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full" onClick={() => router.push('/login')}>
+            <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white" onClick={() => router.push('/login')}>
               Back to login
             </Button>
           </CardContent>
@@ -88,19 +88,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="inline-block mb-4">
-            <span className="text-2xl font-bold text-blue-600">AnyTradesman</span>
+            <span className="text-2xl font-bold text-blue-500">AnyTradesman</span>
           </Link>
-          <CardTitle>Create your account</CardTitle>
+          <CardTitle className="text-white">Create your account</CardTitle>
           <CardDescription>Get started with AnyTradesman today</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Account Type Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
               I want to...
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -109,8 +109,8 @@ export default function RegisterPage() {
                 onClick={() => setAccountType('customer')}
                 className={`p-4 rounded-lg border-2 text-center transition-colors ${
                   accountType === 'customer'
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                    : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
                 }`}
               >
                 <svg className="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,8 +123,8 @@ export default function RegisterPage() {
                 onClick={() => setAccountType('business_owner')}
                 className={`p-4 rounded-lg border-2 text-center transition-colors ${
                   accountType === 'business_owner'
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                    : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
                 }`}
               >
                 <svg className="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@ export default function RegisterPage() {
 
           <form onSubmit={handleRegister} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+              <div className="p-3 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
                 {error}
               </div>
             )}
@@ -186,15 +186,15 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 required
-                className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="mt-1 rounded border-neutral-600 bg-neutral-800 text-blue-600 focus:ring-blue-500"
               />
-              <span className="ml-2 text-sm text-gray-600">
+              <span className="ml-2 text-sm text-neutral-400">
                 I agree to the{' '}
-                <Link href="/terms" className="text-blue-600 hover:text-blue-500">
+                <Link href="/terms" className="text-blue-400 hover:text-blue-300">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-blue-600 hover:text-blue-500">
+                <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
                   Privacy Policy
                 </Link>
               </span>
@@ -205,9 +205,9 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className="mt-6 text-center text-sm text-neutral-400">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
               Sign in
             </Link>
           </p>
