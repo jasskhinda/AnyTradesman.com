@@ -18,65 +18,83 @@ interface SearchPageProps {
 
 async function SearchResults({ searchParams }: { searchParams: Awaited<SearchPageProps['searchParams']> }) {
   const supabase = await createClient();
-  const { q, location, category, radius } = searchParams;
+  const { q } = searchParams;
 
-  // For now, just fetch all active businesses
-  // In production, you'd use the PostGIS functions for location-based search
-  let query = supabase
-    .from('businesses')
-    .select(`
-      *,
-      business_categories (
-        categories (
-          name,
-          slug
+  try {
+    // For now, just fetch all active businesses
+    // In production, you'd use the PostGIS functions for location-based search
+    let query = supabase
+      .from('businesses')
+      .select(`
+        *,
+        business_categories (
+          categories (
+            name,
+            slug
+          )
         )
-      )
-    `)
-    .eq('is_active', true)
-    .order('rating_average', { ascending: false })
-    .limit(20);
+      `)
+      .eq('is_active', true)
+      .order('rating_average', { ascending: false })
+      .limit(20);
 
-  if (q) {
-    query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
-  }
+    if (q) {
+      query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+    }
 
-  const { data: businesses, error } = await query;
+    const { data: businesses, error } = await query;
 
-  if (error) {
-    console.error('Search error:', error);
+    if (error) {
+      // If table doesn't exist or RLS blocks, show no results instead of error
+      console.error('Search error:', error);
+      return (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">🔍</div>
+          <h3 className="text-xl font-semibold text-white mb-2">No professionals yet</h3>
+          <p className="text-neutral-400 max-w-md mx-auto">
+            Be the first to join our network of trusted professionals.
+          </p>
+        </div>
+      );
+    }
+
+    // Transform the data to include categories
+    const transformedBusinesses = businesses?.map((business) => ({
+      ...business,
+      categories: business.business_categories?.map((bc: { categories: { name: string; slug: string } }) => bc.categories) || [],
+    })) || [];
+
+    if (transformedBusinesses.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">🔍</div>
+          <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
+          <p className="text-neutral-400 max-w-md mx-auto">
+            We couldn&apos;t find any professionals matching your search. Try adjusting your filters or search terms.
+          </p>
+        </div>
+      );
+    }
+
     return (
-      <div className="text-center py-12">
-        <p className="text-neutral-400">An error occurred while searching. Please try again.</p>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {transformedBusinesses.map((business) => (
+          <BusinessCard key={business.id} business={business} />
+        ))}
       </div>
     );
-  }
-
-  // Transform the data to include categories
-  const transformedBusinesses = businesses?.map((business) => ({
-    ...business,
-    categories: business.business_categories?.map((bc: { categories: { name: string; slug: string } }) => bc.categories) || [],
-  })) || [];
-
-  if (transformedBusinesses.length === 0) {
+  } catch (err) {
+    console.error('Search error:', err);
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4">🔍</div>
-        <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
+        <h3 className="text-xl font-semibold text-white mb-2">No professionals yet</h3>
         <p className="text-neutral-400 max-w-md mx-auto">
-          We couldn&apos;t find any professionals matching your search. Try adjusting your filters or search terms.
+          Be the first to join our network of trusted professionals.
         </p>
       </div>
     );
   }
-
-  return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {transformedBusinesses.map((business) => (
-        <BusinessCard key={business.id} business={business} />
-      ))}
-    </div>
-  );
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
