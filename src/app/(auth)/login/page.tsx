@@ -23,32 +23,43 @@ function LoginForm() {
     setError(null);
     setIsLoading(true);
 
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Unable to connect to the server. Please try again later.');
       setIsLoading(false);
-      return;
     }
-
-    router.push(redirectTo);
-    router.refresh();
   };
 
   const handleGoogleLogin = async () => {
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback?next=${redirectTo}`,
-      },
-    });
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=${redirectTo}`,
+        },
+      });
+    } catch (err) {
+      console.error('Google login error:', err);
+      setError('Unable to connect to Google. Please try again later.');
+    }
   };
 
   return (

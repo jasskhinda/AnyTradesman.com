@@ -38,28 +38,34 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: accountType,
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: accountType,
+          },
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
-        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    });
+      });
 
-    if (signUpError) {
-      setError(signUpError.message);
+      if (signUpError) {
+        setError(signUpError.message);
+        setIsLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('Unable to connect to the server. Please try again later.');
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    setSuccess(true);
-    setIsLoading(false);
   };
 
   if (success) {
