@@ -23,10 +23,10 @@ export async function GET(request: Request) {
           .single();
 
         // Create profile if it doesn't exist
-        if (!profile) {
+        if (!profile && user.email) {
           await supabase.from('profiles').insert({
             id: user.id,
-            email: user.email!,
+            email: user.email,
             full_name: user.user_metadata.full_name || user.user_metadata.name || null,
             avatar_url: user.user_metadata.avatar_url || null,
             role: user.user_metadata.role || 'customer',
