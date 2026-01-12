@@ -61,7 +61,7 @@ export default function BusinessPage() {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profile?.role !== 'business_owner') {
       router.push('/dashboard');
@@ -73,7 +73,7 @@ export default function BusinessPage() {
       .from('businesses')
       .select('*')
       .eq('owner_id', user.id)
-      .single();
+      .maybeSingle();
 
     // Fetch categories
     const { data: categoriesData } = await supabase

@@ -66,7 +66,7 @@ export default function BusinessSetupPage() {
       .from('businesses')
       .select('id')
       .eq('owner_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (existingBusiness) {
       router.push('/business');
@@ -89,7 +89,7 @@ export default function BusinessSetupPage() {
       .from('profiles')
       .select('email')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profile) {
       setFormData(prev => ({ ...prev, email: profile.email }));
