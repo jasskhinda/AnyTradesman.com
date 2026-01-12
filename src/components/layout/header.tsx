@@ -20,34 +20,49 @@ export function Header() {
     const supabase = createClient();
 
     const getUser = async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      try {
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
 
-      if (authUser) {
+        if (authError || !authUser) {
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', authUser.id)
-          .single();
+          .maybeSingle();
 
         setUser(profile);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
 
-        setUser(profile);
+          setUser(profile);
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
       }
+      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
