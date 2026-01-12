@@ -1,11 +1,11 @@
-import { Header } from '@/components/layout/header';
+import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Footer } from '@/components/layout/footer';
 import { Accessibility, Mail } from 'lucide-react';
 
 export default function AccessibilityPage() {
   return (
     <div className="min-h-screen flex flex-col bg-neutral-950">
-      <Header />
+      <HeaderWrapper />
 
       <main className="flex-1">
         {/* Hero */}

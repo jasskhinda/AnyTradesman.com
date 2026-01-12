@@ -1,4 +1,4 @@
-import { Header } from '@/components/layout/header';
+import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Quote, ArrowRight } from 'lucide-react';
@@ -61,7 +61,7 @@ const homeownerStories = [
 export default function SuccessStoriesPage() {
   return (
     <div className="min-h-screen flex flex-col bg-neutral-950">
-      <Header />
+      <HeaderWrapper />
 
       <main className="flex-1">
         {/* Hero */}

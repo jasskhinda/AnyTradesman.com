@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { Header } from '@/components/layout/header';
+import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -63,7 +63,7 @@ export default async function DashboardPage() {
     // Show error state instead of redirecting to avoid infinite loop
     return (
       <div className="min-h-screen bg-neutral-950">
-        <Header initialUser={null} />
+        <HeaderWrapper />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Card className="border-red-800 bg-red-950/20">
             <CardContent className="pt-6">
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950">
-      <Header initialUser={profileData} />
+      <HeaderWrapper />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}

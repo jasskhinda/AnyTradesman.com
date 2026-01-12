@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { Header } from '@/components/layout/header';
+import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Footer } from '@/components/layout/footer';
 import { CategoryCard } from '@/components/ui/category-card';
 
@@ -21,7 +21,7 @@ export default async function CategoriesPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-neutral-950">
-      <Header />
+      <HeaderWrapper />
 
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
