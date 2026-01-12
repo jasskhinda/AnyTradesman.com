@@ -20,39 +20,58 @@ export function Header() {
   useEffect(() => {
     const supabase = createClient();
     let isMounted = true;
+    let authChecked = false;
 
-    // Helper to fetch profile
-    const fetchProfile = async (userId: string) => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-      return profile;
+    // Helper to fetch profile with error handling
+    const fetchProfile = async (userId: string): Promise<Profile | null> => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+        return profile;
+      } catch {
+        return null;
+      }
     };
+
+    // Timeout to ensure loading state never gets stuck
+    const timeout = setTimeout(() => {
+      if (isMounted && !authChecked) {
+        authChecked = true;
+        setIsLoading(false);
+      }
+    }, 3000);
 
     // Check auth state immediately on mount
     const checkAuth = async () => {
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
+        // Try getSession first - reads from cookies/localStorage
+        const { data: { session } } = await supabase.auth.getSession();
 
-        if (!isMounted) return;
+        if (!isMounted || authChecked) return;
 
-        if (authUser) {
-          const profile = await fetchProfile(authUser.id);
-          if (isMounted) {
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          if (isMounted && !authChecked) {
+            authChecked = true;
             setUser(profile);
             setIsLoading(false);
           }
-        } else {
-          if (isMounted) {
-            setUser(null);
-            setIsLoading(false);
-          }
+          return;
+        }
+
+        // No session found
+        if (isMounted && !authChecked) {
+          authChecked = true;
+          setUser(null);
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Header: Auth check error:', error);
-        if (isMounted) {
+        if (isMounted && !authChecked) {
+          authChecked = true;
           setUser(null);
           setIsLoading(false);
         }
@@ -61,13 +80,28 @@ export function Header() {
 
     checkAuth();
 
-    // Also listen for auth state changes (sign in/out during session)
+    // Listen for auth state changes (sign in/out during session)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (!isMounted) return;
 
-      // Skip INITIAL_SESSION since we already checked above
-      if (event === 'INITIAL_SESSION') return;
+      // On INITIAL_SESSION, if we haven't checked yet, use this
+      if (event === 'INITIAL_SESSION') {
+        if (!authChecked && session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          if (isMounted && !authChecked) {
+            authChecked = true;
+            setUser(profile);
+            setIsLoading(false);
+          }
+        } else if (!authChecked) {
+          authChecked = true;
+          setUser(null);
+          setIsLoading(false);
+        }
+        return;
+      }
 
+      // Handle actual sign in/out events
       if (session?.user) {
         const profile = await fetchProfile(session.user.id);
         if (isMounted) {
@@ -80,6 +114,7 @@ export function Header() {
 
     return () => {
       isMounted = false;
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
