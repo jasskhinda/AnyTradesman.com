@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,23 +33,18 @@ export function ChangePasswordForm() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-
-      // First verify we have a session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setError('Your session has expired. Please log in again.');
-        setIsLoading(false);
-        return;
-      }
-
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: newPassword }),
       });
 
-      if (error) {
-        setError(error.message);
-        setIsLoading(false);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to update password');
         return;
       }
 
