@@ -24,26 +24,57 @@ export function Header() {
     // Timeout to ensure loading state doesn't hang forever
     const timeout = setTimeout(() => {
       if (isMounted && isLoading) {
+        console.log('Header: Loading timeout reached');
         setIsLoading(false);
       }
     }, 3000);
 
     const getUser = async () => {
       try {
-        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+        // First try getSession which reads from storage (faster)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (!isMounted) return;
 
-        if (authError || !authUser) {
+        if (sessionError) {
+          console.error('Header: Session error:', sessionError);
           setUser(null);
           setIsLoading(false);
           return;
         }
 
+        if (!session?.user) {
+          // No session, try getUser as fallback (validates with server)
+          const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+
+          if (!isMounted) return;
+
+          if (authError || !authUser) {
+            console.log('Header: No authenticated user found');
+            setUser(null);
+            setIsLoading(false);
+            return;
+          }
+
+          // User found via getUser, fetch profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authUser.id)
+            .maybeSingle();
+
+          if (isMounted) {
+            setUser(profile);
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        // Session exists, fetch profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', authUser.id)
+          .eq('id', session.user.id)
           .maybeSingle();
 
         if (isMounted) {
@@ -51,7 +82,7 @@ export function Header() {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error('Header: Error fetching user:', error);
         if (isMounted) {
           setUser(null);
           setIsLoading(false);
@@ -62,6 +93,8 @@ export function Header() {
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+      console.log('Header: Auth state changed:', event, session?.user?.email);
+
       if (event === 'SIGNED_IN' && session?.user) {
         try {
           const { data: profile } = await supabase
@@ -72,10 +105,36 @@ export function Header() {
 
           setUser(profile);
         } catch (error) {
-          console.error('Error fetching profile:', error);
+          console.error('Header: Error fetching profile:', error);
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+        // Also handle token refresh to keep user state updated
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          setUser(profile);
+        } catch (error) {
+          console.error('Header: Error fetching profile on token refresh:', error);
+        }
+      } else if (event === 'INITIAL_SESSION' && session?.user) {
+        // Handle initial session event
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          setUser(profile);
+        } catch (error) {
+          console.error('Header: Error fetching profile on initial session:', error);
+        }
       }
       setIsLoading(false);
     });
