@@ -18,10 +18,20 @@ export function Header() {
 
   useEffect(() => {
     const supabase = createClient();
+    let isMounted = true;
+
+    // Timeout to ensure loading state doesn't hang forever
+    const timeout = setTimeout(() => {
+      if (isMounted && isLoading) {
+        setIsLoading(false);
+      }
+    }, 3000);
 
     const getUser = async () => {
       try {
         const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+
+        if (!isMounted) return;
 
         if (authError || !authUser) {
           setUser(null);
@@ -35,12 +45,16 @@ export function Header() {
           .eq('id', authUser.id)
           .maybeSingle();
 
-        setUser(profile);
+        if (isMounted) {
+          setUser(profile);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error('Error fetching user:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setUser(null);
+          setIsLoading(false);
+        }
       }
     };
 
@@ -65,7 +79,11 @@ export function Header() {
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSignOut = async () => {
