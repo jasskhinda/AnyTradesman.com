@@ -33,10 +33,10 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // Fetch profile with explicit type
+  // Fetch profile with all fields for header
   const { data: profileData, error: profileError } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role')
+    .select('*')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -63,7 +63,7 @@ export default async function DashboardPage() {
     // Show error state instead of redirecting to avoid infinite loop
     return (
       <div className="min-h-screen bg-neutral-950">
-        <Header />
+        <Header initialUser={null} />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Card className="border-red-800 bg-red-950/20">
             <CardContent className="pt-6">
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950">
-      <Header />
+      <Header initialUser={profileData} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}

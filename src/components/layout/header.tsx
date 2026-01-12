@@ -10,17 +10,22 @@ import { Menu, X, User, LogOut, LayoutDashboard, Building2 } from 'lucide-react'
 import type { Profile } from '@/types/database';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
-export function Header() {
+interface HeaderProps {
+  initialUser?: Profile | null;
+}
+
+export function Header({ initialUser }: HeaderProps = {}) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [user, setUser] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<Profile | null>(initialUser ?? null);
+  const [isLoading, setIsLoading] = useState(initialUser === undefined);
 
   useEffect(() => {
     const supabase = createClient();
     let isMounted = true;
-    let authChecked = false;
+    // If we have initialUser, we've already checked auth server-side
+    let authChecked = initialUser !== undefined;
 
     // Helper to fetch profile with error handling
     const fetchProfile = async (userId: string): Promise<Profile | null> => {
@@ -44,8 +49,10 @@ export function Header() {
       }
     }, 3000);
 
-    // Check auth state immediately on mount
+    // Only check auth client-side if we don't have initialUser
     const checkAuth = async () => {
+      if (authChecked) return;
+
       try {
         // Try getSession first - reads from cookies/localStorage
         const { data: { session } } = await supabase.auth.getSession();
@@ -84,7 +91,7 @@ export function Header() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (!isMounted) return;
 
-      // On INITIAL_SESSION, if we haven't checked yet, use this
+      // Skip INITIAL_SESSION if we already have server-provided user
       if (event === 'INITIAL_SESSION') {
         if (!authChecked && session?.user) {
           const profile = await fetchProfile(session.user.id);
@@ -101,14 +108,16 @@ export function Header() {
         return;
       }
 
-      // Handle actual sign in/out events
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        if (isMounted) {
-          setUser(profile);
+      // Handle actual sign in/out events - always process these
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          if (isMounted) {
+            setUser(profile);
+          }
+        } else {
+          setUser(null);
         }
-      } else {
-        setUser(null);
       }
     });
 
@@ -117,7 +126,7 @@ export function Header() {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initialUser]);
 
   const handleSignOut = async () => {
     const supabase = createClient();
