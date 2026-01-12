@@ -31,43 +31,57 @@ export function Header() {
       return profile;
     };
 
-    // Listen for auth state changes - this handles INITIAL_SESSION automatically
+    // Check auth state immediately on mount
+    const checkAuth = async () => {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+
+        if (!isMounted) return;
+
+        if (authUser) {
+          const profile = await fetchProfile(authUser.id);
+          if (isMounted) {
+            setUser(profile);
+            setIsLoading(false);
+          }
+        } else {
+          if (isMounted) {
+            setUser(null);
+            setIsLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error('Header: Auth check error:', error);
+        if (isMounted) {
+          setUser(null);
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkAuth();
+
+    // Also listen for auth state changes (sign in/out during session)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (!isMounted) return;
 
+      // Skip INITIAL_SESSION since we already checked above
+      if (event === 'INITIAL_SESSION') return;
+
       if (session?.user) {
-        // User is authenticated - fetch profile
-        try {
-          const profile = await fetchProfile(session.user.id);
-          if (isMounted) {
-            setUser(profile);
-          }
-        } catch (error) {
-          console.error('Header: Error fetching profile:', error);
+        const profile = await fetchProfile(session.user.id);
+        if (isMounted) {
+          setUser(profile);
         }
       } else {
-        // No session - user is not authenticated
         setUser(null);
-      }
-
-      if (isMounted) {
-        setIsLoading(false);
       }
     });
 
-    // Timeout fallback in case onAuthStateChange doesn't fire
-    const timeout = setTimeout(() => {
-      if (isMounted && isLoading) {
-        setIsLoading(false);
-      }
-    }, 2000);
-
     return () => {
       isMounted = false;
-      clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSignOut = async () => {
