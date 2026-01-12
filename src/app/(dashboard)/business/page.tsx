@@ -104,7 +104,7 @@ export default function BusinessPage() {
         .eq('business_id', businessData.id);
 
       if (bizCats) {
-        setBusinessCategories(bizCats.map(bc => bc.category_id));
+        setBusinessCategories(bizCats.map((bc: { category_id: string }) => bc.category_id));
       }
     }
 

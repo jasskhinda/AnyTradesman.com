@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Menu, X, User, LogOut, LayoutDashboard, Building2 } from 'lucide-react';
 import type { Profile } from '@/types/database';
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 export function Header() {
   const router = useRouter();
@@ -60,7 +61,7 @@ export function Header() {
 
     getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_IN' && session?.user) {
         try {
           const { data: profile } = await supabase

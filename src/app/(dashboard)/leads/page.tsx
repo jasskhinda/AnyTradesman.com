@@ -98,7 +98,7 @@ export default function LeadsPage() {
               }
               return bc.categories;
             })
-            .filter((c): c is Category => c !== null);
+            .filter((c: Category | null): c is Category => c !== null);
           setMyCategories(categories);
         }
       }
@@ -120,16 +120,16 @@ export default function LeadsPage() {
 
       if (requestsData && business) {
         // Check which requests we've already quoted
-        const requestIds = requestsData.map(r => r.id);
+        const requestIds = requestsData.map((r: ServiceRequest) => r.id);
         const { data: existingQuotes } = await supabase
           .from('quotes')
           .select('service_request_id')
           .eq('business_id', business.id)
           .in('service_request_id', requestIds);
 
-        const quotedRequestIds = new Set(existingQuotes?.map(q => q.service_request_id) || []);
+        const quotedRequestIds = new Set(existingQuotes?.map((q: { service_request_id: string }) => q.service_request_id) || []);
 
-        const leadsWithQuoteStatus = requestsData.map(request => ({
+        const leadsWithQuoteStatus = requestsData.map((request: ServiceRequest) => ({
           ...request,
           has_quoted: quotedRequestIds.has(request.id),
         }));

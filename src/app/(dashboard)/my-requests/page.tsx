@@ -70,7 +70,7 @@ export default function MyRequestsPage() {
       if (requestsData) {
         // Get quote counts for each request
         const requestsWithCounts = await Promise.all(
-          requestsData.map(async (request) => {
+          requestsData.map(async (request: ServiceRequest) => {
             const { count } = await supabase
               .from('quotes')
               .select('*', { count: 'exact', head: true })
