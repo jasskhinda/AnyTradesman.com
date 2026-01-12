@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -25,6 +26,17 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validation
+    if (!fullName.trim()) {
+      setError('Please enter your full name');
+      return;
+    }
+
+    if (!email.trim()) {
+      setError('Please enter your email');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -36,17 +48,22 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!agreedToTerms) {
+      setError('You must agree to the Terms of Service and Privacy Policy');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const supabase = createClient();
 
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
         password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: fullName.trim(),
             role: accountType,
           },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
@@ -54,7 +71,18 @@ export default function RegisterPage() {
       });
 
       if (signUpError) {
-        setError(signUpError.message);
+        if (signUpError.message.includes('already registered')) {
+          setError('An account with this email already exists. Try signing in instead.');
+        } else {
+          setError(signUpError.message);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if email confirmation is required
+      if (data?.user?.identities?.length === 0) {
+        setError('An account with this email already exists. Try signing in instead.');
         setIsLoading(false);
         return;
       }
@@ -62,7 +90,7 @@ export default function RegisterPage() {
       setSuccess(true);
     } catch (err) {
       console.error('Registration error:', err);
-      setError('Unable to connect to the server. Please try again later.');
+      setError('Unable to connect to the server. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -83,8 +111,15 @@ export default function RegisterPage() {
               We&apos;ve sent a confirmation link to <strong className="text-white">{email}</strong>. Click the link to verify your account.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white" onClick={() => router.push('/login')}>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-neutral-400 text-center">
+              Didn&apos;t receive the email? Check your spam folder or try registering again.
+            </p>
+            <Button
+              variant="outline"
+              className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+              onClick={() => router.push('/login')}
+            >
               Back to login
             </Button>
           </CardContent>
@@ -113,11 +148,12 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setAccountType('customer')}
+                disabled={isLoading}
                 className={`p-4 rounded-lg border-2 text-center transition-colors ${
                   accountType === 'customer'
                     ? 'border-red-500 bg-red-500/20 text-red-400'
                     : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
-                }`}
+                } disabled:opacity-50`}
               >
                 <svg className="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -127,11 +163,12 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setAccountType('business_owner')}
+                disabled={isLoading}
                 className={`p-4 rounded-lg border-2 text-center transition-colors ${
                   accountType === 'business_owner'
                     ? 'border-red-500 bg-red-500/20 text-red-400'
                     : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
-                }`}
+                } disabled:opacity-50`}
               >
                 <svg className="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -156,6 +193,7 @@ export default function RegisterPage() {
               placeholder="John Doe"
               required
               autoComplete="name"
+              disabled={isLoading}
             />
 
             <Input
@@ -166,6 +204,7 @@ export default function RegisterPage() {
               placeholder="you@example.com"
               required
               autoComplete="email"
+              disabled={isLoading}
             />
 
             <Input
@@ -176,6 +215,7 @@ export default function RegisterPage() {
               placeholder="At least 8 characters"
               required
               autoComplete="new-password"
+              disabled={isLoading}
             />
 
             <Input
@@ -186,12 +226,15 @@ export default function RegisterPage() {
               placeholder="Confirm your password"
               required
               autoComplete="new-password"
+              disabled={isLoading}
             />
 
             <div className="flex items-start">
               <input
                 type="checkbox"
-                required
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                disabled={isLoading}
                 className="mt-1 rounded border-neutral-600 bg-neutral-800 text-red-600 focus:ring-red-500"
               />
               <span className="ml-2 text-sm text-neutral-400">

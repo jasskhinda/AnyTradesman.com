@@ -194,36 +194,36 @@ export default function AdminCategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-950">
       {/* Admin Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-neutral-900 border-b border-neutral-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-xl font-bold text-red-600">
+              <Link href="/" className="text-xl font-bold text-red-500">
                 AnyTradesman
               </Link>
-              <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded">
+              <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-medium rounded">
                 Admin
               </span>
             </div>
             <nav className="flex items-center gap-6">
-              <Link href="/admin" className="text-gray-600 hover:text-gray-900">
+              <Link href="/admin" className="text-neutral-400 hover:text-white">
                 Dashboard
               </Link>
-              <Link href="/admin/users" className="text-gray-600 hover:text-gray-900">
+              <Link href="/admin/users" className="text-neutral-400 hover:text-white">
                 Users
               </Link>
-              <Link href="/admin/businesses" className="text-gray-600 hover:text-gray-900">
+              <Link href="/admin/businesses" className="text-neutral-400 hover:text-white">
                 Businesses
               </Link>
-              <Link href="/admin/verifications" className="text-gray-600 hover:text-gray-900">
+              <Link href="/admin/verifications" className="text-neutral-400 hover:text-white">
                 Verifications
               </Link>
-              <Link href="/admin/categories" className="text-gray-900 font-medium">
+              <Link href="/admin/categories" className="text-white font-medium">
                 Categories
               </Link>
-              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
+              <Link href="/dashboard" className="text-neutral-400 hover:text-white">
                 Exit Admin
               </Link>
             </nav>
@@ -234,8 +234,8 @@ export default function AdminCategoriesPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Categories Management</h1>
-            <p className="mt-1 text-gray-500">Manage service categories displayed on the platform</p>
+            <h1 className="text-2xl font-bold text-white">Categories Management</h1>
+            <p className="mt-1 text-neutral-400">Manage service categories displayed on the platform</p>
           </div>
           <Button onClick={() => setShowAddForm(true)}>
             <Plus className="w-4 h-4 mr-2" />
@@ -252,7 +252,7 @@ export default function AdminCategoriesPage() {
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-300 mb-1">
                     Name *
                   </label>
                   <input
@@ -263,43 +263,43 @@ export default function AdminCategoriesPage() {
                       name: e.target.value,
                       slug: generateSlug(e.target.value),
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="e.g., Plumbing"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-300 mb-1">
                     Slug
                   </label>
                   <input
                     type="text"
                     value={newCategory.slug}
                     onChange={(e) => setNewCategory({ ...newCategory, slug: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="e.g., plumbing"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-300 mb-1">
                     Description
                   </label>
                   <input
                     type="text"
                     value={newCategory.description}
                     onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="Brief description of this category"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-300 mb-1">
                     Icon (Lucide icon name)
                   </label>
                   <input
                     type="text"
                     value={newCategory.icon}
                     onChange={(e) => setNewCategory({ ...newCategory, icon: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="e.g., wrench, zap, home"
                   />
                 </div>
@@ -309,9 +309,9 @@ export default function AdminCategoriesPage() {
                       type="checkbox"
                       checked={newCategory.is_active}
                       onChange={(e) => setNewCategory({ ...newCategory, is_active: e.target.checked })}
-                      className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      className="rounded border-neutral-700 text-red-500 focus:ring-red-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Active (visible on site)</span>
+                    <span className="ml-2 text-sm text-neutral-300">Active (visible on site)</span>
                   </label>
                 </div>
               </div>
@@ -339,10 +339,10 @@ export default function AdminCategoriesPage() {
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                <p className="mt-2 text-gray-500">Loading categories...</p>
+                <p className="mt-2 text-neutral-400">Loading categories...</p>
               </div>
             ) : categories.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-neutral-400">
                 <LayoutGrid className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p>No categories found</p>
                 <Button className="mt-4" onClick={() => setShowAddForm(true)}>
@@ -354,20 +354,20 @@ export default function AdminCategoriesPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-500 w-8"></th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500">Slug</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500">Description</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500">Actions</th>
+                    <tr className="border-b border-neutral-800">
+                      <th className="text-left py-3 px-4 font-medium text-neutral-400 w-8"></th>
+                      <th className="text-left py-3 px-4 font-medium text-neutral-400">Name</th>
+                      <th className="text-left py-3 px-4 font-medium text-neutral-400">Slug</th>
+                      <th className="text-left py-3 px-4 font-medium text-neutral-400">Description</th>
+                      <th className="text-left py-3 px-4 font-medium text-neutral-400">Status</th>
+                      <th className="text-left py-3 px-4 font-medium text-neutral-400">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {categories.map((category) => (
-                      <tr key={category.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <tr key={category.id} className="border-b border-neutral-800 hover:bg-neutral-950">
                         <td className="py-3 px-4">
-                          <GripVertical className="w-4 h-4 text-gray-400 cursor-move" />
+                          <GripVertical className="w-4 h-4 text-neutral-500 cursor-move" />
                         </td>
                         <td className="py-3 px-4">
                           {editingId === category.id ? (
@@ -375,10 +375,10 @@ export default function AdminCategoriesPage() {
                               type="text"
                               value={editForm.name || ''}
                               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                              className="w-full px-2 py-1 border border-gray-300 rounded"
+                              className="w-full px-2 py-1 border border-neutral-700 rounded"
                             />
                           ) : (
-                            <span className="font-medium text-gray-900">{category.name}</span>
+                            <span className="font-medium text-white">{category.name}</span>
                           )}
                         </td>
                         <td className="py-3 px-4">
@@ -387,21 +387,21 @@ export default function AdminCategoriesPage() {
                               type="text"
                               value={editForm.slug || ''}
                               onChange={(e) => setEditForm({ ...editForm, slug: e.target.value })}
-                              className="w-full px-2 py-1 border border-gray-300 rounded"
+                              className="w-full px-2 py-1 border border-neutral-700 rounded"
                             />
                           ) : (
-                            <code className="text-sm bg-gray-100 px-2 py-1 rounded">
+                            <code className="text-sm bg-neutral-800 px-2 py-1 rounded">
                               {category.slug}
                             </code>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-gray-600">
+                        <td className="py-3 px-4 text-neutral-400">
                           {editingId === category.id ? (
                             <input
                               type="text"
                               value={editForm.description || ''}
                               onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                              className="w-full px-2 py-1 border border-gray-300 rounded"
+                              className="w-full px-2 py-1 border border-neutral-700 rounded"
                             />
                           ) : (
                             <span className="text-sm">{category.description || '-'}</span>
@@ -412,8 +412,8 @@ export default function AdminCategoriesPage() {
                             onClick={() => handleToggleActive(category.id, category.is_active)}
                             className={`px-2 py-1 text-xs rounded ${
                               category.is_active
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-100 text-gray-500'
+                                ? 'bg-green-500/20 text-green-400'
+                                : 'bg-neutral-800 text-neutral-400'
                             }`}
                           >
                             {category.is_active ? 'Active' : 'Inactive'}
@@ -454,7 +454,7 @@ export default function AdminCategoriesPage() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleDeleteCategory(category.id)}
-                                  className="text-red-600 border-red-300 hover:bg-red-50"
+                                  className="text-red-500 border-red-300 hover:bg-red-50"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>

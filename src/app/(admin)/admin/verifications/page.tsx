@@ -142,11 +142,11 @@ export default function AdminVerificationsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'verified':
-        return 'bg-green-100 text-green-700';
+        return 'bg-green-500/20 text-green-400';
       case 'rejected':
-        return 'bg-red-100 text-red-700';
+        return 'bg-red-500/20 text-red-400';
       default:
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-yellow-500/20 text-yellow-400';
     }
   };
 
@@ -162,36 +162,36 @@ export default function AdminVerificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-950">
       {/* Admin Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-neutral-900 border-b border-neutral-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-xl font-bold text-red-600">
+              <Link href="/" className="text-xl font-bold text-red-500">
                 AnyTradesman
               </Link>
-              <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded">
+              <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-medium rounded">
                 Admin
               </span>
             </div>
             <nav className="flex items-center gap-6">
-              <Link href="/admin" className="text-gray-600 hover:text-gray-900">
+              <Link href="/admin" className="text-neutral-400 hover:text-white">
                 Dashboard
               </Link>
-              <Link href="/admin/users" className="text-gray-600 hover:text-gray-900">
+              <Link href="/admin/users" className="text-neutral-400 hover:text-white">
                 Users
               </Link>
-              <Link href="/admin/businesses" className="text-gray-600 hover:text-gray-900">
+              <Link href="/admin/businesses" className="text-neutral-400 hover:text-white">
                 Businesses
               </Link>
-              <Link href="/admin/verifications" className="text-gray-900 font-medium">
+              <Link href="/admin/verifications" className="text-white font-medium">
                 Verifications
               </Link>
-              <Link href="/admin/categories" className="text-gray-600 hover:text-gray-900">
+              <Link href="/admin/categories" className="text-neutral-400 hover:text-white">
                 Categories
               </Link>
-              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
+              <Link href="/dashboard" className="text-neutral-400 hover:text-white">
                 Exit Admin
               </Link>
             </nav>
@@ -201,8 +201,8 @@ export default function AdminVerificationsPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Verification Queue</h1>
-          <p className="mt-1 text-gray-500">Review and verify business credentials</p>
+          <h1 className="text-2xl font-bold text-white">Verification Queue</h1>
+          <p className="mt-1 text-neutral-400">Review and verify business credentials</p>
         </div>
 
         {/* Filters */}
@@ -215,7 +215,7 @@ export default function AdminVerificationsPage() {
                   setStatusFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="px-4 py-2 border border-neutral-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               >
                 <option value="pending">Pending Review</option>
                 <option value="verified">Verified</option>
@@ -233,7 +233,7 @@ export default function AdminVerificationsPage() {
               <FileCheck className="w-5 h-5" />
               Credentials ({totalCount})
               {statusFilter === 'pending' && totalCount > 0 && (
-                <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">
+                <span className="ml-2 px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded">
                   {totalCount} awaiting review
                 </span>
               )}
@@ -243,10 +243,10 @@ export default function AdminVerificationsPage() {
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                <p className="mt-2 text-gray-500">Loading credentials...</p>
+                <p className="mt-2 text-neutral-400">Loading credentials...</p>
               </div>
             ) : credentials.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-neutral-400">
                 <FileCheck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p>No credentials found</p>
                 {statusFilter === 'pending' && (
@@ -258,27 +258,27 @@ export default function AdminVerificationsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Business</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Credential Type</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Number</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Expiry</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Submitted</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Actions</th>
+                      <tr className="border-b border-neutral-800">
+                        <th className="text-left py-3 px-4 font-medium text-neutral-400">Business</th>
+                        <th className="text-left py-3 px-4 font-medium text-neutral-400">Credential Type</th>
+                        <th className="text-left py-3 px-4 font-medium text-neutral-400">Number</th>
+                        <th className="text-left py-3 px-4 font-medium text-neutral-400">Expiry</th>
+                        <th className="text-left py-3 px-4 font-medium text-neutral-400">Status</th>
+                        <th className="text-left py-3 px-4 font-medium text-neutral-400">Submitted</th>
+                        <th className="text-left py-3 px-4 font-medium text-neutral-400">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {credentials.map((credential) => (
-                        <tr key={credential.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr key={credential.id} className="border-b border-neutral-800 hover:bg-neutral-950">
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
-                              <Building2 className="w-4 h-4 text-gray-400" />
+                              <Building2 className="w-4 h-4 text-neutral-500" />
                               <div>
-                                <p className="font-medium text-gray-900">
+                                <p className="font-medium text-white">
                                   {credential.business?.name || 'Unknown'}
                                 </p>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-neutral-400">
                                   {credential.business?.email || 'No email'}
                                 </p>
                               </div>
@@ -287,20 +287,20 @@ export default function AdminVerificationsPage() {
                           <td className="py-3 px-4">
                             <span className="capitalize">{credential.credential_type.replace('_', ' ')}</span>
                           </td>
-                          <td className="py-3 px-4 text-gray-600">
+                          <td className="py-3 px-4 text-neutral-400">
                             {credential.credential_number || '-'}
                           </td>
-                          <td className="py-3 px-4 text-gray-600">
+                          <td className="py-3 px-4 text-neutral-400">
                             {credential.expiry_date ? (
                               <span className={`flex items-center gap-1 ${
                                 new Date(credential.expiry_date) < new Date()
-                                  ? 'text-red-600'
+                                  ? 'text-red-500'
                                   : ''
                               }`}>
                                 <Calendar className="w-3 h-3" />
                                 {new Date(credential.expiry_date).toLocaleDateString()}
                                 {new Date(credential.expiry_date) < new Date() && (
-                                  <AlertCircle className="w-3 h-3 text-red-600" />
+                                  <AlertCircle className="w-3 h-3 text-red-500" />
                                 )}
                               </span>
                             ) : (
@@ -313,7 +313,7 @@ export default function AdminVerificationsPage() {
                               {credential.verification_status}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-gray-600">
+                          <td className="py-3 px-4 text-neutral-400">
                             {new Date(credential.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4">
@@ -340,7 +340,7 @@ export default function AdminVerificationsPage() {
                                     size="sm"
                                     onClick={() => handleVerification(credential.id, 'rejected')}
                                     disabled={processing}
-                                    className="text-red-600 border-red-300 hover:bg-red-50"
+                                    className="text-red-500 border-red-300 hover:bg-red-50"
                                   >
                                     <XCircle className="w-4 h-4" />
                                   </Button>
@@ -357,7 +357,7 @@ export default function AdminVerificationsPage() {
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-neutral-400">
                       Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of {totalCount}
                     </p>
                     <div className="flex items-center gap-2">
@@ -369,7 +369,7 @@ export default function AdminVerificationsPage() {
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-neutral-400">
                         Page {currentPage} of {totalPages}
                       </span>
                       <Button
@@ -401,25 +401,25 @@ export default function AdminVerificationsPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500">Business</p>
+                    <p className="text-sm text-neutral-400">Business</p>
                     <p className="font-medium">{selectedCredential.business?.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Type</p>
+                    <p className="text-sm text-neutral-400">Type</p>
                     <p className="font-medium capitalize">
                       {selectedCredential.credential_type.replace('_', ' ')}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Credential Number</p>
+                    <p className="text-sm text-neutral-400">Credential Number</p>
                     <p className="font-medium">{selectedCredential.credential_number || '-'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Issuing Authority</p>
+                    <p className="text-sm text-neutral-400">Issuing Authority</p>
                     <p className="font-medium">{selectedCredential.issuing_authority || '-'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Issue Date</p>
+                    <p className="text-sm text-neutral-400">Issue Date</p>
                     <p className="font-medium">
                       {selectedCredential.issue_date
                         ? new Date(selectedCredential.issue_date).toLocaleDateString()
@@ -427,10 +427,10 @@ export default function AdminVerificationsPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Expiry Date</p>
+                    <p className="text-sm text-neutral-400">Expiry Date</p>
                     <p className={`font-medium ${
                       selectedCredential.expiry_date && new Date(selectedCredential.expiry_date) < new Date()
-                        ? 'text-red-600'
+                        ? 'text-red-500'
                         : ''
                     }`}>
                       {selectedCredential.expiry_date
@@ -442,12 +442,12 @@ export default function AdminVerificationsPage() {
 
                 {selectedCredential.document_url && (
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">Document</p>
+                    <p className="text-sm text-neutral-400 mb-2">Document</p>
                     <a
                       href={selectedCredential.document_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-red-600 hover:text-red-700"
+                      className="flex items-center gap-2 text-red-500 hover:text-red-400"
                     >
                       <Download className="w-4 h-4" />
                       View/Download Document
@@ -461,7 +461,7 @@ export default function AdminVerificationsPage() {
                     {selectedCredential.verification_status}
                   </span>
                   {selectedCredential.verified_at && (
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-neutral-400">
                       on {new Date(selectedCredential.verified_at).toLocaleDateString()}
                     </span>
                   )}
@@ -474,7 +474,7 @@ export default function AdminVerificationsPage() {
                         onClick={() => handleVerification(selectedCredential.id, 'rejected')}
                         disabled={processing}
                         variant="outline"
-                        className="text-red-600 border-red-300 hover:bg-red-50"
+                        className="text-red-500 border-red-300 hover:bg-red-50"
                       >
                         <XCircle className="w-4 h-4 mr-2" />
                         Reject
