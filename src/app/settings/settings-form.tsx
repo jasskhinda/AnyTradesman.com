@@ -180,7 +180,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
           <h2 className="text-lg font-semibold text-white">Security</h2>
         </div>
         <div className="space-y-4">
-          <Button variant="outline" onClick={() => router.push('/forgot-password')}>
+          <Button variant="outline" onClick={() => router.push('/settings/change-password')}>
             Change Password
           </Button>
         </div>
