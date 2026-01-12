@@ -33,19 +33,34 @@ export function ChangePasswordForm() {
 
     setIsLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
+    try {
+      const supabase = createClient();
 
-    if (error) {
-      setError(error.message);
+      // First verify we have a session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError('Your session has expired. Please log in again.');
+        setIsLoading(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+    } catch (err) {
+      console.error('Password update error:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    setSuccess(true);
-    setIsLoading(false);
   };
 
   if (success) {
