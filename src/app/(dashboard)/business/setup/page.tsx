@@ -108,65 +108,81 @@ export default function BusinessSetupPage() {
       setUserId(userId);
       console.log('Step 2: User ID set:', userId);
 
-      // Fetch profile first for header display
-      console.log('Step 3: Fetching profile...');
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-      console.log('Step 3 complete. Profile:', profile ? 'found' : 'not found', 'Error:', profileError);
+      // Helper function to add timeout to promises
+      const withTimeout = <T,>(promise: Promise<T>, ms: number, name: string): Promise<T> => {
+        return Promise.race([
+          promise,
+          new Promise<T>((_, reject) =>
+            setTimeout(() => reject(new Error(`${name} timed out after ${ms}ms`)), ms)
+          ),
+        ]);
+      };
 
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
-      }
+      // Fetch profile, business, and categories in parallel with timeouts
+      console.log('Step 3: Fetching data in parallel...');
 
-      if (profile) {
-        setUserProfile(profile);
-        setFormData(prev => ({ ...prev, email: profile.email }));
+      const [profileResult, businessResult, categoriesResult] = await Promise.all([
+        withTimeout(
+          supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+          5000,
+          'Profile fetch'
+        ).catch(err => {
+          console.error('Profile fetch failed:', err);
+          return { data: null, error: err };
+        }),
+
+        withTimeout(
+          supabase.from('businesses').select('id').eq('owner_id', userId).maybeSingle(),
+          5000,
+          'Business check'
+        ).catch(err => {
+          console.error('Business check failed:', err);
+          return { data: null, error: err };
+        }),
+
+        withTimeout(
+          supabase.from('categories').select('*').eq('is_active', true).order('name'),
+          5000,
+          'Categories fetch'
+        ).catch(err => {
+          console.error('Categories fetch failed:', err);
+          return { data: null, error: err };
+        }),
+      ]);
+
+      console.log('Step 3 complete. Results:', {
+        profile: profileResult.data ? 'found' : 'not found',
+        profileError: profileResult.error,
+        business: businessResult.data ? 'found' : 'not found',
+        businessError: businessResult.error,
+        categoriesCount: categoriesResult.data?.length || 0,
+        categoriesError: categoriesResult.error,
+      });
+
+      // Handle profile
+      if (profileResult.data) {
+        setUserProfile(profileResult.data);
+        setFormData(prev => ({ ...prev, email: profileResult.data.email }));
       }
 
       // Check if user already has a business
-      console.log('Step 4: Checking for existing business...');
-      const { data: existingBusiness, error: businessError } = await supabase
-        .from('businesses')
-        .select('id')
-        .eq('owner_id', userId)
-        .maybeSingle();
-      console.log('Step 4 complete. Business:', existingBusiness ? 'found' : 'not found', 'Error:', businessError);
-
-      if (businessError) {
-        console.error('Business check error:', businessError);
-      }
-
-      if (existingBusiness) {
+      if (businessResult.data) {
         console.log('User already has a business, redirecting...');
         router.push('/business');
         return;
       }
 
-      // Load categories
-      console.log('Step 5: Loading categories...');
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
-      console.log('Step 5 complete. Categories count:', categoriesData?.length || 0, 'Error:', categoriesError);
-
-      if (categoriesError) {
-        console.error('Categories fetch error:', categoriesError);
+      // Handle categories
+      if (categoriesResult.error) {
         setError('Failed to load categories. Please refresh the page.');
-      }
-
-      if (categoriesData) {
-        setCategories(categoriesData);
+      } else if (categoriesResult.data) {
+        setCategories(categoriesResult.data);
       }
 
       console.log('All steps complete, setting loading to false');
       setLoading(false);
     } catch (err) {
-      console.error('Unexpected error in checkAuthAndLoadData:', err);
+      console.error('Unexpected error in loadDataWithUser:', err);
       setError('An unexpected error occurred. Please refresh the page.');
       setLoading(false);
     }
