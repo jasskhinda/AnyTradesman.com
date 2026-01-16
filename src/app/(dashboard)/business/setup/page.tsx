@@ -108,28 +108,14 @@ export default function BusinessSetupPage() {
       setUserId(userId);
       console.log('Step 2: User ID set:', userId);
 
-      // Helper function to add timeout to promises
-      const withTimeout = <T,>(promise: Promise<T>, ms: number, name: string): Promise<T> => {
-        return Promise.race([
-          promise,
-          new Promise<T>((_, reject) =>
-            setTimeout(() => reject(new Error(`${name} timed out after ${ms}ms`)), ms)
-          ),
-        ]);
-      };
-
-      // Fetch profile, business, and categories in parallel with timeouts
-      console.log('Step 3: Fetching data in parallel...');
+      // Fetch profile, business, and categories
+      console.log('Step 3: Fetching data...');
 
       // Fetch profile
       let profile: Profile | null = null;
       let profileError: Error | null = null;
       try {
-        const result = await withTimeout(
-          supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
-          5000,
-          'Profile fetch'
-        );
+        const result = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
         profile = result.data;
         if (result.error) profileError = new Error(result.error.message);
       } catch (err) {
@@ -141,11 +127,7 @@ export default function BusinessSetupPage() {
       let existingBusiness: { id: string } | null = null;
       let businessError: Error | null = null;
       try {
-        const result = await withTimeout(
-          supabase.from('businesses').select('id').eq('owner_id', userId).maybeSingle(),
-          5000,
-          'Business check'
-        );
+        const result = await supabase.from('businesses').select('id').eq('owner_id', userId).maybeSingle();
         existingBusiness = result.data;
         if (result.error) businessError = new Error(result.error.message);
       } catch (err) {
@@ -157,11 +139,7 @@ export default function BusinessSetupPage() {
       let categoriesData: Category[] | null = null;
       let categoriesError: Error | null = null;
       try {
-        const result = await withTimeout(
-          supabase.from('categories').select('*').eq('is_active', true).order('name'),
-          5000,
-          'Categories fetch'
-        );
+        const result = await supabase.from('categories').select('*').eq('is_active', true).order('name');
         categoriesData = result.data;
         if (result.error) categoriesError = new Error(result.error.message);
       } catch (err) {
