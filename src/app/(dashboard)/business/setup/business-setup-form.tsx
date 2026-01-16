@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +14,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import type { Category, Profile } from '@/types/database';
+import { createBusiness } from './actions';
 
 const steps = [
   { id: 1, title: 'Business Details', icon: Building2 },
@@ -36,7 +35,6 @@ export function BusinessSetupForm({
   categories,
   userEmail,
 }: BusinessSetupFormProps) {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,60 +79,27 @@ export function BusinessSetupForm({
     setSaving(true);
     setError(null);
 
-    const supabase = createClient();
+    // Use server action for database mutation
+    const result = await createBusiness({
+      userId,
+      name: formData.name,
+      description: formData.description,
+      phone: formData.phone,
+      email: formData.email,
+      website: formData.website,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      zip_code: formData.zip_code,
+      service_radius_miles: formData.service_radius_miles,
+      selectedCategories: formData.selectedCategories,
+    });
 
-    // Generate slug from name
-    const slug = formData.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    // Create business
-    const { data: business, error: businessError } = await supabase
-      .from('businesses')
-      .insert({
-        owner_id: userId,
-        name: formData.name,
-        slug,
-        description: formData.description || null,
-        phone: formData.phone || null,
-        email: formData.email || null,
-        website: formData.website || null,
-        address: formData.address || null,
-        city: formData.city || null,
-        state: formData.state || null,
-        zip_code: formData.zip_code || null,
-        service_radius_miles: formData.service_radius_miles,
-        is_verified: false,
-        verification_status: 'pending',
-        is_active: true,
-      })
-      .select()
-      .single();
-
-    if (businessError) {
-      setError(businessError.message);
+    if (result?.error) {
+      setError(result.error);
       setSaving(false);
-      return;
     }
-
-    // Add categories
-    if (formData.selectedCategories.length > 0) {
-      const { error: catError } = await supabase
-        .from('business_categories')
-        .insert(formData.selectedCategories.map(catId => ({
-          business_id: business.id,
-          category_id: catId,
-        })));
-
-      if (catError) {
-        console.error('Error adding categories:', catError);
-        // Continue anyway - business was created
-      }
-    }
-
-    // Redirect to credentials page
-    router.push('/business/credentials');
+    // If successful, server action handles redirect
   }
 
   return (
