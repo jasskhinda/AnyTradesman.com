@@ -4,11 +4,13 @@ import { getStripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
-// Create admin Supabase client for webhook handling
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Create admin Supabase client lazily to avoid build-time errors
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -53,7 +55,7 @@ export async function POST(request: Request) {
           const periodStart = firstItem?.current_period_start;
           const periodEnd = firstItem?.current_period_end;
 
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from('subscriptions')
             .upsert({
               business_id: businessId,
@@ -78,7 +80,7 @@ export async function POST(request: Request) {
         const customerId = subscription.customer as string;
 
         // Find business by stripe customer ID
-        const { data: existingSub } = await supabaseAdmin
+        const { data: existingSub } = await getSupabaseAdmin()
           .from('subscriptions')
           .select('business_id')
           .eq('stripe_customer_id', customerId)
@@ -90,7 +92,7 @@ export async function POST(request: Request) {
           const periodStart = firstItem?.current_period_start;
           const periodEnd = firstItem?.current_period_end;
 
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from('subscriptions')
             .update({
               status: mapStripeStatus(subscription.status),
@@ -107,14 +109,14 @@ export async function POST(request: Request) {
         const customerId = subscription.customer as string;
 
         // Find and update subscription status
-        const { data: existingSub } = await supabaseAdmin
+        const { data: existingSub } = await getSupabaseAdmin()
           .from('subscriptions')
           .select('business_id')
           .eq('stripe_customer_id', customerId)
           .single();
 
         if (existingSub) {
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from('subscriptions')
             .update({
               status: 'canceled',
@@ -129,14 +131,14 @@ export async function POST(request: Request) {
         const customerId = invoice.customer as string;
 
         // Update subscription status to past_due
-        const { data: existingSub } = await supabaseAdmin
+        const { data: existingSub } = await getSupabaseAdmin()
           .from('subscriptions')
           .select('business_id')
           .eq('stripe_customer_id', customerId)
           .single();
 
         if (existingSub) {
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from('subscriptions')
             .update({
               status: 'past_due',
