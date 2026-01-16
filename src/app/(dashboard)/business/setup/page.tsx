@@ -15,7 +15,7 @@ import {
   ArrowRight,
   ArrowLeft,
 } from 'lucide-react';
-import type { Category } from '@/types/database';
+import type { Category, Profile } from '@/types/database';
 
 const steps = [
   { id: 1, title: 'Business Details', icon: Building2 },
@@ -31,6 +31,7 @@ export default function BusinessSetupPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -51,51 +52,72 @@ export default function BusinessSetupPage() {
   }, []);
 
   async function checkAuthAndLoadData() {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!user) {
-      router.push('/login');
-      return;
+      if (authError || !user) {
+        console.error('Auth error:', authError);
+        router.push('/login');
+        return;
+      }
+
+      setUserId(user.id);
+
+      // Fetch profile first for header display
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+      }
+
+      if (profile) {
+        setUserProfile(profile);
+        setFormData(prev => ({ ...prev, email: profile.email }));
+      }
+
+      // Check if user already has a business
+      const { data: existingBusiness, error: businessError } = await supabase
+        .from('businesses')
+        .select('id')
+        .eq('owner_id', user.id)
+        .maybeSingle();
+
+      if (businessError) {
+        console.error('Business check error:', businessError);
+      }
+
+      if (existingBusiness) {
+        router.push('/business');
+        return;
+      }
+
+      // Load categories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+
+      if (categoriesError) {
+        console.error('Categories fetch error:', categoriesError);
+        setError('Failed to load categories. Please refresh the page.');
+      }
+
+      if (categoriesData) {
+        setCategories(categoriesData);
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error('Unexpected error in checkAuthAndLoadData:', err);
+      setError('An unexpected error occurred. Please refresh the page.');
+      setLoading(false);
     }
-
-    setUserId(user.id);
-
-    // Check if user already has a business
-    const { data: existingBusiness } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .maybeSingle();
-
-    if (existingBusiness) {
-      router.push('/business');
-      return;
-    }
-
-    // Load categories
-    const { data: categoriesData } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('name');
-
-    if (categoriesData) {
-      setCategories(categoriesData);
-    }
-
-    // Pre-fill email from user profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (profile) {
-      setFormData(prev => ({ ...prev, email: profile.email }));
-    }
-
-    setLoading(false);
   }
 
   function toggleCategory(categoryId: string) {
@@ -180,12 +202,22 @@ export default function BusinessSetupPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-950">
-        <Header />
+        <Header initialUser={userProfile} />
         <main className="max-w-2xl mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-neutral-800 rounded w-1/2 mx-auto" />
-            <div className="h-64 bg-neutral-800 rounded" />
-          </div>
+          {error ? (
+            <div className="text-center">
+              <p className="text-red-400 mb-4">{error}</p>
+              <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+            </div>
+          ) : (
+            <>
+              <div className="animate-pulse space-y-6">
+                <div className="h-8 bg-neutral-800 rounded w-1/2 mx-auto" />
+                <div className="h-64 bg-neutral-800 rounded" />
+              </div>
+              <p className="text-center text-neutral-400 mt-4">Loading content...</p>
+            </>
+          )}
         </main>
       </div>
     );
@@ -193,7 +225,7 @@ export default function BusinessSetupPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950">
-      <Header />
+      <Header initialUser={userProfile} />
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         {/* Progress Steps */}
