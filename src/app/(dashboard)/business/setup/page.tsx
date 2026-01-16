@@ -48,16 +48,43 @@ export default function BusinessSetupPage() {
   });
 
   useEffect(() => {
-    checkAuthAndLoadData();
+    let isMounted = true;
+
+    // Add timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (isMounted) {
+        console.error('Loading timeout - forcing error state');
+        setError('Loading timed out. Please check your connection and refresh.');
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
+
+    checkAuthAndLoadData().finally(() => {
+      clearTimeout(timeout);
+    });
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function checkAuthAndLoadData() {
     try {
       const supabase = createClient();
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-      if (authError || !user) {
-        console.error('Auth error:', authError);
+      // Use getSession first (reads from cache/cookies, faster)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+      }
+
+      const user = session?.user;
+
+      if (!user) {
+        console.log('No user session found, redirecting to login');
         router.push('/login');
         return;
       }
