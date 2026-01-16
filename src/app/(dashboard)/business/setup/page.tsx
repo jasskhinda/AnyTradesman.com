@@ -112,15 +112,29 @@ export default function BusinessSetupPage() {
       console.log('Step 3: Fetching data...');
       console.log('Supabase client:', supabase);
 
+      // Use direct fetch to bypass Supabase SDK issues
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+      const headers = {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      };
+
       // Fetch profile
       let profile: Profile | null = null;
       let profileError: Error | null = null;
       try {
-        console.log('Starting profile fetch...');
-        const result = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
-        console.log('Profile fetch result:', result);
-        profile = result.data;
-        if (result.error) profileError = new Error(result.error.message);
+        console.log('Starting profile fetch with direct fetch...');
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=*`,
+          { headers }
+        );
+        console.log('Profile fetch response status:', response.status);
+        const data = await response.json();
+        console.log('Profile fetch data:', data);
+        profile = Array.isArray(data) && data.length > 0 ? data[0] : null;
       } catch (err) {
         console.error('Profile fetch failed:', err);
         profileError = err as Error;
@@ -130,9 +144,14 @@ export default function BusinessSetupPage() {
       let existingBusiness: { id: string } | null = null;
       let businessError: Error | null = null;
       try {
-        const result = await supabase.from('businesses').select('id').eq('owner_id', userId).maybeSingle();
-        existingBusiness = result.data;
-        if (result.error) businessError = new Error(result.error.message);
+        console.log('Starting business fetch...');
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/businesses?owner_id=eq.${userId}&select=id`,
+          { headers }
+        );
+        console.log('Business fetch response status:', response.status);
+        const data = await response.json();
+        existingBusiness = Array.isArray(data) && data.length > 0 ? data[0] : null;
       } catch (err) {
         console.error('Business check failed:', err);
         businessError = err as Error;
@@ -142,9 +161,14 @@ export default function BusinessSetupPage() {
       let categoriesData: Category[] | null = null;
       let categoriesError: Error | null = null;
       try {
-        const result = await supabase.from('categories').select('*').eq('is_active', true).order('name');
-        categoriesData = result.data;
-        if (result.error) categoriesError = new Error(result.error.message);
+        console.log('Starting categories fetch...');
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/categories?is_active=eq.true&select=*&order=name`,
+          { headers }
+        );
+        console.log('Categories fetch response status:', response.status);
+        const data = await response.json();
+        categoriesData = Array.isArray(data) ? data : null;
       } catch (err) {
         console.error('Categories fetch failed:', err);
         categoriesError = err as Error;
