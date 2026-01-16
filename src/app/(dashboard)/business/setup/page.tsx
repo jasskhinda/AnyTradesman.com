@@ -74,32 +74,45 @@ export default function BusinessSetupPage() {
     try {
       const supabase = createClient();
 
-      console.log('Step 1: Getting session...');
-      // Use getSession first (reads from cache/cookies, faster)
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('Step 1 complete. Session:', session ? 'found' : 'not found', 'Error:', sessionError);
+      // The middleware already protects this route and ensures user is logged in
+      // Use onAuthStateChange to get the session without blocking
+      console.log('Step 1: Getting auth state...');
 
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-      }
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log('Auth state changed:', event, 'Session:', session ? 'found' : 'not found');
 
-      const user = session?.user;
+          if (!session?.user) {
+            console.log('No user session found, redirecting to login');
+            router.push('/login');
+            return;
+          }
 
-      if (!user) {
-        console.log('No user session found, redirecting to login');
-        router.push('/login');
-        return;
-      }
+          // Continue loading data with the session
+          await loadDataWithUser(session.user.id);
+          subscription.unsubscribe();
+        }
+      );
+    } catch (err) {
+      console.error('Unexpected error in checkAuthAndLoadData:', err);
+      setError('An unexpected error occurred. Please refresh the page.');
+      setLoading(false);
+    }
+  }
 
-      setUserId(user.id);
-      console.log('Step 2: User ID set:', user.id);
+  async function loadDataWithUser(userId: string) {
+    try {
+      const supabase = createClient();
+
+      setUserId(userId);
+      console.log('Step 2: User ID set:', userId);
 
       // Fetch profile first for header display
       console.log('Step 3: Fetching profile...');
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle();
       console.log('Step 3 complete. Profile:', profile ? 'found' : 'not found', 'Error:', profileError);
 
@@ -117,7 +130,7 @@ export default function BusinessSetupPage() {
       const { data: existingBusiness, error: businessError } = await supabase
         .from('businesses')
         .select('id')
-        .eq('owner_id', user.id)
+        .eq('owner_id', userId)
         .maybeSingle();
       console.log('Step 4 complete. Business:', existingBusiness ? 'found' : 'not found', 'Error:', businessError);
 
