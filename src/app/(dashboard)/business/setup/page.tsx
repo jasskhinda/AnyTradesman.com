@@ -110,12 +110,15 @@ export default function BusinessSetupPage() {
 
       // Fetch profile, business, and categories
       console.log('Step 3: Fetching data...');
+      console.log('Supabase client:', supabase);
 
       // Fetch profile
       let profile: Profile | null = null;
       let profileError: Error | null = null;
       try {
+        console.log('Starting profile fetch...');
         const result = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+        console.log('Profile fetch result:', result);
         profile = result.data;
         if (result.error) profileError = new Error(result.error.message);
       } catch (err) {
