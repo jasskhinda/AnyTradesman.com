@@ -128,7 +128,7 @@ export default function BusinessSetupPage() {
           'Profile fetch'
         ).catch(err => {
           console.error('Profile fetch failed:', err);
-          return { data: null, error: err };
+          return { data: null as Profile | null, error: err };
         }),
 
         withTimeout(
@@ -137,7 +137,7 @@ export default function BusinessSetupPage() {
           'Business check'
         ).catch(err => {
           console.error('Business check failed:', err);
-          return { data: null, error: err };
+          return { data: null as { id: string } | null, error: err };
         }),
 
         withTimeout(
@@ -146,7 +146,7 @@ export default function BusinessSetupPage() {
           'Categories fetch'
         ).catch(err => {
           console.error('Categories fetch failed:', err);
-          return { data: null, error: err };
+          return { data: null as Category[] | null, error: err };
         }),
       ]);
 
