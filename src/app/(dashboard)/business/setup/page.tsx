@@ -121,62 +121,81 @@ export default function BusinessSetupPage() {
       // Fetch profile, business, and categories in parallel with timeouts
       console.log('Step 3: Fetching data in parallel...');
 
-      const [profileResult, businessResult, categoriesResult] = await Promise.all([
-        withTimeout(
+      // Fetch profile
+      let profile: Profile | null = null;
+      let profileError: Error | null = null;
+      try {
+        const result = await withTimeout(
           supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
           5000,
           'Profile fetch'
-        ).catch(err => {
-          console.error('Profile fetch failed:', err);
-          return { data: null as Profile | null, error: err };
-        }),
+        );
+        profile = result.data;
+        if (result.error) profileError = new Error(result.error.message);
+      } catch (err) {
+        console.error('Profile fetch failed:', err);
+        profileError = err as Error;
+      }
 
-        withTimeout(
+      // Fetch business check
+      let existingBusiness: { id: string } | null = null;
+      let businessError: Error | null = null;
+      try {
+        const result = await withTimeout(
           supabase.from('businesses').select('id').eq('owner_id', userId).maybeSingle(),
           5000,
           'Business check'
-        ).catch(err => {
-          console.error('Business check failed:', err);
-          return { data: null as { id: string } | null, error: err };
-        }),
+        );
+        existingBusiness = result.data;
+        if (result.error) businessError = new Error(result.error.message);
+      } catch (err) {
+        console.error('Business check failed:', err);
+        businessError = err as Error;
+      }
 
-        withTimeout(
+      // Fetch categories
+      let categoriesData: Category[] | null = null;
+      let categoriesError: Error | null = null;
+      try {
+        const result = await withTimeout(
           supabase.from('categories').select('*').eq('is_active', true).order('name'),
           5000,
           'Categories fetch'
-        ).catch(err => {
-          console.error('Categories fetch failed:', err);
-          return { data: null as Category[] | null, error: err };
-        }),
-      ]);
+        );
+        categoriesData = result.data;
+        if (result.error) categoriesError = new Error(result.error.message);
+      } catch (err) {
+        console.error('Categories fetch failed:', err);
+        categoriesError = err as Error;
+      }
 
       console.log('Step 3 complete. Results:', {
-        profile: profileResult.data ? 'found' : 'not found',
-        profileError: profileResult.error,
-        business: businessResult.data ? 'found' : 'not found',
-        businessError: businessResult.error,
-        categoriesCount: categoriesResult.data?.length || 0,
-        categoriesError: categoriesResult.error,
+        profile: profile ? 'found' : 'not found',
+        profileError: profileError?.message,
+        business: existingBusiness ? 'found' : 'not found',
+        businessError: businessError?.message,
+        categoriesCount: categoriesData?.length || 0,
+        categoriesError: categoriesError?.message,
       });
 
       // Handle profile
-      if (profileResult.data) {
-        setUserProfile(profileResult.data);
-        setFormData(prev => ({ ...prev, email: profileResult.data.email }));
+      if (profile) {
+        setUserProfile(profile);
+        setFormData(prev => ({ ...prev, email: profile.email }));
       }
 
       // Check if user already has a business
-      if (businessResult.data) {
+      if (existingBusiness) {
         console.log('User already has a business, redirecting...');
         router.push('/business');
         return;
       }
 
       // Handle categories
-      if (categoriesResult.error) {
+      if (categoriesError) {
         setError('Failed to load categories. Please refresh the page.');
-      } else if (categoriesResult.data) {
-        setCategories(categoriesResult.data);
+      } else if (categoriesData) {
+        setCategories(categoriesData);
       }
 
       console.log('All steps complete, setting loading to false');
