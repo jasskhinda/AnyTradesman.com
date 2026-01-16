@@ -74,8 +74,10 @@ export default function BusinessSetupPage() {
     try {
       const supabase = createClient();
 
+      console.log('Step 1: Getting session...');
       // Use getSession first (reads from cache/cookies, faster)
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Step 1 complete. Session:', session ? 'found' : 'not found', 'Error:', sessionError);
 
       if (sessionError) {
         console.error('Session error:', sessionError);
@@ -90,13 +92,16 @@ export default function BusinessSetupPage() {
       }
 
       setUserId(user.id);
+      console.log('Step 2: User ID set:', user.id);
 
       // Fetch profile first for header display
+      console.log('Step 3: Fetching profile...');
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
+      console.log('Step 3 complete. Profile:', profile ? 'found' : 'not found', 'Error:', profileError);
 
       if (profileError) {
         console.error('Profile fetch error:', profileError);
@@ -108,27 +113,32 @@ export default function BusinessSetupPage() {
       }
 
       // Check if user already has a business
+      console.log('Step 4: Checking for existing business...');
       const { data: existingBusiness, error: businessError } = await supabase
         .from('businesses')
         .select('id')
         .eq('owner_id', user.id)
         .maybeSingle();
+      console.log('Step 4 complete. Business:', existingBusiness ? 'found' : 'not found', 'Error:', businessError);
 
       if (businessError) {
         console.error('Business check error:', businessError);
       }
 
       if (existingBusiness) {
+        console.log('User already has a business, redirecting...');
         router.push('/business');
         return;
       }
 
       // Load categories
+      console.log('Step 5: Loading categories...');
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('categories')
         .select('*')
         .eq('is_active', true)
         .order('name');
+      console.log('Step 5 complete. Categories count:', categoriesData?.length || 0, 'Error:', categoriesError);
 
       if (categoriesError) {
         console.error('Categories fetch error:', categoriesError);
@@ -139,6 +149,7 @@ export default function BusinessSetupPage() {
         setCategories(categoriesData);
       }
 
+      console.log('All steps complete, setting loading to false');
       setLoading(false);
     } catch (err) {
       console.error('Unexpected error in checkAuthAndLoadData:', err);
