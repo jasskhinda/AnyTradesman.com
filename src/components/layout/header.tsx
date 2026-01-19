@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -20,6 +20,21 @@ export function Header({ initialUser }: HeaderProps = {}) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [user, setUser] = useState<Profile | null>(initialUser ?? null);
   const [isLoading, setIsLoading] = useState(initialUser === undefined);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    }
+
+    if (isProfileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isProfileMenuOpen]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -184,7 +199,7 @@ export function Header({ initialUser }: HeaderProps = {}) {
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-neutral-300 animate-pulse" />
             ) : user ? (
-              <div className="relative">
+              <div className="relative" ref={profileMenuRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                   className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900"
@@ -195,53 +210,47 @@ export function Header({ initialUser }: HeaderProps = {}) {
                 </button>
 
                 {isProfileMenuOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    />
-                    <div className="absolute right-0 mt-2 w-48 bg-neutral-800 rounded-lg shadow-lg border border-neutral-700 py-1 z-20">
-                      <div className="px-4 py-2 border-b border-neutral-700">
-                        <p className="text-sm font-medium text-white truncate">
-                          {user.full_name || 'User'}
-                        </p>
-                        <p className="text-xs text-neutral-400 truncate">{user.email}</p>
-                      </div>
-                      <Link
-                        href="/dashboard"
-                        className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Dashboard
-                      </Link>
-                      {user.role === 'business_owner' && (
-                        <Link
-                          href="/business"
-                          className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
-                          onClick={() => setIsProfileMenuOpen(false)}
-                        >
-                          <Building2 className="w-4 h-4 mr-2" />
-                          My Business
-                        </Link>
-                      )}
-                      <Link
-                        href="/settings"
-                        className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        <User className="w-4 h-4 mr-2" />
-                        Settings
-                      </Link>
-                      <button
-                        onClick={handleSignOut}
-                        className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-neutral-700"
-                      >
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Sign out
-                      </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-neutral-800 rounded-lg shadow-lg border border-neutral-700 py-1 z-50">
+                    <div className="px-4 py-2 border-b border-neutral-700">
+                      <p className="text-sm font-medium text-white truncate">
+                        {user.full_name || 'User'}
+                      </p>
+                      <p className="text-xs text-neutral-400 truncate">{user.email}</p>
                     </div>
-                  </>
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4 mr-2" />
+                      Dashboard
+                    </Link>
+                    {user.role === 'business_owner' && (
+                      <Link
+                        href="/business"
+                        className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <Building2 className="w-4 h-4 mr-2" />
+                        My Business
+                      </Link>
+                    )}
+                    <Link
+                      href="/settings"
+                      className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-neutral-700 cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign out
+                    </button>
+                  </div>
                 )}
               </div>
             ) : (
