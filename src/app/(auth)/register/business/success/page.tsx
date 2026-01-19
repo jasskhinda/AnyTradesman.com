@@ -22,8 +22,8 @@ function SuccessContent() {
 
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         {/* Success Icon */}
-        <div className="mx-auto w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle className="w-10 h-10 text-teal-600" />
+        <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle className="w-10 h-10 text-red-600" />
         </div>
 
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -54,7 +54,7 @@ function SuccessContent() {
 
           <Link
             href="/login"
-            className="inline-block px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+            className="inline-block px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
           >
             Go to Login
           </Link>
@@ -64,7 +64,7 @@ function SuccessContent() {
         <div className="mt-12 text-center">
           <p className="text-gray-600">
             Questions?{' '}
-            <a href="tel:+13172700529" className="text-teal-600 hover:underline">
+            <a href="tel:+13172700529" className="text-red-600 hover:underline">
               +1 (317) 270-0529
             </a>
           </p>
@@ -78,7 +78,7 @@ export default function BusinessRegistrationSuccessPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
       </div>
     }>
       <SuccessContent />

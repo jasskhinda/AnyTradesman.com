@@ -253,7 +253,7 @@ export default function BusinessRegisterPage() {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   currentStep >= step
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-red-500 text-white'
                     : 'bg-gray-200 text-gray-500'
                 }`}
               >
@@ -266,7 +266,7 @@ export default function BusinessRegisterPage() {
               {step < 4 && (
                 <div
                   className={`flex-1 h-0.5 mx-2 ${
-                    currentStep > step ? 'bg-teal-500' : 'bg-gray-200'
+                    currentStep > step ? 'bg-red-500' : 'bg-gray-200'
                   }`}
                 />
               )}
@@ -326,7 +326,7 @@ export default function BusinessRegisterPage() {
                       }}
                       onFocus={() => setShowServiceDropdown(true)}
                       placeholder="Search for a service..."
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     />
                     <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   </div>
@@ -365,7 +365,7 @@ export default function BusinessRegisterPage() {
                 value={zipCode}
                 onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
                 placeholder="Enter your ZIP code"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -384,7 +384,7 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First name"
                 autoComplete="given-name"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
             <div>
@@ -397,7 +397,7 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last name"
                 autoComplete="family-name"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
             <p className="text-sm text-gray-500">
@@ -419,7 +419,7 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder="Your business name"
                 autoComplete="organization"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
               <p className="mt-1 text-sm text-gray-500">
                 If you don&apos;t have one, you can use your name
@@ -435,7 +435,7 @@ export default function BusinessRegisterPage() {
                 onChange={handlePhoneChange}
                 placeholder="xxx-xxx-xxxx"
                 autoComplete="tel"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
               <p className="mt-1 text-sm text-gray-500">
                 We&apos;ll use this number to put you in touch with homeowners
@@ -457,7 +457,7 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 autoComplete="email"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
             <div>
@@ -470,7 +470,7 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
                 autoComplete="new-password"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
             <div>
@@ -483,7 +483,7 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm your password"
                 autoComplete="new-password"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -497,7 +497,7 @@ export default function BusinessRegisterPage() {
               disabled={!canProceed()}
               className={`w-full py-4 rounded-lg text-lg font-medium transition-colors ${
                 canProceed()
-                  ? 'bg-teal-600 text-white hover:bg-teal-700'
+                  ? 'bg-red-600 text-white hover:bg-red-700'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
             >
@@ -509,7 +509,7 @@ export default function BusinessRegisterPage() {
               disabled={!canProceed() || isLoading}
               className={`w-full py-4 rounded-lg text-lg font-medium transition-colors ${
                 canProceed() && !isLoading
-                  ? 'bg-teal-600 text-white hover:bg-teal-700'
+                  ? 'bg-red-600 text-white hover:bg-red-700'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
             >
@@ -522,11 +522,11 @@ export default function BusinessRegisterPage() {
         {(currentStep === 3 || currentStep === 4) && (
           <p className="mt-4 text-xs text-gray-500 text-center">
             By clicking {currentStep === 4 ? 'Create Account' : 'Next'}, I agree to the{' '}
-            <Link href="/terms" className="text-teal-600 hover:underline">
+            <Link href="/terms" className="text-red-600 hover:underline">
               AnyTrades Terms
             </Link>{' '}
             and{' '}
-            <Link href="/privacy" className="text-teal-600 hover:underline">
+            <Link href="/privacy" className="text-red-600 hover:underline">
               Privacy Policy
             </Link>{' '}
             and authorize AnyTrades and parties acting on its behalf, to use automated technology
@@ -538,7 +538,7 @@ export default function BusinessRegisterPage() {
         <div className="mt-8 text-center">
           <p className="text-gray-600">
             Questions?{' '}
-            <a href="tel:+13172700529" className="text-teal-600 hover:underline">
+            <a href="tel:+13172700529" className="text-red-600 hover:underline">
               +1 (317) 270-0529
             </a>
           </p>
@@ -547,7 +547,7 @@ export default function BusinessRegisterPage() {
         {/* Already have account */}
         <p className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link href="/login" className="text-teal-600 hover:underline font-medium">
+          <Link href="/login" className="text-red-600 hover:underline font-medium">
             Sign in
           </Link>
         </p>
