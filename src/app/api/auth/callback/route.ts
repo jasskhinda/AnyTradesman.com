@@ -15,6 +15,7 @@ const ALLOWED_REDIRECTS = [
   '/settings',
   '/request',
   '/admin',
+  '/email-verified',
 ];
 
 function isValidRedirect(path: string): boolean {
@@ -35,7 +36,10 @@ export async function GET(request: Request) {
   const redirectPath = isValidRedirect(next) ? next : '/dashboard';
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=Missing authentication code`);
+    const errorUrl = new URL('/email-verified', origin);
+    errorUrl.searchParams.set('status', 'error');
+    errorUrl.searchParams.set('error', 'Missing authentication code. The link may be invalid.');
+    return NextResponse.redirect(errorUrl.toString());
   }
 
   try {
@@ -44,7 +48,10 @@ export async function GET(request: Request) {
 
     if (exchangeError) {
       console.error('Auth exchange error:', exchangeError);
-      return NextResponse.redirect(`${origin}/login?error=Authentication failed`);
+      const errorUrl = new URL('/email-verified', origin);
+      errorUrl.searchParams.set('status', 'error');
+      errorUrl.searchParams.set('error', 'Verification failed. The link may have expired or already been used.');
+      return NextResponse.redirect(errorUrl.toString());
     }
 
     // Get the authenticated user
@@ -52,7 +59,10 @@ export async function GET(request: Request) {
 
     if (userError || !user) {
       console.error('Get user error:', userError);
-      return NextResponse.redirect(`${origin}/login?error=Could not get user`);
+      const errorUrl = new URL('/email-verified', origin);
+      errorUrl.searchParams.set('status', 'error');
+      errorUrl.searchParams.set('error', 'Could not verify your account. Please try again.');
+      return NextResponse.redirect(errorUrl.toString());
     }
 
     // Check if profile exists
@@ -78,9 +88,17 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.redirect(`${origin}${redirectPath}`);
+    // Redirect to email-verified page with success status
+    const verifiedUrl = new URL('/email-verified', origin);
+    verifiedUrl.searchParams.set('status', 'success');
+    verifiedUrl.searchParams.set('next', redirectPath);
+    return NextResponse.redirect(verifiedUrl.toString());
   } catch (error) {
     console.error('Auth callback error:', error);
-    return NextResponse.redirect(`${origin}/login?error=Authentication error`);
+    // Redirect to email-verified page with error status
+    const errorUrl = new URL('/email-verified', origin);
+    errorUrl.searchParams.set('status', 'error');
+    errorUrl.searchParams.set('error', 'Authentication error. Please try again.');
+    return NextResponse.redirect(errorUrl.toString());
   }
 }
