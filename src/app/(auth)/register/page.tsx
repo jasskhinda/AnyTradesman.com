@@ -7,13 +7,14 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight } from 'lucide-react';
 
 type AccountType = 'customer' | 'business_owner';
 
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [accountType, setAccountType] = useState<AccountType>('customer');
+  const [accountType, setAccountType] = useState<AccountType | null>(null);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,7 +65,7 @@ export default function RegisterPage() {
         options: {
           data: {
             full_name: fullName.trim(),
-            role: accountType,
+            role: 'customer',
           },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
@@ -128,55 +129,95 @@ export default function RegisterPage() {
     );
   }
 
+  // Show account type selection first
+  if (accountType === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <Link href="/" className="inline-block mb-4">
+              <span className="text-2xl font-bold text-red-500">AnyTrades</span>
+            </Link>
+            <CardTitle className="text-white">Join AnyTrades</CardTitle>
+            <CardDescription>How would you like to use AnyTrades?</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Customer Option */}
+            <button
+              onClick={() => setAccountType('customer')}
+              className="w-full p-6 rounded-xl border-2 border-neutral-700 hover:border-red-500 hover:bg-red-500/10 transition-all text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center group-hover:bg-red-500/20">
+                    <svg className="w-6 h-6 text-neutral-400 group-hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">I need to hire a pro</h3>
+                    <p className="text-sm text-neutral-400">Find trusted professionals for your project</p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-neutral-500 group-hover:text-red-400" />
+              </div>
+            </button>
+
+            {/* Business Owner Option */}
+            <button
+              onClick={() => router.push('/register/business')}
+              className="w-full p-6 rounded-xl border-2 border-neutral-700 hover:border-red-500 hover:bg-red-500/10 transition-all text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center group-hover:bg-red-500/20">
+                    <svg className="w-6 h-6 text-neutral-400 group-hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">I&apos;m a service professional</h3>
+                    <p className="text-sm text-neutral-400">Get leads and grow your business</p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-neutral-500 group-hover:text-red-400" />
+              </div>
+            </button>
+
+            <p className="text-center text-sm text-neutral-400 pt-4">
+              Already have an account?{' '}
+              <Link href="/login" className="text-red-400 hover:text-red-300 font-medium">
+                Sign in
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="inline-block mb-4">
-            <span className="text-2xl font-bold text-red-500">AnyTradesman</span>
+            <span className="text-2xl font-bold text-red-500">AnyTrades</span>
           </Link>
           <CardTitle className="text-white">Create your account</CardTitle>
-          <CardDescription>Get started with AnyTradesman today</CardDescription>
+          <CardDescription>Find trusted professionals for your projects</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Account Type Selection */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              I want to...
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setAccountType('customer')}
-                disabled={isLoading}
-                className={`p-4 rounded-lg border-2 text-center transition-colors ${
-                  accountType === 'customer'
-                    ? 'border-red-500 bg-red-500/20 text-red-400'
-                    : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
-                } disabled:opacity-50`}
-              >
-                <svg className="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <span className="text-sm font-medium">Find a Pro</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setAccountType('business_owner')}
-                disabled={isLoading}
-                className={`p-4 rounded-lg border-2 text-center transition-colors ${
-                  accountType === 'business_owner'
-                    ? 'border-red-500 bg-red-500/20 text-red-400'
-                    : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
-                } disabled:opacity-50`}
-              >
-                <svg className="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span className="text-sm font-medium">List my Business</span>
-              </button>
-            </div>
-          </div>
+          {/* Back to selection */}
+          <button
+            type="button"
+            onClick={() => setAccountType(null)}
+            className="mb-6 flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Change account type
+          </button>
 
           <form onSubmit={handleRegister} className="space-y-4">
             {error && (

@@ -129,10 +129,27 @@ export function Header({ initialUser }: HeaderProps = {}) {
   }, [initialUser]);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+    try {
+      // Call server-side logout to properly clear cookies
+      await fetch('/api/auth/logout', { method: 'POST' });
+
+      // Also sign out on client side
+      const supabase = createClient();
+      await supabase.auth.signOut();
+
+      // Clear user state immediately
+      setUser(null);
+      setIsProfileMenuOpen(false);
+
+      // Navigate to home and refresh
+      router.push('/');
+      router.refresh();
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Still try to redirect even if there's an error
+      router.push('/');
+      router.refresh();
+    }
   };
 
   return (
