@@ -64,8 +64,8 @@ function SuccessContent() {
         <div className="mt-12 text-center">
           <p className="text-gray-600">
             Questions?{' '}
-            <a href="tel:+18337770260" className="text-teal-600 hover:underline">
-              (833) 777-0260
+            <a href="tel:+13172700529" className="text-teal-600 hover:underline">
+              +1 (317) 270-0529
             </a>
           </p>
         </div>
