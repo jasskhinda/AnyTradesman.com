@@ -58,6 +58,11 @@ function EmailVerifiedContent() {
 
             <p className="text-gray-600 mb-6">
               Your email has been successfully verified. Your account is now active.
+              {next.includes('/business/setup') && (
+                <span className="block mt-2">
+                  Next, you&apos;ll complete your business profile to start receiving leads.
+                </span>
+              )}
             </p>
 
             <div className="bg-gray-50 rounded-xl p-6 mb-8">
@@ -72,7 +77,7 @@ function EmailVerifiedContent() {
               href={next}
               className="inline-block px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
             >
-              Continue Now
+              {next.includes('/business/setup') ? 'Complete Business Profile' : 'Continue Now'}
             </Link>
           </>
         ) : (

@@ -22,11 +22,19 @@ const steps = [
   { id: 3, title: 'Services', icon: Wrench },
 ];
 
+interface OnboardingData {
+  businessName?: string;
+  phone?: string;
+  service?: string;
+  zipCode?: string;
+}
+
 interface BusinessSetupFormProps {
   userId: string;
   userProfile: Profile | null;
   categories: Category[];
   userEmail: string;
+  onboardingData?: OnboardingData;
 }
 
 export function BusinessSetupForm({
@@ -34,23 +42,35 @@ export function BusinessSetupForm({
   userProfile,
   categories,
   userEmail,
+  onboardingData,
 }: BusinessSetupFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Find matching category from onboarding service name
+  const findMatchingCategory = (serviceName?: string): string[] => {
+    if (!serviceName) return [];
+    const lowerService = serviceName.toLowerCase();
+    const match = categories.find(cat =>
+      cat.name.toLowerCase().includes(lowerService) ||
+      lowerService.includes(cat.name.toLowerCase())
+    );
+    return match ? [match.id] : [];
+  };
+
   const [formData, setFormData] = useState({
-    name: '',
+    name: onboardingData?.businessName || '',
     description: '',
-    phone: '',
+    phone: onboardingData?.phone || '',
     email: userEmail,
     website: '',
     address: '',
     city: '',
     state: '',
-    zip_code: '',
+    zip_code: onboardingData?.zipCode || '',
     service_radius_miles: 25,
-    selectedCategories: [] as string[],
+    selectedCategories: findMatchingCategory(onboardingData?.service),
   });
 
   function toggleCategory(categoryId: string) {

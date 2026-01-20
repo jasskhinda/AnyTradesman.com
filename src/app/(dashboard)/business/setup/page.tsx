@@ -3,6 +3,14 @@ import { createClient } from '@/lib/supabase/server';
 import { BusinessSetupForm } from './business-setup-form';
 import type { Category, Profile } from '@/types/database';
 
+// Onboarding data from the signup flow
+interface OnboardingData {
+  businessName?: string;
+  phone?: string;
+  service?: string;
+  zipCode?: string;
+}
+
 export default async function BusinessSetupPage() {
   const supabase = await createClient();
 
@@ -42,12 +50,21 @@ export default async function BusinessSetupPage() {
     console.error('Error fetching categories:', categoriesError);
   }
 
+  // Extract onboarding data from user metadata (set during signup)
+  const onboardingData: OnboardingData = {
+    businessName: user.user_metadata?.onboarding_business_name,
+    phone: user.user_metadata?.onboarding_phone,
+    service: user.user_metadata?.onboarding_service,
+    zipCode: user.user_metadata?.onboarding_zip,
+  };
+
   return (
     <BusinessSetupForm
       userId={user.id}
       userProfile={profile as Profile | null}
       categories={(categories as Category[]) || []}
       userEmail={user.email || profile?.email || ''}
+      onboardingData={onboardingData}
     />
   );
 }
