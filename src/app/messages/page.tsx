@@ -35,15 +35,30 @@ export default async function MessagesPage() {
     .eq('id', user.id)
     .maybeSingle();
 
+  // Get businesses owned by the user for conversation filtering
+  const { data: ownedBusinesses } = await supabase
+    .from('businesses')
+    .select('id')
+    .eq('owner_id', user.id);
+
+  const businessIds = ownedBusinesses?.map((b: { id: string }) => b.id) || [];
+
   // Load conversations based on role
-  const { data: convos, error } = await supabase
+  let query = supabase
     .from('conversations')
     .select(`
       *,
       customer:profiles!conversations_customer_id_fkey(full_name, avatar_url),
       business:businesses!conversations_business_id_fkey(name, logo_url)
-    `)
-    .or(`customer_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`)
+    `);
+
+  if (businessIds.length > 0) {
+    query = query.or(`customer_id.eq.${user.id},business_id.in.(${businessIds.join(',')})`);
+  } else {
+    query = query.eq('customer_id', user.id);
+  }
+
+  const { data: convos, error } = await query
     .order('last_message_at', { ascending: false });
 
   let conversations: Conversation[] = [];
