@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Footer } from '@/components/layout/footer';
 import { SearchBar } from '@/components/ui/search-bar';
+import { HeroSection } from '@/components/ui/hero-section';
 import { Button } from '@/components/ui/button';
 import { CategoryCard } from '@/components/ui/category-card';
+import { createClient } from '@/lib/supabase/server';
 import {
   CheckCircle,
   Shield,
@@ -78,46 +80,72 @@ const howItWorks = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch hero configuration
+  let heroConfig = null;
+  let heroSlides: { id: string; image_url: string; title: string | null; subtitle: string | null }[] = [];
+
+  try {
+    const supabase = await createClient();
+
+    const { data: configData } = await supabase
+      .from('hero_config')
+      .select('*')
+      .limit(1)
+      .single();
+
+    const { data: slidesData } = await supabase
+      .from('hero_slides')
+      .select('id, image_url, title, subtitle')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    heroConfig = configData;
+    heroSlides = slidesData || [];
+  } catch {
+    // Tables may not exist yet - fallback to static hero
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-neutral-950">
       <HeaderWrapper />
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative">
-          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/banner.png')" }} />
-          <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/80 via-neutral-950/70 to-neutral-950" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-            <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
-                Find Trusted Local Pros for Any Job
-              </h1>
-              <p className="mt-6 text-lg md:text-xl text-neutral-300">
-                Connect with verified contractors, get free quotes, and hire the right professional for your home projects.
-              </p>
+        <HeroSection
+          displayMode={heroConfig?.display_mode || 'slider'}
+          slides={heroSlides}
+          videoUrl={heroConfig?.video_url || null}
+          autoplayInterval={heroConfig?.autoplay_interval || 5000}
+        >
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+              Find Trusted Local Pros for Any Job
+            </h1>
+            <p className="mt-6 text-lg md:text-xl text-neutral-300">
+              Connect with verified contractors, get free quotes, and hire the right professional for your home projects.
+            </p>
 
-              <div className="mt-10">
-                <SearchBar size="large" />
-              </div>
+            <div className="mt-10">
+              <SearchBar size="large" />
+            </div>
 
-              <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-neutral-400">
-                <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
-                  Free quotes
-                </span>
-                <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
-                  Verified professionals
-                </span>
-                <span className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
-                  Read real reviews
-                </span>
-              </div>
+            <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-neutral-400">
+              <span className="flex items-center">
+                <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
+                Free quotes
+              </span>
+              <span className="flex items-center">
+                <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
+                Verified professionals
+              </span>
+              <span className="flex items-center">
+                <CheckCircle className="w-4 h-4 mr-1 text-red-400" />
+                Read real reviews
+              </span>
             </div>
           </div>
-        </section>
+        </HeroSection>
 
         {/* Stats Section */}
         <section className="bg-neutral-900 border-b border-neutral-800">
