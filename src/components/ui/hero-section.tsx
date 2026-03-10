@@ -48,11 +48,21 @@ export function HeroSection({ displayMode, slides, videoUrl, autoplayInterval, c
     if (embedUrl) {
       return (
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 scale-[1.2]">
+          <div className="absolute inset-0">
             <iframe
               src={embedUrl}
-              className="absolute inset-0 w-full h-full"
-              style={{ border: 'none', pointerEvents: 'none' }}
+              className="absolute"
+              style={{
+                border: 'none',
+                pointerEvents: 'none',
+                top: '50%',
+                left: '50%',
+                width: '177.78vh', /* 100 * 16/9 */
+                height: '56.25vw', /* 100 * 9/16 */
+                minWidth: '100%',
+                minHeight: '100%',
+                transform: 'translate(-50%, -50%)',
+              }}
               allow="autoplay; fullscreen"
               title="Hero video"
             />
