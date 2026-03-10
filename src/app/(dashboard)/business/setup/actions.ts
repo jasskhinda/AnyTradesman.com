@@ -77,6 +77,6 @@ export async function createBusiness(data: CreateBusinessData): Promise<{ error?
     }
   }
 
-  // Redirect to credentials page
-  redirect('/business/credentials');
+  // Redirect to subscription page (required step)
+  redirect('/business/subscription');
 }

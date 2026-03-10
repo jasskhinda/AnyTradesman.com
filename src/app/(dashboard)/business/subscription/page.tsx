@@ -2,19 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Check,
-  ArrowLeft,
   Crown,
   Zap,
   Star,
   CreditCard,
-  AlertCircle,
+  Shield,
+  Building2,
+  CheckCircle,
 } from 'lucide-react';
 import type { Business, Subscription } from '@/types/database';
 
@@ -197,17 +197,56 @@ export default function SubscriptionPage() {
       <Header />
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/business">
-            <Button variant="outline" size="sm" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Choose Your Plan</h1>
-            <p className="mt-1 text-neutral-400">Select a subscription to start receiving leads</p>
+        {/* Onboarding Progress (show only if no subscription yet) */}
+        {!subscription && (
+          <div className="mb-10">
+            <div className="flex items-center justify-center space-x-4 mb-4">
+              {[
+                { label: 'Create Account', icon: CheckCircle, done: true },
+                { label: 'Business Profile', icon: Building2, done: true },
+                { label: 'Choose Plan', icon: CreditCard, done: false, active: true },
+              ].map((step, index) => (
+                <div key={step.label} className="flex items-center">
+                  <div className="flex flex-col items-center">
+                    <div
+                      className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                        step.done
+                          ? 'bg-green-600 text-white'
+                          : step.active
+                          ? 'bg-red-600 text-white'
+                          : 'bg-neutral-800 text-neutral-500'
+                      }`}
+                    >
+                      {step.done ? (
+                        <CheckCircle className="w-5 h-5" />
+                      ) : (
+                        <step.icon className="w-5 h-5" />
+                      )}
+                    </div>
+                    <span className={`text-xs mt-1 ${step.active ? 'text-white font-medium' : 'text-neutral-500'}`}>
+                      {step.label}
+                    </span>
+                  </div>
+                  {index < 2 && (
+                    <div className={`w-16 h-0.5 mx-2 mb-5 ${step.done ? 'bg-green-600' : 'bg-neutral-800'}`} />
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
+        )}
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white">
+            {subscription ? 'Manage Your Plan' : 'One Last Step — Choose Your Plan'}
+          </h1>
+          <p className="mt-2 text-lg text-neutral-400">
+            {subscription
+              ? 'View and manage your current subscription'
+              : 'Select a plan to activate your business and start receiving leads from customers in your area.'
+            }
+          </p>
         </div>
 
         {/* Current Subscription Status */}
@@ -402,8 +441,8 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
-        {/* Guarantee */}
-        <Card className="bg-neutral-900/50">
+        {/* Guarantee + Trust */}
+        <Card className="bg-neutral-900/50 mb-8">
           <CardContent className="pt-6 text-center">
             <Star className="w-8 h-8 mx-auto mb-3 text-yellow-400" />
             <h3 className="text-lg font-semibold text-white mb-2">30-Day Money Back Guarantee</h3>
@@ -412,6 +451,21 @@ export default function SubscriptionPage() {
             </p>
           </CardContent>
         </Card>
+
+        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-neutral-500 pb-4">
+          <span className="flex items-center gap-1.5">
+            <Shield className="w-4 h-4" />
+            Secure payment via Stripe
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Star className="w-4 h-4" />
+            Cancel anytime
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Check className="w-4 h-4" />
+            No hidden fees
+          </span>
+        </div>
       </main>
     </div>
   );

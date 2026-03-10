@@ -110,6 +110,61 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Subscription gate for business owners
+  // Business owners must subscribe before accessing dashboard/business features
+  if (isProtectedRoute && user) {
+    // Routes that are allowed without subscription (so they can subscribe/setup)
+    const subscriptionExemptRoutes = [
+      '/business/subscription',
+      '/business/setup',
+      '/business/credentials',
+    ];
+    const isExempt = subscriptionExemptRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
+
+    if (!isExempt) {
+      // Check if user is a business_owner
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.role === 'business_owner') {
+        // Check if they have a business
+        const { data: business } = await supabase
+          .from('businesses')
+          .select('id')
+          .eq('owner_id', user.id)
+          .maybeSingle();
+
+        if (business) {
+          // Check for active subscription
+          const { data: subscription } = await supabase
+            .from('subscriptions')
+            .select('status')
+            .eq('business_id', business.id)
+            .eq('status', 'active')
+            .maybeSingle();
+
+          if (!subscription) {
+            const url = request.nextUrl.clone();
+            url.pathname = '/business/subscription';
+            return NextResponse.redirect(url);
+          }
+        } else {
+          // No business yet, redirect to setup
+          if (!pathname.startsWith('/business/setup')) {
+            const url = request.nextUrl.clone();
+            url.pathname = '/business/setup';
+            return NextResponse.redirect(url);
+          }
+        }
+      }
+    }
+  }
+
   // Redirect logged-in users away from auth pages
   const authRoutes = ['/login', '/register'];
   const isAuthRoute = authRoutes.some((route) =>
