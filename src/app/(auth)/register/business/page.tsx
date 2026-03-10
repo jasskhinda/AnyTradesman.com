@@ -214,12 +214,12 @@ export default function BusinessRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-neutral-950">
       {/* Header */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-neutral-800">
         <div className="max-w-2xl mx-auto px-4 py-4">
-          <Link href="/" className="text-2xl font-bold text-red-600">
-            AnyTrades
+          <Link href="/" className="text-2xl font-bold text-red-500">
+            AnyTradesman
           </Link>
         </div>
       </div>
@@ -229,7 +229,7 @@ export default function BusinessRegisterPage() {
         {currentStep > 1 && (
           <button
             onClick={handleBack}
-            className="mb-6 p-2 -ml-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="mb-6 p-2 -ml-2 text-neutral-400 hover:text-white transition-colors"
             aria-label="Go back"
           >
             <ArrowLeft className="w-6 h-6" />
@@ -239,7 +239,7 @@ export default function BusinessRegisterPage() {
         {currentStep === 1 && (
           <button
             onClick={() => router.push('/register')}
-            className="mb-6 p-2 -ml-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="mb-6 p-2 -ml-2 text-neutral-400 hover:text-white transition-colors"
             aria-label="Go back"
           >
             <ArrowLeft className="w-6 h-6" />
@@ -254,7 +254,7 @@ export default function BusinessRegisterPage() {
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   currentStep >= step
                     ? 'bg-red-500 text-white'
-                    : 'bg-gray-200 text-gray-500'
+                    : 'bg-neutral-800 text-neutral-500'
                 }`}
               >
                 {currentStep > step ? (
@@ -266,7 +266,7 @@ export default function BusinessRegisterPage() {
               {step < 4 && (
                 <div
                   className={`flex-1 h-0.5 mx-2 ${
-                    currentStep > step ? 'bg-red-500' : 'bg-gray-200'
+                    currentStep > step ? 'bg-red-500' : 'bg-neutral-800'
                   }`}
                 />
               )}
@@ -275,22 +275,22 @@ export default function BusinessRegisterPage() {
         </div>
 
         {/* Step Title */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-white mb-2">
           {currentStep === 1 && 'Get started with the basics'}
           {currentStep === 2 && 'Get started with the basics'}
           {currentStep === 3 && 'Get started with the basics'}
           {currentStep === 4 && 'Create your account'}
         </h1>
-        <p className="text-gray-600 mb-8">
-          {currentStep === 1 && 'Thousands of opportunities on AnyTrades; get started to start receiving leads.'}
-          {currentStep === 2 && 'Thousands of opportunities on AnyTrades; get started to start receiving leads.'}
-          {currentStep === 3 && 'Thousands of opportunities on AnyTrades; get started to start receiving leads.'}
+        <p className="text-neutral-400 mb-8">
+          {currentStep === 1 && 'Thousands of opportunities on AnyTradesman; get started to start receiving leads.'}
+          {currentStep === 2 && 'Thousands of opportunities on AnyTradesman; get started to start receiving leads.'}
+          {currentStep === 3 && 'Thousands of opportunities on AnyTradesman; get started to start receiving leads.'}
           {currentStep === 4 && 'Set up your login credentials to access your account.'}
         </p>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          <div className="mb-6 p-4 rounded-lg bg-red-900/30 border border-red-800 text-red-400 text-sm">
             {error}
           </div>
         )}
@@ -300,15 +300,15 @@ export default function BusinessRegisterPage() {
           <div className="space-y-6">
             {/* Service Dropdown */}
             <div ref={dropdownRef} className="relative">
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 Service
               </label>
               {service ? (
-                <div className="flex items-center justify-between border border-gray-300 rounded-lg px-4 py-3 bg-white">
-                  <span className="text-gray-900">{service}</span>
+                <div className="flex items-center justify-between border border-neutral-700 rounded-lg px-4 py-3 bg-neutral-800">
+                  <span className="text-white">{service}</span>
                   <button
                     onClick={clearService}
-                    className="p-1 text-gray-400 hover:text-gray-600"
+                    className="p-1 text-neutral-400 hover:text-white"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -326,13 +326,13 @@ export default function BusinessRegisterPage() {
                       }}
                       onFocus={() => setShowServiceDropdown(true)}
                       placeholder="Search for a service..."
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     />
-                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
                   </div>
                   {showServiceDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                      <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                    <div className="absolute z-10 w-full mt-1 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                      <div className="px-4 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wide border-b border-neutral-700">
                         Services
                       </div>
                       {filteredServices.length > 0 ? (
@@ -340,14 +340,14 @@ export default function BusinessRegisterPage() {
                           <button
                             key={s}
                             onClick={() => selectService(s)}
-                            className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-gray-700"
+                            className="w-full text-left px-4 py-3 hover:bg-neutral-700 flex items-center gap-3 text-neutral-300"
                           >
-                            <Search className="w-4 h-4 text-gray-400" />
+                            <Search className="w-4 h-4 text-neutral-500" />
                             {s}
                           </button>
                         ))
                       ) : (
-                        <div className="px-4 py-3 text-gray-500">No services found</div>
+                        <div className="px-4 py-3 text-neutral-500">No services found</div>
                       )}
                     </div>
                   )}
@@ -357,7 +357,7 @@ export default function BusinessRegisterPage() {
 
             {/* ZIP Code */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 ZIP code
               </label>
               <input
@@ -365,7 +365,7 @@ export default function BusinessRegisterPage() {
                 value={zipCode}
                 onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
                 placeholder="Enter your ZIP code"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -375,7 +375,7 @@ export default function BusinessRegisterPage() {
         {currentStep === 2 && (
           <div className="space-y-6">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 First name
               </label>
               <input
@@ -384,11 +384,11 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First name"
                 autoComplete="given-name"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 Last name
               </label>
               <input
@@ -397,10 +397,10 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last name"
                 autoComplete="family-name"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-neutral-500">
               Use the business owner&apos;s name
             </p>
           </div>
@@ -410,7 +410,7 @@ export default function BusinessRegisterPage() {
         {currentStep === 3 && (
           <div className="space-y-6">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 Business name
               </label>
               <input
@@ -419,14 +419,14 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder="Your business name"
                 autoComplete="organization"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-neutral-500">
                 If you don&apos;t have one, you can use your name
               </p>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 Mobile number
               </label>
               <input
@@ -435,9 +435,9 @@ export default function BusinessRegisterPage() {
                 onChange={handlePhoneChange}
                 placeholder="xxx-xxx-xxxx"
                 autoComplete="tel"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-neutral-500">
                 We&apos;ll use this number to put you in touch with homeowners
               </p>
             </div>
@@ -448,7 +448,7 @@ export default function BusinessRegisterPage() {
         {currentStep === 4 && (
           <div className="space-y-6">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 Email
               </label>
               <input
@@ -457,11 +457,11 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 autoComplete="email"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 Password
               </label>
               <input
@@ -470,11 +470,11 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
                 autoComplete="new-password"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-neutral-500 mb-1">
                 Confirm password
               </label>
               <input
@@ -483,7 +483,7 @@ export default function BusinessRegisterPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm your password"
                 autoComplete="new-password"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-neutral-700 bg-neutral-800 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -498,7 +498,7 @@ export default function BusinessRegisterPage() {
               className={`w-full py-4 rounded-lg text-lg font-medium transition-colors ${
                 canProceed()
                   ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
               }`}
             >
               Next
@@ -510,7 +510,7 @@ export default function BusinessRegisterPage() {
               className={`w-full py-4 rounded-lg text-lg font-medium transition-colors ${
                 canProceed() && !isLoading
                   ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
               }`}
             >
               {isLoading ? 'Creating account...' : 'Create Account'}
@@ -520,23 +520,23 @@ export default function BusinessRegisterPage() {
 
         {/* Terms Text (Step 3 & 4) */}
         {(currentStep === 3 || currentStep === 4) && (
-          <p className="mt-4 text-xs text-gray-500 text-center">
+          <p className="mt-4 text-xs text-neutral-500 text-center">
             By clicking {currentStep === 4 ? 'Create Account' : 'Next'}, I agree to the{' '}
             <Link href="/terms" className="text-red-600 hover:underline">
-              AnyTrades Terms
+              AnyTradesman Terms
             </Link>{' '}
             and{' '}
             <Link href="/privacy" className="text-red-600 hover:underline">
               Privacy Policy
             </Link>{' '}
-            and authorize AnyTrades and parties acting on its behalf, to use automated technology
+            and authorize AnyTradesman and parties acting on its behalf, to use automated technology
             to deliver marketing calls and texts to the number I provided. Consent is not a condition of purchase.
           </p>
         )}
 
         {/* Questions */}
         <div className="mt-8 text-center">
-          <p className="text-gray-600">
+          <p className="text-neutral-400">
             Questions?{' '}
             <a href="tel:+13172700529" className="text-red-600 hover:underline">
               +1 (317) 270-0529
@@ -545,7 +545,7 @@ export default function BusinessRegisterPage() {
         </div>
 
         {/* Already have account */}
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-neutral-400">
           Already have an account?{' '}
           <Link href="/login" className="text-red-600 hover:underline font-medium">
             Sign in

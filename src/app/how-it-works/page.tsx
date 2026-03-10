@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'How It Works',
+  description: 'See how AnyTradesman works — post your project, get matched with local pros, compare quotes, and hire with confidence.',
+};
 import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';

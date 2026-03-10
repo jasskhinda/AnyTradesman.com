@@ -1,11 +1,16 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
+
+export const metadata: Metadata = {
+  title: 'Find a Pro',
+  description: 'Search for trusted local contractors, plumbers, electricians, and more in your area. Read reviews and get free quotes.',
+};
 import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Footer } from '@/components/layout/footer';
 import { SearchBar } from '@/components/ui/search-bar';
 import { BusinessCard } from '@/components/ui/business-card';
 import { createClient } from '@/lib/supabase/server';
-import { MapPin, Filter, SlidersHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MapPin } from 'lucide-react';
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -128,16 +133,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               )}
             </div>
 
-            <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white">
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-              </Button>
-              <Button variant="outline" size="sm" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white">
-                <SlidersHorizontal className="w-4 h-4 mr-2" />
-                Sort
-              </Button>
-            </div>
           </div>
 
           {/* Results Grid */}

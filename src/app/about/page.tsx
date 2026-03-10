@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import { HeaderWrapper } from '@/components/layout/header-wrapper';
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description: 'Learn about AnyTradesman — our mission to connect homeowners with trusted local contractors and service professionals.',
+};
 import { Footer } from '@/components/layout/footer';
 import { Users, Target, Heart, Award } from 'lucide-react';
 

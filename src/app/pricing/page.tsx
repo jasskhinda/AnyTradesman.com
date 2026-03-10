@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import { HeaderWrapper } from '@/components/layout/header-wrapper';
+
+export const metadata: Metadata = {
+  title: 'Pricing',
+  description: 'Affordable plans for contractors and service professionals. Choose the right AnyTradesman plan to grow your business and get more leads.',
+};
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Check, Zap } from 'lucide-react';

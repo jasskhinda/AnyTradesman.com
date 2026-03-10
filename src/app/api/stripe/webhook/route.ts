@@ -6,26 +6,40 @@ import Stripe from 'stripe';
 
 // Create admin Supabase client lazily to avoid build-time errors
 function getSupabaseAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error('Missing Supabase environment variables for webhook');
+  }
+  return createClient(url, key);
 }
 
 export async function POST(request: Request) {
   const body = await request.text();
   const headersList = await headers();
-  const signature = headersList.get('stripe-signature')!;
+  const signature = headersList.get('stripe-signature');
+
+  if (!signature) {
+    return NextResponse.json(
+      { error: 'Missing stripe-signature header' },
+      { status: 400 }
+    );
+  }
+
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured');
+    return NextResponse.json(
+      { error: 'Webhook not configured' },
+      { status: 500 }
+    );
+  }
 
   let event: Stripe.Event;
   const stripe = getStripe();
 
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err);
     return NextResponse.json(
@@ -169,7 +183,8 @@ function mapTierToSubscriptionTier(tierId: string | undefined): string {
     case 'yearly':
       return 'enterprise';
     default:
-      return 'free';
+      console.error(`Unknown tier ID in webhook: ${tierId}`);
+      return 'professional'; // Safe default rather than silent downgrade
   }
 }
 

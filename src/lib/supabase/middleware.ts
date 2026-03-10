@@ -124,43 +124,48 @@ export async function updateSession(request: NextRequest) {
     );
 
     if (!isExempt) {
-      // Check if user is a business_owner
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+      try {
+        // Check if user is a business_owner
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
 
-      if (profile?.role === 'business_owner') {
-        // Check if they have a business
-        const { data: business } = await supabase
-          .from('businesses')
-          .select('id')
-          .eq('owner_id', user.id)
-          .maybeSingle();
-
-        if (business) {
-          // Check for active subscription
-          const { data: subscription } = await supabase
-            .from('subscriptions')
-            .select('status')
-            .eq('business_id', business.id)
-            .eq('status', 'active')
+        if (profile?.role === 'business_owner') {
+          // Check if they have a business
+          const { data: business } = await supabase
+            .from('businesses')
+            .select('id')
+            .eq('owner_id', user.id)
             .maybeSingle();
 
-          if (!subscription) {
-            const url = request.nextUrl.clone();
-            url.pathname = '/business/subscription';
-            return NextResponse.redirect(url);
-          }
-        } else {
-          // No business yet, redirect to setup
-          if (!pathname.startsWith('/business/setup')) {
-            const url = request.nextUrl.clone();
-            url.pathname = '/business/setup';
-            return NextResponse.redirect(url);
+          if (business) {
+            // Check for active subscription
+            const { data: subscription } = await supabase
+              .from('subscriptions')
+              .select('status')
+              .eq('business_id', business.id)
+              .eq('status', 'active')
+              .maybeSingle();
+
+            if (!subscription) {
+              const url = request.nextUrl.clone();
+              url.pathname = '/business/subscription';
+              return NextResponse.redirect(url);
+            }
+          } else {
+            // No business yet, redirect to setup
+            if (!pathname.startsWith('/business/setup')) {
+              const url = request.nextUrl.clone();
+              url.pathname = '/business/setup';
+              return NextResponse.redirect(url);
+            }
           }
         }
+      } catch (error) {
+        // Fail open - if DB check fails, allow the request through
+        console.error('Middleware subscription check failed:', error);
       }
     }
   }

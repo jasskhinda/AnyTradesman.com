@@ -319,14 +319,14 @@ export function BusinessSetupForm({
               )}
 
               {currentStep < steps.length ? (
-                <Button onClick={() => setCurrentStep(prev => prev + 1)} disabled={!canProceed()}>
+                <Button onClick={() => setCurrentStep(prev => prev + 1)} disabled={!canProceed() || saving}>
                   Next
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
                 <Button onClick={handleSubmit} disabled={saving || !canProceed()}>
                   {saving ? 'Creating...' : 'Create Business'}
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  {!saving && <ArrowRight className="w-4 h-4 ml-2" />}
                 </Button>
               )}
             </div>

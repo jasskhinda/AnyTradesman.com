@@ -23,6 +23,12 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
+    // Verify authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Get business details
     const { data: business, error: businessError } = await supabase
       .from('businesses')
@@ -35,6 +41,11 @@ export async function POST(request: Request) {
         { error: 'Business not found' },
         { status: 404 }
       );
+    }
+
+    // Verify user owns this business
+    if (business.owner_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const tier = PRICING_TIERS[tierId as PricingTierId];
