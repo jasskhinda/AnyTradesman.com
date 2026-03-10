@@ -152,18 +152,11 @@ export function Header({ initialUser }: HeaderProps = {}) {
       const supabase = createClient();
       await supabase.auth.signOut();
 
-      // Clear user state immediately
-      setUser(null);
-      setIsProfileMenuOpen(false);
-
-      // Navigate to home and refresh
-      router.push('/');
-      router.refresh();
+      // Hard redirect to fully clear cached state
+      window.location.href = '/';
     } catch (error) {
       console.error('Sign out error:', error);
-      // Still try to redirect even if there's an error
-      router.push('/');
-      router.refresh();
+      window.location.href = '/';
     }
   };
 
