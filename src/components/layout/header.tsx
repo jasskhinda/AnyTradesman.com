@@ -143,21 +143,9 @@ export function Header({ initialUser }: HeaderProps = {}) {
     };
   }, [initialUser]);
 
-  const handleSignOut = async () => {
-    try {
-      // Call server-side logout to properly clear cookies
-      await fetch('/api/auth/logout', { method: 'POST' });
-
-      // Also sign out on client side
-      const supabase = createClient();
-      await supabase.auth.signOut();
-
-      // Hard redirect to fully clear cached state
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Sign out error:', error);
-      window.location.href = '/';
-    }
+  const handleSignOut = () => {
+    // Navigate to server-side logout which clears cookies and redirects to home
+    window.location.href = '/api/auth/logout';
   };
 
   return (

@@ -9,11 +9,12 @@ export async function POST() {
   return NextResponse.json({ success: true });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createClient();
 
   await supabase.auth.signOut();
 
   // Redirect to home page after logout
-  return NextResponse.redirect(new URL('/', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'));
+  const url = new URL('/', request.url);
+  return NextResponse.redirect(url);
 }
