@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
-import { createServiceRequest } from './actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,29 +76,35 @@ export function ServiceRequestForm({
     setError(null);
 
     try {
-      const result = await createServiceRequest({
-        category_id: formData.category_id,
-        title: formData.title,
-        description: formData.description,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zip_code,
-        preferred_date: formData.preferred_date,
-        budget_min: formData.budget_min,
-        budget_max: formData.budget_max,
+      const response = await fetch('/api/request/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category_id: formData.category_id,
+          title: formData.title,
+          description: formData.description,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zip_code: formData.zip_code,
+          preferred_date: formData.preferred_date,
+          budget_min: formData.budget_min,
+          budget_max: formData.budget_max,
+        }),
       });
 
-      if (result.error) {
-        setError(result.error);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to submit your request. Please try again.');
         setSubmitting(false);
         return;
       }
 
-      router.push(`/request/${result.id}/success`);
+      router.push(`/request/${data.id}/success`);
     } catch (err) {
       console.error('Service request submit error:', err);
-      setError('Something went wrong. Please try again.');
+      setError('Something went wrong. Please check your connection and try again.');
       setSubmitting(false);
     }
   }
