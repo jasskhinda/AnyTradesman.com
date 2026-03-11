@@ -66,9 +66,17 @@ export async function POST(request: Request) {
 
     const { data: subscription } = await supabase
       .from('subscriptions')
-      .select('stripe_customer_id')
+      .select('stripe_customer_id, status')
       .eq('business_id', businessId)
       .maybeSingle();
+
+    // Block new checkout if there's already an active subscription
+    if (subscription?.status === 'active') {
+      return NextResponse.json(
+        { error: 'You already have an active subscription. Use the Change Plan option to switch plans.' },
+        { status: 400 }
+      );
+    }
 
     if (subscription?.stripe_customer_id) {
       customerId = subscription.stripe_customer_id;
