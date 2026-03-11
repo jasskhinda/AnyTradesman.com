@@ -105,7 +105,7 @@ export async function POST(request: Request) {
         // Find business by stripe customer ID
         const { data: existingSub } = await getSupabaseAdmin()
           .from('subscriptions')
-          .select('business_id')
+          .select('business_id, tier')
           .eq('stripe_customer_id', customerId)
           .single();
 
@@ -115,13 +115,24 @@ export async function POST(request: Request) {
           const periodStart = firstItem?.current_period_start;
           const periodEnd = firstItem?.current_period_end;
 
+          // Check if tier changed (set by update-subscription API via metadata)
+          const newTierId = subscription.metadata?.tier_id;
+          const newDbTier = newTierId ? mapTierToSubscriptionTier(newTierId) : null;
+
+          const updateData: Record<string, unknown> = {
+            status: mapStripeStatus(subscription.status),
+            current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+            current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+          };
+
+          // Update tier if it changed
+          if (newDbTier && newDbTier !== existingSub.tier) {
+            updateData.tier = newDbTier;
+          }
+
           await getSupabaseAdmin()
             .from('subscriptions')
-            .update({
-              status: mapStripeStatus(subscription.status),
-              current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
-              current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-            })
+            .update(updateData)
             .eq('business_id', existingSub.business_id);
         }
         break;

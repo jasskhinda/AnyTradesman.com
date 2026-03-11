@@ -654,6 +654,10 @@ CREATE POLICY "Business owners can view their subscription"
     )
   );
 
+CREATE POLICY "Public can view active subscriptions"
+  ON subscriptions FOR SELECT
+  USING (status = 'active');
+
 -- ============================================
 -- SEED DATA: Categories
 -- ============================================

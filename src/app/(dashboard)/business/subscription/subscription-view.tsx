@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +19,9 @@ import {
   Search,
   MessageSquare,
   BadgeCheck,
+  ArrowUp,
+  ArrowDown,
+  ExternalLink,
 } from 'lucide-react';
 
 interface SubscriptionData {
@@ -30,6 +34,25 @@ interface SubscriptionData {
 interface SubscriptionViewProps {
   businessId: string;
   subscription: SubscriptionData | null;
+  hasStripeCustomer: boolean;
+}
+
+// Tier hierarchy for upgrade/downgrade detection
+const TIER_RANK: Record<string, number> = {
+  basic: 1,
+  professional: 2,
+  enterprise: 3,
+};
+
+// Map pricing tier IDs to DB tier names
+function pricingTierToDbTier(tierId: string): string {
+  switch (tierId) {
+    case 'beta': return 'basic';
+    case 'monthly':
+    case 'sixMonth': return 'professional';
+    case 'yearly': return 'enterprise';
+    default: return 'professional';
+  }
 }
 
 const pricingTiers = [
@@ -135,8 +158,19 @@ function getTierFeatures(tier: string) {
   }));
 }
 
-export function SubscriptionView({ businessId, subscription }: SubscriptionViewProps) {
+export function SubscriptionView({ businessId, subscription, hasStripeCustomer }: SubscriptionViewProps) {
+  const router = useRouter();
   const [processing, setProcessing] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{
+    tierId: string;
+    tierName: string;
+    isUpgrade: boolean;
+    price: number;
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const isActiveSubscriber = subscription?.status === 'active';
 
   async function handleSubscribe(tierId: string) {
     setProcessing(tierId);
@@ -145,10 +179,7 @@ export function SubscriptionView({ businessId, subscription }: SubscriptionViewP
       const response = await fetch('/api/stripe/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          businessId,
-          tierId,
-        }),
+        body: JSON.stringify({ businessId, tierId }),
       });
 
       const data = await response.json();
@@ -156,20 +187,384 @@ export function SubscriptionView({ businessId, subscription }: SubscriptionViewP
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error('No checkout URL returned:', data.error);
         alert('Could not start checkout. Please try again.');
       }
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
+    } catch {
       alert('Something went wrong. Please try again.');
     }
 
     setProcessing(null);
   }
 
+  async function handleChangePlan(tierId: string) {
+    setProcessing(tierId);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch('/api/stripe/update-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId, newTierId: tierId }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.isUpgrade) {
+          setSuccess('Plan upgraded successfully! Your new features are now active.');
+        } else {
+          setSuccess('Plan changed successfully. Your new plan will take effect at your next billing cycle.');
+        }
+        setConfirmAction(null);
+        // Refresh the page to show updated subscription
+        setTimeout(() => router.refresh(), 1500);
+      } else {
+        setError(data.error || 'Failed to change plan. Please try again.');
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+    }
+
+    setProcessing(null);
+  }
+
+  async function handleBillingPortal() {
+    setProcessing('portal');
+
+    try {
+      const response = await fetch('/api/stripe/billing-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Could not open billing portal. Please try again.');
+      }
+    } catch {
+      alert('Something went wrong. Please try again.');
+    }
+
+    setProcessing(null);
+  }
+
+  // Get the relationship of a pricing tier to the current subscription
+  function getTierRelation(tierId: string): 'current' | 'upgrade' | 'downgrade' | 'switch' {
+    if (!subscription) return 'upgrade';
+    const currentDbTier = subscription.tier;
+    const targetDbTier = pricingTierToDbTier(tierId);
+
+    if (targetDbTier === currentDbTier) return 'current';
+
+    const currentRank = TIER_RANK[currentDbTier] || 0;
+    const targetRank = TIER_RANK[targetDbTier] || 0;
+
+    if (targetRank > currentRank) return 'upgrade';
+    if (targetRank < currentRank) return 'downgrade';
+    return 'switch';
+  }
+
+  // ─── Active Subscriber View ───────────────────────────────────────────────
+  if (isActiveSubscriber) {
+    return (
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white">Manage Your Plan</h1>
+          <p className="mt-2 text-neutral-400">
+            View your current subscription, change plans, or manage billing.
+          </p>
+        </div>
+
+        {/* Status Messages */}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-6 p-4 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400">
+            {success}
+          </div>
+        )}
+
+        {/* Current Plan Card */}
+        <Card className="mb-8 bg-green-500/10 border-green-500/30">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <Crown className="w-6 h-6 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-white">
+                    {tierDisplayNames[subscription.tier] || subscription.tier} Plan
+                  </p>
+                  <p className="text-sm text-neutral-400">
+                    <span className="text-green-400 font-medium">Active</span>
+                    {subscription.current_period_end && (
+                      <> &bull; Renews {new Date(subscription.current_period_end).toLocaleDateString()}</>
+                    )}
+                  </p>
+                </div>
+              </div>
+              {hasStripeCustomer && (
+                <Button
+                  variant="outline"
+                  className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                  onClick={handleBillingPortal}
+                  disabled={processing === 'portal'}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  {processing === 'portal' ? 'Opening...' : 'Manage Billing'}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Your Active Features */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              Your Active Features
+            </CardTitle>
+            <CardDescription>
+              Features included with your {tierDisplayNames[subscription.tier] || subscription.tier} plan
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {getTierFeatures(subscription.tier).map((feature) => (
+                <div
+                  key={feature.name}
+                  className={`flex items-center gap-3 p-3 rounded-lg ${
+                    feature.unlocked
+                      ? 'bg-green-500/10 border border-green-500/20'
+                      : 'bg-neutral-800/50 border border-neutral-800 opacity-50'
+                  }`}
+                >
+                  <feature.icon className={`w-4 h-4 flex-shrink-0 ${feature.unlocked ? 'text-green-400' : 'text-neutral-600'}`} />
+                  <span className={`text-sm ${feature.unlocked ? 'text-white' : 'text-neutral-500 line-through'}`}>
+                    {feature.name}
+                  </span>
+                  {feature.unlocked && <Check className="w-4 h-4 text-green-400 ml-auto" />}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Change Plan Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-white mb-2">Change Plan</h2>
+          <p className="text-neutral-400 text-sm mb-6">
+            Upgrades take effect immediately. Downgrades apply at your next billing cycle.
+          </p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {pricingTiers.map((tier) => {
+              const relation = getTierRelation(tier.id);
+              const isCurrent = relation === 'current';
+
+              return (
+                <Card
+                  key={tier.id}
+                  className={`relative ${
+                    isCurrent
+                      ? 'border-green-500 bg-green-500/5 ring-1 ring-green-500/20'
+                      : relation === 'upgrade'
+                      ? 'border-neutral-700 hover:border-green-500/50 transition-colors'
+                      : 'border-neutral-800 hover:border-neutral-700 transition-colors'
+                  }`}
+                >
+                  {isCurrent && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium text-white bg-green-600">
+                      Current Plan
+                    </div>
+                  )}
+                  <CardHeader className="text-center pb-4">
+                    <CardTitle className="text-white text-base">{tier.name}</CardTitle>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold text-white">${tier.price}</span>
+                      <span className="text-neutral-400 text-sm">{tier.period}</span>
+                    </div>
+                    {tier.billedAs && (
+                      <p className="text-xs text-neutral-500 mt-1">{tier.billedAs}</p>
+                    )}
+                    {tier.savings && (
+                      <span className="inline-block mt-2 px-2 py-0.5 rounded text-xs font-medium bg-green-500/20 text-green-400">
+                        {tier.savings}
+                      </span>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 mb-4">
+                      {tier.features.map((feature, index) => (
+                        <li key={index} className="flex items-start text-xs">
+                          <Check className="w-3.5 h-3.5 text-green-400 mr-1.5 flex-shrink-0 mt-0.5" />
+                          <span className="text-neutral-300">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {isCurrent ? (
+                      <div className="text-center text-sm text-green-400 font-medium py-2">
+                        <CheckCircle className="w-4 h-4 inline mr-1" />
+                        Active
+                      </div>
+                    ) : relation === 'upgrade' ? (
+                      <Button
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        onClick={() => setConfirmAction({
+                          tierId: tier.id,
+                          tierName: tier.name,
+                          isUpgrade: true,
+                          price: tier.price,
+                        })}
+                        disabled={!!processing}
+                      >
+                        <ArrowUp className="w-4 h-4 mr-1" />
+                        Upgrade
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full border-neutral-700 text-neutral-400 hover:bg-neutral-800"
+                        onClick={() => setConfirmAction({
+                          tierId: tier.id,
+                          tierName: tier.name,
+                          isUpgrade: false,
+                          price: tier.price,
+                        })}
+                        disabled={!!processing}
+                      >
+                        <ArrowDown className="w-4 h-4 mr-1" />
+                        Downgrade
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Priority Support & Account Manager */}
+        {(subscription.tier === 'professional' || subscription.tier === 'enterprise') && (
+          <Card className="mb-8 bg-neutral-900/50">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Headphones className="w-5 h-5 text-red-400" />
+                Support & Contact
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-neutral-800/50 border border-neutral-700">
+                <Headphones className="w-5 h-5 text-red-400 mt-0.5" />
+                <div>
+                  <p className="font-medium text-white">Priority Support</p>
+                  <p className="text-sm text-neutral-400 mt-1">
+                    As a {tierDisplayNames[subscription.tier]} subscriber, you get priority response times.
+                  </p>
+                  <a
+                    href="mailto:support@anytradesman.com?subject=Priority%20Support%20Request"
+                    className="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-300 mt-2"
+                  >
+                    support@anytradesman.com
+                  </a>
+                </div>
+              </div>
+              {subscription.tier === 'enterprise' && (
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                  <UserCheck className="w-5 h-5 text-yellow-400 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-white">Dedicated Account Manager</p>
+                    <p className="text-sm text-neutral-400 mt-1">
+                      Your dedicated account manager is here to help you maximize your results.
+                    </p>
+                    <a
+                      href="mailto:accounts@anytradesman.com?subject=Enterprise%20Account%20Support"
+                      className="inline-flex items-center gap-1 text-sm text-yellow-400 hover:text-yellow-300 mt-2"
+                    >
+                      accounts@anytradesman.com
+                    </a>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Confirmation Modal */}
+        {confirmAction && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+            <Card className="max-w-md w-full">
+              <CardHeader>
+                <CardTitle className="text-white">
+                  {confirmAction.isUpgrade ? 'Confirm Upgrade' : 'Confirm Downgrade'}
+                </CardTitle>
+                <CardDescription>
+                  {confirmAction.isUpgrade
+                    ? `You're upgrading to the ${confirmAction.tierName} plan at $${confirmAction.price}/mo.`
+                    : `You're downgrading to the ${confirmAction.tierName} plan at $${confirmAction.price}/mo.`
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {confirmAction.isUpgrade ? (
+                  <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-sm text-neutral-300">
+                    <p className="font-medium text-green-400 mb-1">Upgrade takes effect immediately</p>
+                    <p>You&apos;ll be charged the prorated difference for the remainder of your current billing period. Your new features will be available right away.</p>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-sm text-neutral-300">
+                    <p className="font-medium text-yellow-400 mb-1">Downgrade takes effect at next billing cycle</p>
+                    <p>You&apos;ll keep your current plan features until {subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString() : 'the end of your billing period'}. After that, your plan will switch to {confirmAction.tierName}.</p>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                    onClick={() => { setConfirmAction(null); setError(null); }}
+                    disabled={!!processing}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className={`flex-1 ${confirmAction.isUpgrade ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                    onClick={() => handleChangePlan(confirmAction.tierId)}
+                    disabled={!!processing}
+                  >
+                    {processing ? 'Processing...' : confirmAction.isUpgrade ? 'Upgrade Now' : 'Confirm Downgrade'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </main>
+    );
+  }
+
+  // ─── Non-Subscriber / Inactive View ───────────────────────────────────────
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
-      {/* Onboarding Progress (show only if no subscription yet) */}
+      {/* Onboarding Progress (show only if no subscription at all) */}
       {!subscription && (
         <div className="mb-10">
           <div className="flex items-center justify-center space-x-4 mb-4">
@@ -211,120 +606,15 @@ export function SubscriptionView({ businessId, subscription }: SubscriptionViewP
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-white">
-          {subscription ? 'Manage Your Plan' : 'One Last Step — Choose Your Plan'}
+          {subscription ? 'Reactivate Your Plan' : 'One Last Step — Choose Your Plan'}
         </h1>
         <p className="mt-2 text-lg text-neutral-400">
           {subscription
-            ? 'View and manage your current subscription'
+            ? 'Your subscription has ended. Choose a plan to reactivate your business.'
             : 'Select a plan to activate your business and start receiving leads from customers in your area.'
           }
         </p>
       </div>
-
-      {/* Current Subscription Status */}
-      {subscription && subscription.status === 'active' && (
-        <div className="mb-8 space-y-6">
-          <Card className="bg-green-500/10 border-green-500/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Crown className="w-5 h-5 text-green-400" />
-                  <div>
-                    <p className="font-medium text-white">
-                      Current Plan: {tierDisplayNames[subscription.tier] || subscription.tier}
-                    </p>
-                    <p className="text-sm text-neutral-400">
-                      Status: <span className="text-green-400">Active</span>
-                      {subscription.current_period_end && (
-                        <> &bull; Renews {new Date(subscription.current_period_end).toLocaleDateString()}</>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Your Active Features */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-400" />
-                Your Active Features
-              </CardTitle>
-              <CardDescription>
-                Features included with your {tierDisplayNames[subscription.tier] || subscription.tier} plan
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {getTierFeatures(subscription.tier).map((feature) => (
-                  <div
-                    key={feature.name}
-                    className={`flex items-center gap-3 p-3 rounded-lg ${
-                      feature.unlocked
-                        ? 'bg-green-500/10 border border-green-500/20'
-                        : 'bg-neutral-800/50 border border-neutral-800 opacity-50'
-                    }`}
-                  >
-                    <feature.icon className={`w-4 h-4 flex-shrink-0 ${feature.unlocked ? 'text-green-400' : 'text-neutral-600'}`} />
-                    <span className={`text-sm ${feature.unlocked ? 'text-white' : 'text-neutral-500 line-through'}`}>
-                      {feature.name}
-                    </span>
-                    {feature.unlocked && <Check className="w-4 h-4 text-green-400 ml-auto" />}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Priority Support & Account Manager */}
-          {(subscription.tier === 'professional' || subscription.tier === 'enterprise') && (
-            <Card className="bg-neutral-900/50">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Headphones className="w-5 h-5 text-red-400" />
-                  Support & Contact
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3 p-4 rounded-lg bg-neutral-800/50 border border-neutral-700">
-                  <Headphones className="w-5 h-5 text-red-400 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-white">Priority Support</p>
-                    <p className="text-sm text-neutral-400 mt-1">
-                      As a {tierDisplayNames[subscription.tier]} subscriber, you get priority response times.
-                    </p>
-                    <a
-                      href="mailto:support@anytradesman.com?subject=Priority%20Support%20Request"
-                      className="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-300 mt-2"
-                    >
-                      support@anytradesman.com
-                    </a>
-                  </div>
-                </div>
-                {subscription.tier === 'enterprise' && (
-                  <div className="flex items-start gap-3 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                    <UserCheck className="w-5 h-5 text-yellow-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-white">Dedicated Account Manager</p>
-                      <p className="text-sm text-neutral-400 mt-1">
-                        Your dedicated account manager is here to help you maximize your results.
-                      </p>
-                      <a
-                        href="mailto:accounts@anytradesman.com?subject=Enterprise%20Account%20Support"
-                        className="inline-flex items-center gap-1 text-sm text-yellow-400 hover:text-yellow-300 mt-2"
-                      >
-                        accounts@anytradesman.com
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
 
       {/* Inactive subscription notice */}
       {subscription && subscription.status !== 'active' && (
@@ -479,7 +769,7 @@ export function SubscriptionView({ businessId, subscription }: SubscriptionViewP
             <CardContent className="pt-6">
               <h3 className="font-medium text-white mb-2">Can I change plans later?</h3>
               <p className="text-sm text-neutral-400">
-                Yes! You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle.
+                Yes! You can upgrade or downgrade your plan at any time. Upgrades take effect immediately. Downgrades apply at your next billing cycle.
               </p>
             </CardContent>
           </Card>
