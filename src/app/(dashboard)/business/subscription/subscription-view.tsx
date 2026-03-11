@@ -166,6 +166,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
     tierId: string;
     tierName: string;
     isUpgrade: boolean;
+    isSwitch: boolean;
     price: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -424,7 +425,6 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
             {pricingTiers.map((tier) => {
               const relation = getTierRelation(tier.id);
               const isCurrent = relation === 'current';
-              const isSameTier = relation === 'switch';
 
               return (
                 <Card
@@ -432,8 +432,6 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                   className={`relative ${
                     isCurrent
                       ? 'border-green-500 bg-green-500/5 ring-1 ring-green-500/20'
-                      : isSameTier
-                      ? 'border-neutral-700 bg-neutral-900/50 opacity-60'
                       : relation === 'upgrade'
                       ? 'border-neutral-700 hover:border-green-500/50 transition-colors'
                       : 'border-neutral-800 hover:border-neutral-700 transition-colors'
@@ -469,11 +467,26 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                       ))}
                     </ul>
 
-                    {isCurrent || relation === 'switch' ? (
+                    {isCurrent ? (
                       <div className="text-center text-sm text-green-400 font-medium py-2">
                         <CheckCircle className="w-4 h-4 inline mr-1" />
-                        {isCurrent ? 'Current Plan' : 'Same Tier'}
+                        Current Plan
                       </div>
+                    ) : relation === 'switch' ? (
+                      <Button
+                        variant="outline"
+                        className="w-full border-neutral-600 text-neutral-300 hover:bg-neutral-800"
+                        onClick={() => setConfirmAction({
+                          tierId: tier.id,
+                          tierName: tier.name,
+                          isUpgrade: false,
+                          isSwitch: true,
+                          price: tier.price,
+                        })}
+                        disabled={!!processing}
+                      >
+                        Switch to {tier.name}
+                      </Button>
                     ) : relation === 'upgrade' ? (
                       <Button
                         className="w-full bg-green-600 hover:bg-green-700"
@@ -481,6 +494,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                           tierId: tier.id,
                           tierName: tier.name,
                           isUpgrade: true,
+                          isSwitch: false,
                           price: tier.price,
                         })}
                         disabled={!!processing}
@@ -496,6 +510,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                           tierId: tier.id,
                           tierName: tier.name,
                           isUpgrade: false,
+                          isSwitch: false,
                           price: tier.price,
                         })}
                         disabled={!!processing}
@@ -574,12 +589,14 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
             <Card className="max-w-md w-full">
               <CardHeader>
                 <CardTitle id="confirm-modal-title" className="text-white">
-                  {confirmAction.isUpgrade ? 'Confirm Upgrade' : 'Confirm Plan Change'}
+                  {confirmAction.isUpgrade ? 'Confirm Upgrade' : confirmAction.isSwitch ? 'Switch Billing Cycle' : 'Confirm Plan Change'}
                 </CardTitle>
                 <CardDescription>
                   {confirmAction.isUpgrade
                     ? `You're upgrading to the ${confirmAction.tierName} plan at $${confirmAction.price}/mo.`
-                    : `You're downgrading to the ${confirmAction.tierName} plan at $${confirmAction.price}/mo.`
+                    : confirmAction.isSwitch
+                    ? `You're switching to ${confirmAction.tierName} billing at $${confirmAction.price}/mo.`
+                    : `You're changing to the ${confirmAction.tierName} plan at $${confirmAction.price}/mo.`
                   }
                 </CardDescription>
               </CardHeader>
@@ -589,9 +606,14 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                     <p className="font-medium text-green-400 mb-1">Upgrade takes effect immediately</p>
                     <p>You&apos;ll be charged the prorated difference for the remainder of your current billing period. Your new features will be available right away.</p>
                   </div>
+                ) : confirmAction.isSwitch ? (
+                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm text-neutral-300">
+                    <p className="font-medium text-blue-400 mb-1">Billing change takes effect at next cycle</p>
+                    <p>Your features stay the same. Your billing will switch to {confirmAction.tierName} after your current period ends{formatDate(subscription.current_period_end) ? ` on ${formatDate(subscription.current_period_end)}` : ''}.</p>
+                  </div>
                 ) : (
                   <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-sm text-neutral-300">
-                    <p className="font-medium text-yellow-400 mb-1">Downgrade takes effect at next billing cycle</p>
+                    <p className="font-medium text-yellow-400 mb-1">Change takes effect at next billing cycle</p>
                     <p>You&apos;ll keep your current plan features until {formatDate(subscription.current_period_end) || 'the end of your billing period'}. After that, your plan will switch to {confirmAction.tierName}.</p>
                   </div>
                 )}
@@ -616,7 +638,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                     onClick={() => handleChangePlan(confirmAction.tierId)}
                     disabled={!!processing}
                   >
-                    {processing ? 'Processing...' : confirmAction.isUpgrade ? 'Upgrade Now' : 'Confirm Downgrade'}
+                    {processing ? 'Processing...' : confirmAction.isUpgrade ? 'Upgrade Now' : confirmAction.isSwitch ? 'Confirm Switch' : 'Confirm Change'}
                   </Button>
                 </div>
               </CardContent>
