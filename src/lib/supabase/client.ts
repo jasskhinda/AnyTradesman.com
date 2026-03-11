@@ -19,7 +19,17 @@ export function createClient() {
 
   browserClient = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        // Strip Next.js-injected AbortSignals that cause
+        // "AbortError: signal is aborted without reason" on client-side fetches
+        fetch: (url, options = {}) => {
+          const { signal: _signal, ...rest } = options as RequestInit;
+          return fetch(url, rest);
+        },
+      },
+    }
   );
 
   return browserClient;
