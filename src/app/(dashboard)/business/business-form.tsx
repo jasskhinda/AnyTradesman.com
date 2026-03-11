@@ -15,7 +15,9 @@ import {
   Globe,
   Settings,
   Save,
+  ImageIcon,
 } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/image-upload';
 import type { Business, Category } from '@/types/database';
 
 interface BusinessFormProps {
@@ -29,6 +31,10 @@ export function BusinessForm({ initialBusiness, categories, initialBusinessCateg
   const [business] = useState<Business>(initialBusiness);
   const [businessCategories, setBusinessCategories] = useState<string[]>(initialBusinessCategories);
   const [saving, setSaving] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(initialBusiness.logo_url);
+  const [coverUrl, setCoverUrl] = useState<string | null>(initialBusiness.cover_image_url);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [formData, setFormData] = useState({
     name: initialBusiness.name || '',
     description: initialBusiness.description || '',
@@ -41,6 +47,37 @@ export function BusinessForm({ initialBusiness, categories, initialBusinessCateg
     zip_code: initialBusiness.zip_code || '',
     service_radius_miles: initialBusiness.service_radius_miles || 25,
   });
+
+  async function handleImageUpload(file: File, type: 'logo' | 'cover') {
+    const setUploading = type === 'logo' ? setUploadingLogo : setUploadingCover;
+    setUploading(true);
+
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      body.append('businessId', business.id);
+      body.append('type', type);
+
+      const response = await fetch('/api/business/upload-image', {
+        method: 'POST',
+        body,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      if (type === 'logo') {
+        setLogoUrl(data.url);
+      } else {
+        setCoverUrl(data.url);
+      }
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSave() {
     if (!business) return;
@@ -164,6 +201,40 @@ export function BusinessForm({ initialBusiness, categories, initialBusinessCateg
           </Card>
         </Link>
       </div>
+
+      {/* Branding */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" />
+            Branding
+          </CardTitle>
+          <CardDescription>Upload your business logo and cover image. These appear on your public profile and search results.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-6">
+            <ImageUpload
+              currentUrl={logoUrl}
+              onUpload={(file) => handleImageUpload(file, 'logo')}
+              aspectRatio="square"
+              maxSizeMB={2}
+              label="Logo"
+              uploading={uploadingLogo}
+              placeholder={formData.name?.charAt(0)?.toUpperCase()}
+            />
+            <div className="flex-1">
+              <ImageUpload
+                currentUrl={coverUrl}
+                onUpload={(file) => handleImageUpload(file, 'cover')}
+                aspectRatio="wide"
+                maxSizeMB={5}
+                label="Cover Image"
+                uploading={uploadingCover}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Business Details Form */}
       <Card>
