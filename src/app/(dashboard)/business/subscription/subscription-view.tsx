@@ -424,6 +424,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
             {pricingTiers.map((tier) => {
               const relation = getTierRelation(tier.id);
               const isCurrent = relation === 'current';
+              const isSameTier = relation === 'switch';
 
               return (
                 <Card
@@ -431,6 +432,8 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                   className={`relative ${
                     isCurrent
                       ? 'border-green-500 bg-green-500/5 ring-1 ring-green-500/20'
+                      : isSameTier
+                      ? 'border-neutral-700 bg-neutral-900/50 opacity-60'
                       : relation === 'upgrade'
                       ? 'border-neutral-700 hover:border-green-500/50 transition-colors'
                       : 'border-neutral-800 hover:border-neutral-700 transition-colors'
@@ -466,10 +469,10 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                       ))}
                     </ul>
 
-                    {isCurrent ? (
+                    {isCurrent || relation === 'switch' ? (
                       <div className="text-center text-sm text-green-400 font-medium py-2">
                         <CheckCircle className="w-4 h-4 inline mr-1" />
-                        Active
+                        {isCurrent ? 'Current Plan' : 'Same Tier'}
                       </div>
                     ) : relation === 'upgrade' ? (
                       <Button
@@ -484,20 +487,6 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                       >
                         <ArrowUp className="w-4 h-4 mr-1" />
                         Upgrade
-                      </Button>
-                    ) : relation === 'switch' ? (
-                      <Button
-                        variant="outline"
-                        className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800"
-                        onClick={() => setConfirmAction({
-                          tierId: tier.id,
-                          tierName: tier.name,
-                          isUpgrade: false,
-                          price: tier.price,
-                        })}
-                        disabled={!!processing}
-                      >
-                        Switch Billing
                       </Button>
                     ) : (
                       <Button
