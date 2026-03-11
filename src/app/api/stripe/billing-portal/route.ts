@@ -33,16 +33,32 @@ export async function POST(request: Request) {
     }
 
     // Get stripe customer ID
-    const { data: subscription } = await supabase
+    const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('stripe_customer_id')
       .eq('business_id', businessId)
-      .single();
+      .maybeSingle();
+
+    if (subError) {
+      console.error('Failed to retrieve subscription:', subError.message);
+      return NextResponse.json(
+        { error: 'Failed to retrieve billing information' },
+        { status: 500 }
+      );
+    }
 
     if (!subscription?.stripe_customer_id) {
       return NextResponse.json(
         { error: 'No billing account found' },
         { status: 400 }
+      );
+    }
+
+    if (!process.env.NEXT_PUBLIC_APP_URL) {
+      console.error('NEXT_PUBLIC_APP_URL is not configured');
+      return NextResponse.json(
+        { error: 'Service configuration error' },
+        { status: 500 }
       );
     }
 

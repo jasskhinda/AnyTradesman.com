@@ -30,8 +30,13 @@ export async function POST(request: Request) {
     });
 
     if (error) {
+      console.error('Password update failed:', error.message);
+      // Don't expose internal Supabase error messages to the client
+      const userMessage = error.message.includes('should be different')
+        ? 'New password must be different from your current password.'
+        : 'Failed to update password. Please try again.';
       return NextResponse.json(
-        { error: error.message },
+        { error: userMessage },
         { status: 400 }
       );
     }

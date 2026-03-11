@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -173,8 +173,33 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
 
   const isActiveSubscriber = subscription?.status === 'active';
 
+  // Close confirmation modal on Escape key
+  const handleEscapeKey = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && confirmAction && !processing) {
+      setConfirmAction(null);
+      setError(null);
+    }
+  }, [confirmAction, processing]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => document.removeEventListener('keydown', handleEscapeKey);
+  }, [handleEscapeKey]);
+
+  function formatDate(dateString: string | undefined): string {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    } catch {
+      return '';
+    }
+  }
+
   async function handleSubscribe(tierId: string) {
     setProcessing(tierId);
+    setError(null);
 
     try {
       const response = await fetch('/api/stripe/create-checkout', {
@@ -185,13 +210,20 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
 
       const data = await response.json();
 
+      if (!response.ok) {
+        setError(data.error || 'Could not start checkout. Please try again.');
+        setProcessing(null);
+        return;
+      }
+
       if (data.url) {
         window.location.href = data.url;
-      } else {
-        alert('Could not start checkout. Please try again.');
+        return; // Don't clear processing — we're navigating away
       }
+
+      setError('Could not start checkout. Please try again.');
     } catch {
-      alert('Something went wrong. Please try again.');
+      setError('Unable to connect. Please check your internet connection and try again.');
     }
 
     setProcessing(null);
@@ -211,6 +243,12 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
 
       const data = await response.json();
 
+      if (!response.ok) {
+        setError(data.error || 'Failed to change plan. Please try again.');
+        setProcessing(null);
+        return;
+      }
+
       if (data.success) {
         if (data.isUpgrade) {
           setSuccess('Plan upgraded successfully! Your new features are now active.');
@@ -218,13 +256,12 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
           setSuccess('Plan changed successfully. Your new plan will take effect at your next billing cycle.');
         }
         setConfirmAction(null);
-        // Refresh the page to show updated subscription
         setTimeout(() => router.refresh(), 1500);
       } else {
         setError(data.error || 'Failed to change plan. Please try again.');
       }
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError('Unable to connect. Please check your internet connection and try again.');
     }
 
     setProcessing(null);
@@ -232,6 +269,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
 
   async function handleBillingPortal() {
     setProcessing('portal');
+    setError(null);
 
     try {
       const response = await fetch('/api/stripe/billing-portal', {
@@ -242,13 +280,20 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
 
       const data = await response.json();
 
+      if (!response.ok) {
+        setError(data.error || 'Could not open billing portal. Please try again.');
+        setProcessing(null);
+        return;
+      }
+
       if (data.url) {
         window.location.href = data.url;
-      } else {
-        alert('Could not open billing portal. Please try again.');
+        return;
       }
+
+      setError('Could not open billing portal. Please try again.');
     } catch {
-      alert('Something went wrong. Please try again.');
+      setError('Unable to connect. Please check your internet connection and try again.');
     }
 
     setProcessing(null);
@@ -314,8 +359,8 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                   </p>
                   <p className="text-sm text-neutral-400">
                     <span className="text-green-400 font-medium">Active</span>
-                    {subscription.current_period_end && (
-                      <> &bull; Renews {new Date(subscription.current_period_end).toLocaleDateString()}</>
+                    {formatDate(subscription.current_period_end) && (
+                      <> &bull; Renews {formatDate(subscription.current_period_end)}</>
                     )}
                   </p>
                 </div>
@@ -525,11 +570,22 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
 
         {/* Confirmation Modal */}
         {confirmAction && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-modal-title"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !processing) {
+                setConfirmAction(null);
+                setError(null);
+              }
+            }}
+          >
             <Card className="max-w-md w-full">
               <CardHeader>
-                <CardTitle className="text-white">
-                  {confirmAction.isUpgrade ? 'Confirm Upgrade' : 'Confirm Downgrade'}
+                <CardTitle id="confirm-modal-title" className="text-white">
+                  {confirmAction.isUpgrade ? 'Confirm Upgrade' : 'Confirm Plan Change'}
                 </CardTitle>
                 <CardDescription>
                   {confirmAction.isUpgrade
@@ -547,7 +603,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                 ) : (
                   <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-sm text-neutral-300">
                     <p className="font-medium text-yellow-400 mb-1">Downgrade takes effect at next billing cycle</p>
-                    <p>You&apos;ll keep your current plan features until {subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString() : 'the end of your billing period'}. After that, your plan will switch to {confirmAction.tierName}.</p>
+                    <p>You&apos;ll keep your current plan features until {formatDate(subscription.current_period_end) || 'the end of your billing period'}. After that, your plan will switch to {confirmAction.tierName}.</p>
                   </div>
                 )}
 
@@ -636,6 +692,13 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
           }
         </p>
       </div>
+
+      {/* Error/Success Messages */}
+      {error && (
+        <div className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400">
+          {error}
+        </div>
+      )}
 
       {/* Inactive subscription notice */}
       {subscription && subscription.status !== 'active' && (
@@ -729,11 +792,11 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                   tier.highlight
                     ? 'bg-green-600 hover:bg-green-700'
                     : tier.popular
-                    ? ''
+                    ? 'bg-red-600 hover:bg-red-700'
                     : 'bg-neutral-700 hover:bg-neutral-600'
                 }`}
                 onClick={() => handleSubscribe(tier.id)}
-                disabled={processing === tier.id}
+                disabled={!!processing}
               >
                 {processing === tier.id ? 'Processing...' : 'Subscribe'}
               </Button>
@@ -772,7 +835,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                   variant="outline"
                   className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
                   onClick={() => handleSubscribe(payPerLeadTier.id)}
-                  disabled={processing === payPerLeadTier.id}
+                  disabled={!!processing}
                 >
                   {processing === payPerLeadTier.id ? 'Processing...' : 'Get Started'}
                 </Button>

@@ -2,19 +2,31 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST() {
-  const supabase = await createClient();
-
-  await supabase.auth.signOut();
-
-  return NextResponse.json({ success: true });
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Logout error:', error.message);
+    }
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('Logout error:', err);
+    return NextResponse.json({ success: true }); // Still return success — user expects to be logged out
+  }
 }
 
 export async function GET(request: Request) {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Logout error:', error.message);
+    }
+  } catch (err) {
+    console.error('Logout error:', err);
+  }
 
-  await supabase.auth.signOut();
-
-  // Redirect to home page after logout
+  // Always redirect to home page, even if signOut had an error
   const url = new URL('/', request.url);
   return NextResponse.redirect(url);
 }

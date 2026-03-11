@@ -14,6 +14,25 @@ function getSupabaseAdmin() {
   return createClient(url, key);
 }
 
+// Helper to find subscription by Stripe customer ID
+async function findSubscriptionByCustomer<T extends string>(
+  customerId: string,
+  selectFields: T
+) {
+  const { data, error } = await getSupabaseAdmin()
+    .from('subscriptions')
+    .select(selectFields)
+    .eq('stripe_customer_id', customerId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(`[webhook] DB error finding subscription for customer ${customerId}:`, error.message);
+    return null;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return data as any;
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   const headersList = await headers();
@@ -28,7 +47,7 @@ export async function POST(request: Request) {
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.error('STRIPE_WEBHOOK_SECRET is not configured');
+    console.error('[webhook] STRIPE_WEBHOOK_SECRET is not configured');
     return NextResponse.json(
       { error: 'Webhook not configured' },
       { status: 500 }
@@ -41,12 +60,14 @@ export async function POST(request: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+    console.error('[webhook] Signature verification failed:', err);
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }
     );
   }
+
+  console.info(`[webhook] Processing event: ${event.type} (${event.id})`);
 
   try {
     switch (event.type) {
@@ -55,21 +76,27 @@ export async function POST(request: Request) {
         const businessId = session.metadata?.business_id;
         const tierId = session.metadata?.tier_id;
 
-        if (!businessId) break;
+        if (!businessId) {
+          console.warn(`[webhook] checkout.session.completed missing business_id metadata (event ${event.id})`);
+          break;
+        }
 
         if (session.mode === 'subscription') {
-          // Create or update subscription
           const subscriptionId = session.subscription as string;
+          if (!subscriptionId) {
+            console.error(`[webhook] checkout.session.completed has no subscription ID (event ${event.id})`);
+            break;
+          }
+
           const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId, {
             expand: ['items.data'],
           });
 
-          // Get period dates from the first subscription item
           const firstItem = subscriptionData.items?.data?.[0];
           const periodStart = firstItem?.current_period_start;
           const periodEnd = firstItem?.current_period_end;
 
-          await getSupabaseAdmin()
+          const { error: upsertError } = await getSupabaseAdmin()
             .from('subscriptions')
             .upsert({
               business_id: businessId,
@@ -84,17 +111,25 @@ export async function POST(request: Request) {
               onConflict: 'business_id',
             });
 
+          if (upsertError) {
+            console.error(`[webhook] Failed to upsert subscription for business ${businessId}:`, upsertError.message);
+            throw new Error('Database error: subscription upsert failed');
+          }
+
           // Auto-verify business when subscription activates
-          await getSupabaseAdmin()
+          const { error: verifyError } = await getSupabaseAdmin()
             .from('businesses')
             .update({
               is_verified: true,
               verification_status: 'verified',
             })
             .eq('id', businessId);
-        } else {
-          // One-time payment (pay per lead) - handle differently
-          // Could create credits or tokens for lead purchases
+
+          if (verifyError) {
+            console.error(`[webhook] Failed to verify business ${businessId}:`, verifyError.message);
+          }
+
+          console.info(`[webhook] Subscription created for business ${businessId}, tier: ${tierId}`);
         }
         break;
       }
@@ -103,42 +138,43 @@ export async function POST(request: Request) {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
 
-        // Find business by stripe customer ID
-        const { data: existingSub } = await getSupabaseAdmin()
-          .from('subscriptions')
-          .select('business_id, tier')
-          .eq('stripe_customer_id', customerId)
-          .single();
-
-        if (existingSub) {
-          // Get period dates from the first subscription item
-          const firstItem = subscription.items?.data?.[0];
-          const periodStart = firstItem?.current_period_start;
-          const periodEnd = firstItem?.current_period_end;
-
-          // Check if tier changed (set by update-subscription API via metadata)
-          const newTierId = subscription.metadata?.tier_id;
-          const newDbTier = newTierId ? mapTierToSubscriptionTier(newTierId) : null;
-
-          const updateData: Record<string, unknown> = {
-            status: mapStripeStatus(subscription.status),
-            current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
-            current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-          };
-
-          // Update tier and plan_id if changed
-          if (newTierId) {
-            updateData.plan_id = newTierId;
-          }
-          if (newDbTier && newDbTier !== existingSub.tier) {
-            updateData.tier = newDbTier;
-          }
-
-          await getSupabaseAdmin()
-            .from('subscriptions')
-            .update(updateData)
-            .eq('business_id', existingSub.business_id);
+        const existingSub = await findSubscriptionByCustomer(customerId, 'business_id, tier');
+        if (!existingSub) {
+          console.warn(`[webhook] No subscription found for customer ${customerId} during subscription.updated`);
+          break;
         }
+
+        const firstItem = subscription.items?.data?.[0];
+        const periodStart = firstItem?.current_period_start;
+        const periodEnd = firstItem?.current_period_end;
+
+        const newTierId = subscription.metadata?.tier_id;
+        const newDbTier = newTierId ? mapTierToSubscriptionTier(newTierId) : null;
+
+        const updateData: Record<string, unknown> = {
+          status: mapStripeStatus(subscription.status),
+          current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+          current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+        };
+
+        if (newTierId) {
+          updateData.plan_id = newTierId;
+        }
+        if (newDbTier && newDbTier !== existingSub.tier) {
+          updateData.tier = newDbTier;
+        }
+
+        const { error: updateError } = await getSupabaseAdmin()
+          .from('subscriptions')
+          .update(updateData)
+          .eq('business_id', existingSub.business_id);
+
+        if (updateError) {
+          console.error(`[webhook] Failed to update subscription for business ${existingSub.business_id}:`, updateError.message);
+          throw new Error('Database error: subscription update failed');
+        }
+
+        console.info(`[webhook] Subscription updated for business ${existingSub.business_id}, status: ${subscription.status}`);
         break;
       }
 
@@ -146,36 +182,40 @@ export async function POST(request: Request) {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
 
-        // Find and update subscription status
-        const { data: existingSub } = await getSupabaseAdmin()
-          .from('subscriptions')
-          .select('business_id')
-          .eq('stripe_customer_id', customerId)
-          .single();
-
-        if (existingSub) {
-          await getSupabaseAdmin()
-            .from('subscriptions')
-            .update({
-              status: 'canceled',
-            })
-            .eq('business_id', existingSub.business_id);
-
-          // Remove verified badge if no verified credentials exist
-          const { data: verifiedCreds } = await getSupabaseAdmin()
-            .from('business_credentials')
-            .select('id')
-            .eq('business_id', existingSub.business_id)
-            .eq('verification_status', 'verified')
-            .limit(1);
-
-          if (!verifiedCreds || verifiedCreds.length === 0) {
-            await getSupabaseAdmin()
-              .from('businesses')
-              .update({ is_verified: false })
-              .eq('id', existingSub.business_id);
-          }
+        const existingSub = await findSubscriptionByCustomer(customerId, 'business_id');
+        if (!existingSub) {
+          console.warn(`[webhook] No subscription found for customer ${customerId} during subscription.deleted`);
+          break;
         }
+
+        const { error: cancelError } = await getSupabaseAdmin()
+          .from('subscriptions')
+          .update({ status: 'canceled' })
+          .eq('business_id', existingSub.business_id);
+
+        if (cancelError) {
+          console.error(`[webhook] Failed to cancel subscription for business ${existingSub.business_id}:`, cancelError.message);
+          throw new Error('Database error: subscription cancel failed');
+        }
+
+        // Remove verified badge if no verified credentials exist
+        const { data: verifiedCreds, error: credsError } = await getSupabaseAdmin()
+          .from('business_credentials')
+          .select('id')
+          .eq('business_id', existingSub.business_id)
+          .eq('verification_status', 'verified')
+          .limit(1);
+
+        if (credsError) {
+          console.error(`[webhook] Failed to check credentials for business ${existingSub.business_id}:`, credsError.message);
+        } else if (!verifiedCreds || verifiedCreds.length === 0) {
+          await getSupabaseAdmin()
+            .from('businesses')
+            .update({ is_verified: false })
+            .eq('id', existingSub.business_id);
+        }
+
+        console.info(`[webhook] Subscription canceled for business ${existingSub.business_id}`);
         break;
       }
 
@@ -183,28 +223,29 @@ export async function POST(request: Request) {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
 
-        // Update subscription status to past_due
-        const { data: existingSub } = await getSupabaseAdmin()
-          .from('subscriptions')
-          .select('business_id')
-          .eq('stripe_customer_id', customerId)
-          .single();
-
-        if (existingSub) {
-          await getSupabaseAdmin()
-            .from('subscriptions')
-            .update({
-              status: 'past_due',
-            })
-            .eq('business_id', existingSub.business_id);
+        const existingSub = await findSubscriptionByCustomer(customerId, 'business_id');
+        if (!existingSub) {
+          console.warn(`[webhook] No subscription found for customer ${customerId} during invoice.payment_failed`);
+          break;
         }
+
+        const { error: pastDueError } = await getSupabaseAdmin()
+          .from('subscriptions')
+          .update({ status: 'past_due' })
+          .eq('business_id', existingSub.business_id);
+
+        if (pastDueError) {
+          console.error(`[webhook] Failed to mark past_due for business ${existingSub.business_id}:`, pastDueError.message);
+        }
+
+        console.info(`[webhook] Payment failed for business ${existingSub.business_id}, marked past_due`);
         break;
       }
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error(`[webhook] Error processing ${event.type} (${event.id}):`, error);
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }

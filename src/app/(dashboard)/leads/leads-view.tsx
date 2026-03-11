@@ -66,16 +66,33 @@ export function LeadsView({
     : leads.filter((lead) => lead.categories?.id === selectedCategory);
 
   const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Recently';
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      if (diffMs < 0) return 'Just now';
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return `${diffDays}d ago`;
+    } catch {
+      return 'Recently';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return '';
+    }
   };
 
   if (!businessId) {
@@ -237,10 +254,12 @@ export function LeadsView({
                   </p>
 
                   <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500 mb-4">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {lead.city}, {lead.state}
-                    </span>
+                    {(lead.city || lead.state) && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {[lead.city, lead.state].filter(Boolean).join(', ')}
+                      </span>
+                    )}
                     {(lead.budget_min || lead.budget_max) && hasActiveSubscription && (
                       <span className="flex items-center gap-1">
                         <DollarSign className="w-4 h-4" />
@@ -257,10 +276,10 @@ export function LeadsView({
                         Budget hidden
                       </span>
                     )}
-                    {lead.preferred_date && (
+                    {lead.preferred_date && formatDate(lead.preferred_date) && (
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        {new Date(lead.preferred_date).toLocaleDateString()}
+                        {formatDate(lead.preferred_date)}
                       </span>
                     )}
                   </div>

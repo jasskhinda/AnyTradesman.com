@@ -50,6 +50,15 @@ export async function POST(request: Request) {
 
     const tier = PRICING_TIERS[tierId as PricingTierId];
     const customerEmail = business.email || business.profiles?.email;
+
+    if (!process.env.NEXT_PUBLIC_APP_URL) {
+      console.error('NEXT_PUBLIC_APP_URL is not configured');
+      return NextResponse.json(
+        { error: 'Service configuration error' },
+        { status: 500 }
+      );
+    }
+
     const stripe = getStripe();
 
     // Get or create Stripe customer
@@ -59,7 +68,7 @@ export async function POST(request: Request) {
       .from('subscriptions')
       .select('stripe_customer_id')
       .eq('business_id', businessId)
-      .single();
+      .maybeSingle();
 
     if (subscription?.stripe_customer_id) {
       customerId = subscription.stripe_customer_id;

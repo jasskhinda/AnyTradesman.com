@@ -57,11 +57,19 @@ export async function POST(request: Request) {
     }
 
     // Get current subscription
-    const { data: subscription } = await supabase
+    const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('stripe_subscription_id, stripe_customer_id, tier, plan_id')
       .eq('business_id', businessId)
-      .single();
+      .maybeSingle();
+
+    if (subError) {
+      console.error('Failed to retrieve subscription:', subError.message);
+      return NextResponse.json(
+        { error: 'Failed to retrieve subscription details' },
+        { status: 500 }
+      );
+    }
 
     if (!subscription?.stripe_subscription_id) {
       return NextResponse.json(
