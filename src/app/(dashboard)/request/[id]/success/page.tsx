@@ -1,82 +1,41 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { Header } from '@/components/layout/header';
+import { createClient } from '@/lib/supabase/server';
+import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowRight, Clock, MapPin, FileText } from 'lucide-react';
 
-interface ServiceRequest {
-  id: string;
-  title: string;
-  description: string;
-  city: string;
-  state: string;
-  status: string;
-  created_at: string;
-  categories?: {
-    name: string;
-  };
-}
+export default async function RequestSuccessPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await createClient();
 
-export default function RequestSuccessPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [request, setRequest] = useState<ServiceRequest | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadRequest() {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-
-      const { data } = await supabase
-        .from('service_requests')
-        .select(`
-          *,
-          categories (
-            name
-          )
-        `)
-        .eq('id', params.id)
-        .eq('customer_id', user.id)
-        .single();
-
-      if (data) {
-        setRequest(data);
-      }
-      setLoading(false);
-    }
-
-    loadRequest();
-  }, [params.id, router]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-neutral-950">
-        <Header />
-        <main className="max-w-lg mx-auto px-4 py-16 text-center">
-          <div className="animate-pulse space-y-6">
-            <div className="w-20 h-20 mx-auto bg-neutral-800 rounded-full" />
-            <div className="h-8 bg-neutral-800 rounded w-2/3 mx-auto" />
-            <div className="h-4 bg-neutral-800 rounded w-1/2 mx-auto" />
-          </div>
-        </main>
-      </div>
-    );
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect('/login');
   }
+
+  const { data: request } = await supabase
+    .from('service_requests')
+    .select(`
+      id,
+      title,
+      description,
+      city,
+      state,
+      status,
+      created_at,
+      categories (
+        name
+      )
+    `)
+    .eq('id', id)
+    .eq('customer_id', user.id)
+    .maybeSingle();
 
   return (
     <div className="min-h-screen bg-neutral-950">
-      <Header />
+      <HeaderWrapper />
 
       <main className="max-w-lg mx-auto px-4 py-16">
         <Card className="text-center">
@@ -99,7 +58,7 @@ export default function RequestSuccessPage() {
                   {request.categories && (
                     <div className="flex items-center text-neutral-400">
                       <FileText className="w-4 h-4 mr-2" />
-                      <span>{request.categories.name}</span>
+                      <span>{(request.categories as unknown as { name: string }).name}</span>
                     </div>
                   )}
                   <div className="flex items-center text-neutral-400">
