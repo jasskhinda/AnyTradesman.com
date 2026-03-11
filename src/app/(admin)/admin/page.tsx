@@ -13,6 +13,8 @@ import {
   Clock,
   ArrowRight,
   LayoutGrid,
+  FileText,
+  MapPin,
 } from 'lucide-react';
 
 interface Profile {
@@ -27,6 +29,8 @@ interface Stats {
   activeSubscriptions: number;
   newUsersToday: number;
   newBusinessesToday: number;
+  totalRequests: number;
+  openRequests: number;
 }
 
 async function getStats(supabase: Awaited<ReturnType<typeof createClient>>): Promise<Stats> {
@@ -40,6 +44,8 @@ async function getStats(supabase: Awaited<ReturnType<typeof createClient>>): Pro
     { count: activeSubscriptions },
     { count: newUsersToday },
     { count: newBusinessesToday },
+    { count: totalRequests },
+    { count: openRequests },
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('businesses').select('*', { count: 'exact', head: true }),
@@ -47,6 +53,8 @@ async function getStats(supabase: Awaited<ReturnType<typeof createClient>>): Pro
     supabase.from('subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
     supabase.from('businesses').select('*', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
+    supabase.from('service_requests').select('*', { count: 'exact', head: true }),
+    supabase.from('service_requests').select('*', { count: 'exact', head: true }).eq('status', 'open'),
   ]);
 
   return {
@@ -56,6 +64,8 @@ async function getStats(supabase: Awaited<ReturnType<typeof createClient>>): Pro
     activeSubscriptions: activeSubscriptions || 0,
     newUsersToday: newUsersToday || 0,
     newBusinessesToday: newBusinessesToday || 0,
+    totalRequests: totalRequests || 0,
+    openRequests: openRequests || 0,
   };
 }
 
@@ -95,6 +105,12 @@ export default async function AdminDashboard() {
     .order('created_at', { ascending: false })
     .limit(5);
 
+  const { data: recentRequests } = await supabase
+    .from('service_requests')
+    .select('id, title, city, state, status, created_at')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
   return (
     <div className="min-h-screen bg-neutral-950">
       {/* Admin Header */}
@@ -119,6 +135,9 @@ export default async function AdminDashboard() {
               <Link href="/admin/businesses" className="text-neutral-400 hover:text-white">
                 Businesses
               </Link>
+              <Link href="/admin/requests" className="text-neutral-400 hover:text-white">
+                Requests
+              </Link>
               <Link href="/admin/verifications" className="text-neutral-400 hover:text-white">
                 Verifications
               </Link>
@@ -140,7 +159,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -166,6 +185,23 @@ export default async function AdminDashboard() {
                 </div>
                 <div className="p-3 bg-green-500/20 rounded-lg">
                   <Building2 className="w-6 h-6 text-green-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-neutral-400">Service Requests</p>
+                  <p className="text-3xl font-bold text-white">{stats.totalRequests}</p>
+                  {stats.openRequests > 0 && (
+                    <p className="text-sm text-blue-400 mt-1">{stats.openRequests} open</p>
+                  )}
+                </div>
+                <div className="p-3 bg-indigo-500/20 rounded-lg">
+                  <FileText className="w-6 h-6 text-indigo-400" />
                 </div>
               </div>
             </CardContent>
@@ -204,7 +240,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="grid md:grid-cols-5 gap-4 mb-8">
           <Link href="/admin/users">
             <Card className="hover:border-neutral-700 transition-colors cursor-pointer h-full">
               <CardContent className="pt-6 flex items-center gap-4">
@@ -223,6 +259,17 @@ export default async function AdminDashboard() {
                 <div>
                   <p className="font-medium text-white">Manage Businesses</p>
                   <p className="text-sm text-neutral-400">Review, verify</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/admin/requests">
+            <Card className="hover:border-neutral-700 transition-colors cursor-pointer h-full">
+              <CardContent className="pt-6 flex items-center gap-4">
+                <FileText className="w-8 h-8 text-indigo-400" />
+                <div>
+                  <p className="font-medium text-white">Service Requests</p>
+                  <p className="text-sm text-neutral-400">{stats.openRequests} open</p>
                 </div>
               </CardContent>
             </Card>
@@ -252,7 +299,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8">
           {/* Recent Users */}
           <Card>
             <CardHeader>
@@ -335,6 +382,51 @@ export default async function AdminDashboard() {
                 </div>
               ) : (
                 <p className="text-neutral-400 text-center py-4">No businesses yet</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Service Requests */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-white">Recent Requests</CardTitle>
+                  <CardDescription>Latest service requests</CardDescription>
+                </div>
+                <Link href="/admin/requests" className="text-red-400 hover:text-red-300 text-sm font-medium flex items-center gap-1">
+                  View all <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {recentRequests && recentRequests.length > 0 ? (
+                <div className="space-y-4">
+                  {recentRequests.map((req) => (
+                    <div key={req.id} className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-white truncate max-w-[180px]">{req.title}</p>
+                        <p className="text-sm text-neutral-400 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {req.city}, {req.state}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        req.status === 'open'
+                          ? 'bg-blue-500/20 text-blue-400'
+                          : req.status === 'completed'
+                          ? 'bg-green-500/20 text-green-400'
+                          : req.status === 'canceled'
+                          ? 'bg-red-500/20 text-red-400'
+                          : 'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {req.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-neutral-400 text-center py-4">No requests yet</p>
               )}
             </CardContent>
           </Card>
