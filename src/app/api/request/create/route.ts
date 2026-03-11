@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   try {
@@ -13,8 +14,8 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verify user is authenticated
     const supabase = await createClient();
-
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       console.error('[request/create] Auth error:', authError?.message);
@@ -24,7 +25,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: serviceRequest, error: insertError } = await supabase
+    // Use admin client for the insert to bypass RLS
+    // (auth is already verified above)
+    const adminUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const adminKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!adminUrl || !adminKey) {
+      console.error('[request/create] Missing Supabase admin credentials');
+      return NextResponse.json(
+        { error: 'Service configuration error.' },
+        { status: 500 }
+      );
+    }
+
+    const admin = createAdminClient(adminUrl, adminKey);
+
+    const { data: serviceRequest, error: insertError } = await admin
       .from('service_requests')
       .insert({
         customer_id: user.id,
