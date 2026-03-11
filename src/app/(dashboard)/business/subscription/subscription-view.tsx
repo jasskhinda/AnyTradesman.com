@@ -754,11 +754,9 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
           <Card
             key={tier.id}
             className={`relative ${
-              tier.highlight
-                ? 'border-green-500 bg-green-500/5'
-                : tier.popular
+              tier.popular
                 ? 'border-red-500 bg-red-500/5'
-                : ''
+                : 'border-green-500 bg-green-500/5'
             }`}
           >
             {tier.badge && (
@@ -800,11 +798,9 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
               </ul>
               <Button
                 className={`w-full ${
-                  tier.highlight
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : tier.popular
+                  tier.popular
                     ? 'bg-red-600 hover:bg-red-700'
-                    : 'bg-neutral-700 hover:bg-neutral-600'
+                    : 'bg-green-600 hover:bg-green-700'
                 }`}
                 onClick={() => handleSubscribe(tier.id)}
                 disabled={!!processing}
