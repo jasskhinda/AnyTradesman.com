@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import { Header } from '@/components/layout/header';
+import { createServiceRequest } from './actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,35 +77,26 @@ export function ServiceRequestForm({
     setError(null);
 
     try {
-      const supabase = createClient();
+      const result = await createServiceRequest({
+        category_id: formData.category_id,
+        title: formData.title,
+        description: formData.description,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip_code: formData.zip_code,
+        preferred_date: formData.preferred_date,
+        budget_min: formData.budget_min,
+        budget_max: formData.budget_max,
+      });
 
-      const { data: request, error: insertError } = await supabase
-        .from('service_requests')
-        .insert({
-          customer_id: userId,
-          category_id: formData.category_id,
-          title: formData.title,
-          description: formData.description,
-          address: formData.address || null,
-          city: formData.city,
-          state: formData.state,
-          zip_code: formData.zip_code,
-          preferred_date: formData.preferred_date || null,
-          budget_min: formData.budget_min ? parseFloat(formData.budget_min) : null,
-          budget_max: formData.budget_max ? parseFloat(formData.budget_max) : null,
-          status: 'open',
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error('Service request insert error:', insertError.message);
-        setError('Failed to submit your request. Please try again.');
+      if (result.error) {
+        setError(result.error);
         setSubmitting(false);
         return;
       }
 
-      router.push(`/request/${request.id}/success`);
+      router.push(`/request/${result.id}/success`);
     } catch (err) {
       console.error('Service request submit error:', err);
       setError('Something went wrong. Please try again.');
