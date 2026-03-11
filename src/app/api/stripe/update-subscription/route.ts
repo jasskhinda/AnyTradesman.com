@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     // Get current subscription
     const { data: subscription } = await supabase
       .from('subscriptions')
-      .select('stripe_subscription_id, stripe_customer_id, tier')
+      .select('stripe_subscription_id, stripe_customer_id, tier, plan_id')
       .eq('business_id', businessId)
       .single();
 
@@ -70,14 +70,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if they're trying to switch to the same tier
-    const newDbTier = mapTierToDbTier(newTierId);
-    if (newDbTier === subscription.tier) {
+    // Check if they're trying to switch to the exact same plan
+    if (subscription.plan_id === newTierId) {
       return NextResponse.json(
-        { error: 'You are already on this plan tier' },
+        { error: 'You are already on this plan' },
         { status: 400 }
       );
     }
+
+    const newDbTier = mapTierToDbTier(newTierId);
 
     const stripe = getStripe();
 

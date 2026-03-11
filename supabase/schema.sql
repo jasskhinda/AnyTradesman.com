@@ -185,6 +185,7 @@ CREATE TABLE subscriptions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE UNIQUE,
   tier subscription_tier DEFAULT 'free',
+  plan_id TEXT,
   status subscription_status DEFAULT 'active',
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,

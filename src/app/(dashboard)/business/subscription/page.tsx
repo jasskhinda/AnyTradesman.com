@@ -25,7 +25,7 @@ export default async function SubscriptionPage() {
   // Fetch subscription (include stripe_customer_id to check if billing portal is available)
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('id, tier, status, current_period_end, stripe_customer_id')
+    .select('id, tier, plan_id, status, current_period_end, stripe_customer_id')
     .eq('business_id', business.id)
     .maybeSingle();
 
@@ -37,6 +37,7 @@ export default async function SubscriptionPage() {
         subscription={subscription ? {
           id: subscription.id,
           tier: subscription.tier,
+          plan_id: subscription.plan_id ?? undefined,
           status: subscription.status,
           current_period_end: subscription.current_period_end ?? undefined,
         } : null}

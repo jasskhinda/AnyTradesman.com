@@ -27,6 +27,7 @@ import {
 interface SubscriptionData {
   id?: string;
   tier: string;
+  plan_id?: string;
   status: string;
   current_period_end?: string;
 }
@@ -256,13 +257,19 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
   // Get the relationship of a pricing tier to the current subscription
   function getTierRelation(tierId: string): 'current' | 'upgrade' | 'downgrade' | 'switch' {
     if (!subscription) return 'upgrade';
+
+    // If we know the exact plan_id, use it for precise matching
+    if (subscription.plan_id) {
+      if (tierId === subscription.plan_id) return 'current';
+    }
+
     const currentDbTier = subscription.tier;
     const targetDbTier = pricingTierToDbTier(tierId);
-
-    if (targetDbTier === currentDbTier) return 'current';
-
     const currentRank = TIER_RANK[currentDbTier] || 0;
     const targetRank = TIER_RANK[targetDbTier] || 0;
+
+    // Same feature tier but different billing cycle (e.g., monthly vs sixMonth)
+    if (targetDbTier === currentDbTier) return 'switch';
 
     if (targetRank > currentRank) return 'upgrade';
     if (targetRank < currentRank) return 'downgrade';
@@ -432,6 +439,20 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                       >
                         <ArrowUp className="w-4 h-4 mr-1" />
                         Upgrade
+                      </Button>
+                    ) : relation === 'switch' ? (
+                      <Button
+                        variant="outline"
+                        className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                        onClick={() => setConfirmAction({
+                          tierId: tier.id,
+                          tierName: tier.name,
+                          isUpgrade: false,
+                          price: tier.price,
+                        })}
+                        disabled={!!processing}
+                      >
+                        Switch Billing
                       </Button>
                     ) : (
                       <Button

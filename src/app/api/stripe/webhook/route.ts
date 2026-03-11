@@ -74,6 +74,7 @@ export async function POST(request: Request) {
             .upsert({
               business_id: businessId,
               tier: mapTierToSubscriptionTier(tierId),
+              plan_id: tierId || null,
               status: 'active',
               stripe_customer_id: session.customer as string,
               stripe_subscription_id: subscriptionId,
@@ -125,7 +126,10 @@ export async function POST(request: Request) {
             current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
           };
 
-          // Update tier if it changed
+          // Update tier and plan_id if changed
+          if (newTierId) {
+            updateData.plan_id = newTierId;
+          }
           if (newDbTier && newDbTier !== existingSub.tier) {
             updateData.tier = newDbTier;
           }
