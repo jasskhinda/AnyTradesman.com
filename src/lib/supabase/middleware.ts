@@ -98,7 +98,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Protected routes for main site
-  const protectedRoutes = ['/dashboard', '/business', '/quotes', '/messages', '/settings', '/request'];
+  const protectedRoutes = ['/dashboard', '/business', '/quotes', '/messages', '/settings', '/request', '/leads'];
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );

@@ -14,6 +14,8 @@ import {
   Send,
   CheckCircle,
   Filter,
+  Lock,
+  Crown,
 } from 'lucide-react';
 import type { Profile } from '@/types/database';
 
@@ -46,6 +48,7 @@ interface LeadsViewProps {
   businessId: string | null;
   myCategories: Category[];
   initialLeads: ServiceRequest[];
+  hasActiveSubscription: boolean;
 }
 
 export function LeadsView({
@@ -53,6 +56,7 @@ export function LeadsView({
   businessId,
   myCategories,
   initialLeads,
+  hasActiveSubscription,
 }: LeadsViewProps) {
   const [leads] = useState<ServiceRequest[]>(initialLeads);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -158,6 +162,31 @@ export function LeadsView({
           </Card>
         </div>
 
+        {/* Subscription Banner */}
+        {!hasActiveSubscription && (
+          <div className="mb-8 rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-white mb-1">
+                  Subscribe to unlock full lead access
+                </h3>
+                <p className="text-neutral-400 text-sm mb-4">
+                  With an active subscription, you can view full lead details, see budgets, and send quotes directly to customers.
+                </p>
+                <Link href="/business/subscription">
+                  <Button className="bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold">
+                    <Lock className="w-4 h-4 mr-2" />
+                    View Subscription Plans
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Leads List */}
         {filteredLeads.length === 0 ? (
           <Card>
@@ -203,7 +232,7 @@ export function LeadsView({
                     </span>
                   </div>
 
-                  <p className="text-sm text-neutral-400 line-clamp-2 mb-4">
+                  <p className={`text-sm text-neutral-400 line-clamp-2 mb-4 ${!hasActiveSubscription ? 'blur-sm select-none' : ''}`}>
                     {lead.description}
                   </p>
 
@@ -212,7 +241,7 @@ export function LeadsView({
                       <MapPin className="w-4 h-4" />
                       {lead.city}, {lead.state}
                     </span>
-                    {(lead.budget_min || lead.budget_max) && (
+                    {(lead.budget_min || lead.budget_max) && hasActiveSubscription && (
                       <span className="flex items-center gap-1">
                         <DollarSign className="w-4 h-4" />
                         {lead.budget_min && lead.budget_max
@@ -220,6 +249,12 @@ export function LeadsView({
                           : lead.budget_min
                           ? `From $${lead.budget_min}`
                           : `Up to $${lead.budget_max}`}
+                      </span>
+                    )}
+                    {(lead.budget_min || lead.budget_max) && !hasActiveSubscription && (
+                      <span className="flex items-center gap-1 text-neutral-600">
+                        <Lock className="w-3 h-3" />
+                        Budget hidden
                       </span>
                     )}
                     {lead.preferred_date && (
@@ -231,17 +266,28 @@ export function LeadsView({
                   </div>
 
                   <div className="flex items-center gap-3 pt-4 border-t border-neutral-800">
-                    <Link href={`/leads/${lead.id}`} className="flex-1">
-                      <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800">
-                        View Details
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
-                    {!lead.has_quoted && (
-                      <Link href={`/leads/${lead.id}/quote`}>
-                        <Button>
-                          <Send className="w-4 h-4 mr-2" />
-                          Send Quote
+                    {hasActiveSubscription ? (
+                      <>
+                        <Link href={`/leads/${lead.id}`} className="flex-1">
+                          <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800">
+                            View Details
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </Link>
+                        {!lead.has_quoted && (
+                          <Link href={`/leads/${lead.id}/quote`}>
+                            <Button>
+                              <Send className="w-4 h-4 mr-2" />
+                              Send Quote
+                            </Button>
+                          </Link>
+                        )}
+                      </>
+                    ) : (
+                      <Link href="/business/subscription" className="flex-1">
+                        <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold">
+                          <Lock className="w-4 h-4 mr-2" />
+                          Subscribe to Quote
                         </Button>
                       </Link>
                     )}

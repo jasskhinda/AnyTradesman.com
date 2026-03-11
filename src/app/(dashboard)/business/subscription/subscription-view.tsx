@@ -12,6 +12,12 @@ import {
   Shield,
   Building2,
   CheckCircle,
+  Headphones,
+  UserCheck,
+  BarChart3,
+  Search,
+  MessageSquare,
+  BadgeCheck,
 } from 'lucide-react';
 
 interface SubscriptionData {
@@ -105,6 +111,30 @@ const payPerLeadTier = {
   ],
 };
 
+const tierDisplayNames: Record<string, string> = {
+  basic: 'Early Bird',
+  professional: 'Professional',
+  enterprise: 'Enterprise (Annual)',
+};
+
+function getTierFeatures(tier: string) {
+  const allFeatures = [
+    { name: 'Unlimited lead access', icon: Search, tiers: ['basic', 'professional', 'enterprise'] },
+    { name: 'Verified business badge', icon: BadgeCheck, tiers: ['basic', 'professional', 'enterprise'] },
+    { name: 'Priority in search results', icon: Search, tiers: ['basic', 'professional', 'enterprise'] },
+    { name: 'Customer messaging', icon: MessageSquare, tiers: ['professional', 'enterprise'] },
+    { name: 'Analytics dashboard', icon: BarChart3, tiers: ['professional', 'enterprise'] },
+    { name: 'Featured listings', icon: Crown, tiers: ['enterprise'] },
+    { name: 'Priority support', icon: Headphones, tiers: ['professional', 'enterprise'] },
+    { name: 'Dedicated account manager', icon: UserCheck, tiers: ['enterprise'] },
+  ];
+
+  return allFeatures.map((f) => ({
+    ...f,
+    unlocked: f.tiers.includes(tier),
+  }));
+}
+
 export function SubscriptionView({ businessId, subscription }: SubscriptionViewProps) {
   const [processing, setProcessing] = useState<string | null>(null);
 
@@ -192,27 +222,124 @@ export function SubscriptionView({ businessId, subscription }: SubscriptionViewP
       </div>
 
       {/* Current Subscription Status */}
-      {subscription && (
-        <Card className="mb-8 bg-red-500/10 border-red-500/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Crown className="w-5 h-5 text-red-400" />
-                <div>
-                  <p className="font-medium text-white">
-                    Current Plan: {subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}
-                  </p>
-                  <p className="text-sm text-neutral-400">
-                    Status: {subscription.status}
-                    {subscription.current_period_end && (
-                      <> &bull; Renews {new Date(subscription.current_period_end).toLocaleDateString()}</>
-                    )}
-                  </p>
+      {subscription && subscription.status === 'active' && (
+        <div className="mb-8 space-y-6">
+          <Card className="bg-green-500/10 border-green-500/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Crown className="w-5 h-5 text-green-400" />
+                  <div>
+                    <p className="font-medium text-white">
+                      Current Plan: {tierDisplayNames[subscription.tier] || subscription.tier}
+                    </p>
+                    <p className="text-sm text-neutral-400">
+                      Status: <span className="text-green-400">Active</span>
+                      {subscription.current_period_end && (
+                        <> &bull; Renews {new Date(subscription.current_period_end).toLocaleDateString()}</>
+                      )}
+                    </p>
+                  </div>
                 </div>
               </div>
-              <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800">
-                Manage Subscription
-              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Your Active Features */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                Your Active Features
+              </CardTitle>
+              <CardDescription>
+                Features included with your {tierDisplayNames[subscription.tier] || subscription.tier} plan
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {getTierFeatures(subscription.tier).map((feature) => (
+                  <div
+                    key={feature.name}
+                    className={`flex items-center gap-3 p-3 rounded-lg ${
+                      feature.unlocked
+                        ? 'bg-green-500/10 border border-green-500/20'
+                        : 'bg-neutral-800/50 border border-neutral-800 opacity-50'
+                    }`}
+                  >
+                    <feature.icon className={`w-4 h-4 flex-shrink-0 ${feature.unlocked ? 'text-green-400' : 'text-neutral-600'}`} />
+                    <span className={`text-sm ${feature.unlocked ? 'text-white' : 'text-neutral-500 line-through'}`}>
+                      {feature.name}
+                    </span>
+                    {feature.unlocked && <Check className="w-4 h-4 text-green-400 ml-auto" />}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Priority Support & Account Manager */}
+          {(subscription.tier === 'professional' || subscription.tier === 'enterprise') && (
+            <Card className="bg-neutral-900/50">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Headphones className="w-5 h-5 text-red-400" />
+                  Support & Contact
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-neutral-800/50 border border-neutral-700">
+                  <Headphones className="w-5 h-5 text-red-400 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-white">Priority Support</p>
+                    <p className="text-sm text-neutral-400 mt-1">
+                      As a {tierDisplayNames[subscription.tier]} subscriber, you get priority response times.
+                    </p>
+                    <a
+                      href="mailto:support@anytradesman.com?subject=Priority%20Support%20Request"
+                      className="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-300 mt-2"
+                    >
+                      support@anytradesman.com
+                    </a>
+                  </div>
+                </div>
+                {subscription.tier === 'enterprise' && (
+                  <div className="flex items-start gap-3 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                    <UserCheck className="w-5 h-5 text-yellow-400 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-white">Dedicated Account Manager</p>
+                      <p className="text-sm text-neutral-400 mt-1">
+                        Your dedicated account manager is here to help you maximize your results.
+                      </p>
+                      <a
+                        href="mailto:accounts@anytradesman.com?subject=Enterprise%20Account%20Support"
+                        className="inline-flex items-center gap-1 text-sm text-yellow-400 hover:text-yellow-300 mt-2"
+                      >
+                        accounts@anytradesman.com
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Inactive subscription notice */}
+      {subscription && subscription.status !== 'active' && (
+        <Card className="mb-8 bg-yellow-500/10 border-yellow-500/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <Crown className="w-5 h-5 text-yellow-400" />
+              <div>
+                <p className="font-medium text-white">
+                  Previous Plan: {tierDisplayNames[subscription.tier] || subscription.tier}
+                </p>
+                <p className="text-sm text-neutral-400">
+                  Status: <span className="text-yellow-400">{subscription.status}</span> — Choose a plan below to reactivate.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

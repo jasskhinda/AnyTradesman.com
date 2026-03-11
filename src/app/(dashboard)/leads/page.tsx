@@ -55,6 +55,19 @@ export default async function LeadsPage() {
     .eq('owner_id', user.id)
     .single();
 
+  // Get subscription status
+  let hasActiveSubscription = false;
+  if (business) {
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('status, current_period_end')
+      .eq('business_id', business.id)
+      .maybeSingle();
+    hasActiveSubscription = sub?.status === 'active' &&
+      !!sub?.current_period_end &&
+      new Date(sub.current_period_end) > new Date();
+  }
+
   let myCategories: Category[] = [];
   let leads: ServiceRequest[] = [];
 
@@ -118,6 +131,7 @@ export default async function LeadsPage() {
       businessId={business?.id || null}
       myCategories={myCategories}
       initialLeads={leads}
+      hasActiveSubscription={hasActiveSubscription}
     />
   );
 }

@@ -82,6 +82,15 @@ export async function POST(request: Request) {
             }, {
               onConflict: 'business_id',
             });
+
+          // Auto-verify business when subscription activates
+          await getSupabaseAdmin()
+            .from('businesses')
+            .update({
+              is_verified: true,
+              verification_status: 'verified',
+            })
+            .eq('id', businessId);
         } else {
           // One-time payment (pay per lead) - handle differently
           // Could create credits or tokens for lead purchases
@@ -136,6 +145,21 @@ export async function POST(request: Request) {
               status: 'canceled',
             })
             .eq('business_id', existingSub.business_id);
+
+          // Remove verified badge if no verified credentials exist
+          const { data: verifiedCreds } = await getSupabaseAdmin()
+            .from('business_credentials')
+            .select('id')
+            .eq('business_id', existingSub.business_id)
+            .eq('verification_status', 'verified')
+            .limit(1);
+
+          if (!verifiedCreds || verifiedCreds.length === 0) {
+            await getSupabaseAdmin()
+              .from('businesses')
+              .update({ is_verified: false })
+              .eq('id', existingSub.business_id);
+          }
         }
         break;
       }

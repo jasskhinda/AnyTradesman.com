@@ -14,6 +14,7 @@ import {
   Clock,
   Shield,
   MessageSquare,
+  Crown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Profile } from '@/types/database';
@@ -35,12 +36,12 @@ export async function generateMetadata({ params }: BusinessPageProps) {
 
   if (!business) {
     return {
-      title: 'Business Not Found | AnyTrades',
+      title: 'Business Not Found | AnyTradesman',
     };
   }
 
   return {
-    title: `${business.name} | AnyTrades`,
+    title: `${business.name} | AnyTradesman`,
     description: business.description || `${business.name} - Professional services in ${business.city}, ${business.state}`,
   };
 }
@@ -89,6 +90,18 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const categories = businessCategories?.map((bc: any) => bc.categories).filter(Boolean).flat() || [];
+
+  // Fetch subscription to check featured status
+  const { data: businessSub } = await supabase
+    .from('subscriptions')
+    .select('tier, status, current_period_end')
+    .eq('business_id', business.id)
+    .maybeSingle();
+
+  const isFeatured = businessSub?.status === 'active' &&
+    businessSub?.tier === 'enterprise' &&
+    businessSub?.current_period_end &&
+    new Date(businessSub.current_period_end) > new Date();
 
   // Fetch reviews for this business
   const { data: reviews } = await supabase
@@ -156,6 +169,12 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
                       <h1 className="text-2xl md:text-3xl font-bold text-white">
                         {business.name}
                       </h1>
+                      {isFeatured && (
+                        <span className="inline-flex items-center bg-yellow-500/20 text-yellow-400 text-sm font-medium px-3 py-1 rounded-full">
+                          <Crown className="w-4 h-4 mr-1" />
+                          Featured
+                        </span>
+                      )}
                       {business.is_verified && (
                         <span className="inline-flex items-center bg-green-500/20 text-green-400 text-sm font-medium px-3 py-1 rounded-full">
                           <CheckCircle className="w-4 h-4 mr-1" />

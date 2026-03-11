@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, MapPin, CheckCircle } from 'lucide-react';
+import { Star, MapPin, CheckCircle, Crown } from 'lucide-react';
 import type { Business } from '@/types/database';
 
 interface BusinessCardProps {
   business: Business & {
     distance_miles?: number;
     categories?: { name: string; slug: string }[];
+    isFeatured?: boolean;
+    isSubscriber?: boolean;
   };
 }
 
@@ -14,7 +16,13 @@ export function BusinessCard({ business }: BusinessCardProps) {
   return (
     <Link
       href={`/business/${business.slug}`}
-      className="group block bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden hover:border-neutral-700 transition-all"
+      className={`group block bg-neutral-900 rounded-xl border overflow-hidden hover:border-neutral-700 transition-all ${
+        business.isFeatured
+          ? 'border-yellow-500/50 ring-1 ring-yellow-500/20'
+          : business.isSubscriber
+          ? 'border-neutral-700'
+          : 'border-neutral-800'
+      }`}
     >
       {/* Cover Image */}
       <div className="relative h-40 bg-neutral-800">
@@ -47,6 +55,14 @@ export function BusinessCard({ business }: BusinessCardProps) {
             )}
           </div>
         </div>
+
+        {/* Featured Badge */}
+        {business.isFeatured && (
+          <div className="absolute top-3 left-3 bg-yellow-500 text-neutral-900 text-xs font-bold px-2 py-1 rounded-full flex items-center">
+            <Crown className="w-3 h-3 mr-1" />
+            Featured
+          </div>
+        )}
 
         {/* Verified Badge */}
         {business.is_verified && (

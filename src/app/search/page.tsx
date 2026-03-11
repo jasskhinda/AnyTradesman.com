@@ -37,11 +37,15 @@ async function SearchResults({ searchParams }: { searchParams: Awaited<SearchPag
             name,
             slug
           )
+        ),
+        subscriptions (
+          tier,
+          status,
+          current_period_end
         )
       `)
       .eq('is_active', true)
-      .order('rating_average', { ascending: false })
-      .limit(20);
+      .limit(40);
 
     if (q) {
       query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
@@ -63,11 +67,30 @@ async function SearchResults({ searchParams }: { searchParams: Awaited<SearchPag
       );
     }
 
-    // Transform the data to include categories
-    const transformedBusinesses = businesses?.map((business) => ({
-      ...business,
-      categories: business.business_categories?.map((bc: { categories: { name: string; slug: string } }) => bc.categories) || [],
-    })) || [];
+    // Transform the data to include categories and subscription status
+    const transformedBusinesses = (businesses?.map((business) => {
+      const sub = Array.isArray(business.subscriptions)
+        ? business.subscriptions[0]
+        : business.subscriptions;
+      const isActiveSubscriber = sub?.status === 'active' &&
+        sub?.current_period_end &&
+        new Date(sub.current_period_end) > new Date();
+      const isFeatured = isActiveSubscriber && sub?.tier === 'enterprise';
+
+      return {
+        ...business,
+        categories: business.business_categories?.map((bc: { categories: { name: string; slug: string } }) => bc.categories) || [],
+        isSubscriber: !!isActiveSubscriber,
+        isFeatured: !!isFeatured,
+      };
+    }) || []).sort((a, b) => {
+      // Featured first, then subscribers, then by rating
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
+      if (a.isSubscriber && !b.isSubscriber) return -1;
+      if (!a.isSubscriber && b.isSubscriber) return 1;
+      return (b.rating_average || 0) - (a.rating_average || 0);
+    }).slice(0, 20);
 
     if (transformedBusinesses.length === 0) {
       return (
