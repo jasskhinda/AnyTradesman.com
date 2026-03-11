@@ -76,35 +76,41 @@ export function ServiceRequestForm({
     setSubmitting(true);
     setError(null);
 
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const { data: request, error: insertError } = await supabase
-      .from('service_requests')
-      .insert({
-        customer_id: userId,
-        category_id: formData.category_id,
-        title: formData.title,
-        description: formData.description,
-        address: formData.address || null,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zip_code,
-        preferred_date: formData.preferred_date || null,
-        budget_min: formData.budget_min ? parseFloat(formData.budget_min) : null,
-        budget_max: formData.budget_max ? parseFloat(formData.budget_max) : null,
-        status: 'open',
-      })
-      .select()
-      .single();
+      const { data: request, error: insertError } = await supabase
+        .from('service_requests')
+        .insert({
+          customer_id: userId,
+          category_id: formData.category_id,
+          title: formData.title,
+          description: formData.description,
+          address: formData.address || null,
+          city: formData.city,
+          state: formData.state,
+          zip_code: formData.zip_code,
+          preferred_date: formData.preferred_date || null,
+          budget_min: formData.budget_min ? parseFloat(formData.budget_min) : null,
+          budget_max: formData.budget_max ? parseFloat(formData.budget_max) : null,
+          status: 'open',
+        })
+        .select()
+        .single();
 
-    if (insertError) {
-      setError(insertError.message);
+      if (insertError) {
+        console.error('Service request insert error:', insertError.message);
+        setError('Failed to submit your request. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+
+      router.push(`/request/${request.id}/success`);
+    } catch (err) {
+      console.error('Service request submit error:', err);
+      setError('Something went wrong. Please try again.');
       setSubmitting(false);
-      return;
     }
-
-    // Redirect to success page or request details
-    router.push(`/request/${request.id}/success`);
   }
 
   const selectedCategory = categories.find(c => c.id === formData.category_id);
