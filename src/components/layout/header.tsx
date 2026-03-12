@@ -224,16 +224,6 @@ export function Header({ initialUser }: HeaderProps = {}) {
                         Dashboard
                       </Link>
                     )}
-                    {user.role === 'business_owner' && (
-                      <Link
-                        href="/messages"
-                        className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Messages
-                      </Link>
-                    )}
                     <Link
                       href="/settings"
                       className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
