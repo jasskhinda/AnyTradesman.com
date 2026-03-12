@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, LogOut, LayoutDashboard, Building2 } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Building2, Settings, FileText, MessageSquare } from 'lucide-react';
 import type { Profile } from '@/types/database';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
@@ -167,15 +167,31 @@ export function Header({ initialUser }: HeaderProps = {}) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-8">
-            <Link href="/search" className="text-neutral-700 hover:text-neutral-900 font-medium">
-              Find a Pro
-            </Link>
-            <Link href="/categories" className="text-neutral-700 hover:text-neutral-900 font-medium">
-              Services
-            </Link>
-            <Link href="/how-it-works" className="text-neutral-700 hover:text-neutral-900 font-medium">
-              How It Works
-            </Link>
+            {user?.role === 'business_owner' ? (
+              <>
+                <Link href="/dashboard" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  Dashboard
+                </Link>
+                <Link href="/leads" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  Leads
+                </Link>
+                <Link href="/business" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  My Business
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/search" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  Find a Pro
+                </Link>
+                <Link href="/categories" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  Services
+                </Link>
+                <Link href="/how-it-works" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  How It Works
+                </Link>
+              </>
+            )}
 
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-neutral-300 animate-pulse" />
@@ -198,22 +214,24 @@ export function Header({ initialUser }: HeaderProps = {}) {
                       </p>
                       <p className="text-xs text-neutral-400 truncate">{user.email}</p>
                     </div>
-                    <Link
-                      href="/dashboard"
-                      className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <LayoutDashboard className="w-4 h-4 mr-2" />
-                      Dashboard
-                    </Link>
-                    {user.role === 'business_owner' && (
+                    {user.role !== 'business_owner' && (
                       <Link
-                        href="/business"
+                        href="/dashboard"
                         className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
-                        <Building2 className="w-4 h-4 mr-2" />
-                        My Business
+                        <LayoutDashboard className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    )}
+                    {user.role === 'business_owner' && (
+                      <Link
+                        href="/messages"
+                        className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Messages
                       </Link>
                     )}
                     <Link
@@ -221,7 +239,7 @@ export function Header({ initialUser }: HeaderProps = {}) {
                       className="flex items-center px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white"
                       onClick={() => setIsProfileMenuOpen(false)}
                     >
-                      <User className="w-4 h-4 mr-2" />
+                      <Settings className="w-4 h-4 mr-2" />
                       Settings
                     </Link>
                     <button
@@ -260,29 +278,7 @@ export function Header({ initialUser }: HeaderProps = {}) {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden py-4 space-y-2 bg-white/90 rounded-lg mt-2">
-            <Link
-              href="/search"
-              className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Find a Pro
-            </Link>
-            <Link
-              href="/categories"
-              className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Services
-            </Link>
-            <Link
-              href="/how-it-works"
-              className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              How It Works
-            </Link>
-
-            {user ? (
+            {user?.role === 'business_owner' ? (
               <>
                 <Link
                   href="/dashboard"
@@ -290,6 +286,27 @@ export function Header({ initialUser }: HeaderProps = {}) {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
+                </Link>
+                <Link
+                  href="/leads"
+                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Leads
+                </Link>
+                <Link
+                  href="/business"
+                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Business
+                </Link>
+                <Link
+                  href="/settings"
+                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Settings
                 </Link>
                 <button
                   onClick={() => {
@@ -302,14 +319,59 @@ export function Header({ initialUser }: HeaderProps = {}) {
                 </button>
               </>
             ) : (
-              <div className="pt-4 space-y-2 px-4">
-                <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full border-neutral-300 text-neutral-700 hover:bg-neutral-100">Sign in</Button>
+              <>
+                <Link
+                  href="/search"
+                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Find a Pro
                 </Link>
-                <Link href="/register" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full">Get Started</Button>
+                <Link
+                  href="/categories"
+                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Services
                 </Link>
-              </div>
+                <Link
+                  href="/how-it-works"
+                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  How It Works
+                </Link>
+
+                {user ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-neutral-100 rounded-lg"
+                    >
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <div className="pt-4 space-y-2 px-4">
+                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="outline" className="w-full border-neutral-300 text-neutral-700 hover:bg-neutral-100">Sign in</Button>
+                    </Link>
+                    <Link href="/register" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full">Get Started</Button>
+                    </Link>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
