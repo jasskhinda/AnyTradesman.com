@@ -299,8 +299,16 @@ export default function SendQuotePage() {
           </CardContent>
         </Card>
 
+        {/* Contact info notice */}
+        <div className="mt-6 p-4 rounded-lg bg-green-500/10 border border-green-500/30">
+          <h3 className="font-medium text-green-400 mb-2">After Sending Your Quote</h3>
+          <p className="text-sm text-neutral-400">
+            Once you submit your quote, you&apos;ll receive the customer&apos;s contact information (name, phone, email) so you can reach out to them directly to discuss the project.
+          </p>
+        </div>
+
         {/* Tips */}
-        <div className="mt-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+        <div className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30">
           <h3 className="font-medium text-red-400 mb-2">Tips for a Winning Quote</h3>
           <ul className="text-sm text-neutral-400 space-y-1">
             <li>• Be competitive but fair with your pricing</li>

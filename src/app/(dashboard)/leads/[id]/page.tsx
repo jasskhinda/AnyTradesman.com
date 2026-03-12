@@ -17,10 +17,14 @@ import {
   CheckCircle,
   AlertTriangle,
   FileText,
+  Phone,
+  Mail,
+  User,
 } from 'lucide-react';
 
 interface ServiceRequest {
   id: string;
+  customer_id: string;
   title: string;
   description: string;
   address: string | null;
@@ -46,11 +50,18 @@ interface ExistingQuote {
   created_at: string;
 }
 
+interface CustomerContact {
+  full_name: string | null;
+  email: string;
+  phone: string | null;
+}
+
 export default function LeadDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const [lead, setLead] = useState<ServiceRequest | null>(null);
   const [existingQuote, setExistingQuote] = useState<ExistingQuote | null>(null);
+  const [customerContact, setCustomerContact] = useState<CustomerContact | null>(null);
   const [loading, setLoading] = useState(true);
   const [businessId, setBusinessId] = useState<string | null>(null);
 
@@ -107,6 +118,17 @@ export default function LeadDetailsPage() {
 
       if (quoteData) {
         setExistingQuote(quoteData);
+
+        // Fetch customer contact info (only available after quoting)
+        const { data: customerData } = await supabase
+          .from('profiles')
+          .select('full_name, email, phone')
+          .eq('id', requestData.customer_id)
+          .single();
+
+        if (customerData) {
+          setCustomerContact(customerData);
+        }
       }
 
       setLoading(false);
@@ -316,6 +338,53 @@ export default function LeadDetailsPage() {
                 </Link>
               </CardContent>
             </Card>
+
+            {/* Customer Contact Info - shown after quoting */}
+            {existingQuote && customerContact && (
+              <Card className="border-green-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white text-base flex items-center gap-2">
+                    <User className="w-5 h-5 text-green-400" />
+                    Customer Contact
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <p className="text-xs text-neutral-500 mb-1">Name</p>
+                    <p className="text-neutral-200 font-medium">
+                      {customerContact.full_name || 'Not provided'}
+                    </p>
+                  </div>
+                  {customerContact.phone && (
+                    <div>
+                      <p className="text-xs text-neutral-500 mb-1">Phone</p>
+                      <a
+                        href={`tel:${customerContact.phone}`}
+                        className="text-green-400 hover:text-green-300 flex items-center gap-2"
+                      >
+                        <Phone className="w-4 h-4" />
+                        {customerContact.phone}
+                      </a>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs text-neutral-500 mb-1">Email</p>
+                    <a
+                      href={`mailto:${customerContact.email}`}
+                      className="text-green-400 hover:text-green-300 flex items-center gap-2"
+                    >
+                      <Mail className="w-4 h-4" />
+                      {customerContact.email}
+                    </a>
+                  </div>
+                  <div className="pt-3 border-t border-neutral-800">
+                    <p className="text-xs text-neutral-500">
+                      Contact the customer directly to discuss the project and finalize details.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Tips */}
             <Card>

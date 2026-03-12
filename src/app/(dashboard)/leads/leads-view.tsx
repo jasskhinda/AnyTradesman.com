@@ -16,6 +16,7 @@ import {
   Filter,
   Lock,
   Crown,
+  Phone,
 } from 'lucide-react';
 import type { Profile } from '@/types/database';
 
@@ -289,8 +290,17 @@ export function LeadsView({
                       <>
                         <Link href={`/leads/${lead.id}`} className="flex-1">
                           <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800">
-                            View Details
-                            <ArrowRight className="w-4 h-4 ml-2" />
+                            {lead.has_quoted ? (
+                              <>
+                                <Phone className="w-4 h-4 mr-2 text-green-400" />
+                                View Contact Info
+                              </>
+                            ) : (
+                              <>
+                                View Details
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                              </>
+                            )}
                           </Button>
                         </Link>
                         {!lead.has_quoted && (
