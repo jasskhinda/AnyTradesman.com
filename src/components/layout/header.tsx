@@ -158,9 +158,10 @@ export function Header({ initialUser }: HeaderProps = {}) {
               <Image
                 src="/Logo - FINAL PNG.png"
                 alt="AnyTradesman"
-                width={56}
-                height={56}
+                width={280}
+                height={135}
                 className="h-14 w-auto"
+                priority
               />
             </Link>
           </div>
