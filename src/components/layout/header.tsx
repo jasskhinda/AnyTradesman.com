@@ -158,9 +158,9 @@ export function Header({ initialUser }: HeaderProps = {}) {
               <Image
                 src="/Logo - FINAL PNG.png"
                 alt="AnyTradesman"
-                width={280}
-                height={135}
-                className="h-14 w-auto"
+                width={480}
+                height={231}
+                className="h-[120px] w-auto"
                 priority
               />
             </Link>
