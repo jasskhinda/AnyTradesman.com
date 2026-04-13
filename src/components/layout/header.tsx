@@ -151,16 +151,16 @@ export function Header({ initialUser }: HeaderProps = {}) {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-20">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0">
               <Image
                 src="/Logo - FINAL PNG.png"
                 alt="AnyTradesman"
-                width={480}
-                height={231}
-                className="h-[120px] w-auto"
+                width={374}
+                height={180}
+                className="h-16 w-auto"
                 priority
               />
             </Link>
