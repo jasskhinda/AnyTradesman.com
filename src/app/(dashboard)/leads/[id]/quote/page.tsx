@@ -7,7 +7,6 @@ import { createClient } from '@/lib/supabase/client';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   ArrowLeft,
   DollarSign,
@@ -119,27 +118,31 @@ export default function SendQuotePage() {
     setSubmitting(true);
     setError(null);
 
-    const supabase = createClient();
-
-    const { error: insertError } = await supabase
-      .from('quotes')
-      .insert({
-        service_request_id: lead.id,
-        business_id: businessId,
-        amount: amount,
-        message: formData.message || null,
-        estimated_duration: formData.estimated_duration || null,
-        status: 'pending',
+    try {
+      const res = await fetch('/api/quote/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_request_id: lead.id,
+          amount,
+          message: formData.message || null,
+          estimated_duration: formData.estimated_duration || null,
+        }),
       });
 
-    if (insertError) {
-      setError(insertError.message);
-      setSubmitting(false);
-      return;
-    }
+      const result = await res.json();
 
-    // Redirect to lead page with success state
-    router.push(`/leads/${lead.id}?quoted=true`);
+      if (!res.ok) {
+        setError(result.error || 'Failed to submit quote.');
+        setSubmitting(false);
+        return;
+      }
+
+      router.push(`/leads/${lead.id}?quoted=true`);
+    } catch {
+      setError('Network error. Please try again.');
+      setSubmitting(false);
+    }
   }
 
   if (loading) {

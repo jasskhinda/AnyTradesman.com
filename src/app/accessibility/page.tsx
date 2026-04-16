@@ -93,8 +93,8 @@ export default function AccessibilityPage() {
                 <div className="mt-4 bg-neutral-900 rounded-xl p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <Mail className="w-5 h-5 text-red-400" />
-                    <a href="mailto:accessibility@anytradesman.com" className="text-red-400 hover:text-red-300">
-                      accessibility@anytradesman.com
+                    <a href="mailto:accessibility@anytradesmen.com" className="text-red-400 hover:text-red-300">
+                      accessibility@anytradesmen.com
                     </a>
                   </div>
                   <p className="text-neutral-400 text-sm">

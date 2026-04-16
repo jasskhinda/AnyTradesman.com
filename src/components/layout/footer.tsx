@@ -106,11 +106,6 @@ export function Footer() {
                   Accessibility
                 </Link>
               </li>
-              <li>
-                <Link href="/sitemap" className="hover:text-white transition-colors">
-                  Sitemap
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
@@ -121,15 +116,11 @@ export function Footer() {
               <Image
                 src="/Logo - FINAL PNG.png"
                 alt="AnyTradesman"
-                width={40}
-                height={40}
+                width={200}
+                height={96}
                 className="h-10 w-auto"
               />
             </Link>
-
-            <p className="text-sm text-neutral-500 mt-4 md:mt-0">
-              Follow us on social media — coming soon
-            </p>
 
             <p className="text-sm mt-4 md:mt-0">
               &copy; {new Date().getFullYear()} AnyTradesman. All rights reserved.

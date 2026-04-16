@@ -544,10 +544,10 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                     As a {tierDisplayNames[subscription.tier]} subscriber, you get priority response times.
                   </p>
                   <a
-                    href="mailto:support@anytradesman.com?subject=Priority%20Support%20Request"
+                    href="mailto:support@anytradesmen.com?subject=Priority%20Support%20Request"
                     className="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-300 mt-2"
                   >
-                    support@anytradesman.com
+                    support@anytradesmen.com
                   </a>
                 </div>
               </div>
@@ -560,10 +560,10 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                       Your dedicated account manager is here to help you maximize your results.
                     </p>
                     <a
-                      href="mailto:accounts@anytradesman.com?subject=Enterprise%20Account%20Support"
+                      href="mailto:accounts@anytradesmen.com?subject=Enterprise%20Account%20Support"
                       className="inline-flex items-center gap-1 text-sm text-yellow-400 hover:text-yellow-300 mt-2"
                     >
-                      accounts@anytradesman.com
+                      accounts@anytradesmen.com
                     </a>
                   </div>
                 </div>

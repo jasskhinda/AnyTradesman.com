@@ -1,6 +1,11 @@
 import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Footer } from '@/components/layout/footer';
 
+export const metadata = {
+  title: 'Terms of Service | AnyTradesman',
+  description: 'Terms governing your use of AnyTradesman.',
+};
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-neutral-950">
@@ -14,7 +19,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="mt-4 text-neutral-400">
-              Last updated: December 2024
+              Last updated: April 2026
             </p>
           </div>
         </section>
@@ -150,8 +155,8 @@ export default function TermsPage() {
                 <h2 className="text-xl font-semibold text-white mb-4">14. Contact Information</h2>
                 <p className="text-neutral-400">
                   For questions about these Terms of Service, please contact us at:{' '}
-                  <a href="mailto:legal@anytradesman.com" className="text-red-400 hover:text-red-300">
-                    legal@anytradesman.com
+                  <a href="mailto:legal@anytradesmen.com" className="text-red-400 hover:text-red-300">
+                    legal@anytradesmen.com
                   </a>
                 </p>
               </div>

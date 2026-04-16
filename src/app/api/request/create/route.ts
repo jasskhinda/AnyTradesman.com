@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { sendServiceRequestConfirmation } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -65,6 +66,23 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    // Send confirmation email (don't block response if email fails)
+    admin
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', user.id)
+      .single()
+      .then(({ data: profile }) => {
+        if (profile?.email) {
+          sendServiceRequestConfirmation({
+            to: profile.email,
+            customerName: profile.full_name || '',
+            requestTitle: title,
+            requestId: serviceRequest.id,
+          }).catch((err) => console.error('[request/create] Email failed:', err));
+        }
+      });
 
     return NextResponse.json({ id: serviceRequest.id });
   } catch (error) {

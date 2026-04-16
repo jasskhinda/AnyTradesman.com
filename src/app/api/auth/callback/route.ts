@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { sendWelcomeEmail } from '@/lib/email';
 
 // Allowed redirect paths (security: prevent open redirects)
 const ALLOWED_REDIRECTS = [
@@ -66,25 +67,35 @@ export async function GET(request: Request) {
     }
 
     // Check if profile exists
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('id')
       .eq('id', user.id)
-      .maybeSingle(); // Use maybeSingle instead of single to avoid error when not found
+      .maybeSingle();
 
     // Create profile if it doesn't exist
     if (!profile && user.email) {
+      const role = user.user_metadata?.role || 'customer';
+      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || null;
+
       const { error: insertError } = await supabase.from('profiles').insert({
         id: user.id,
         email: user.email,
-        full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+        full_name: fullName,
         avatar_url: user.user_metadata?.avatar_url || null,
-        role: user.user_metadata?.role || 'customer',
+        role,
       });
 
       if (insertError) {
         console.error('Profile creation error:', insertError);
         // Continue anyway - user is authenticated, profile can be created later
+      } else {
+        // First-time profile - send welcome email (don't block callback)
+        sendWelcomeEmail({
+          to: user.email,
+          name: fullName || '',
+          role: role === 'business_owner' ? 'business_owner' : 'customer',
+        }).catch((err) => console.error('Welcome email failed:', err));
       }
     }
 

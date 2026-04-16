@@ -1,6 +1,11 @@
 import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Footer } from '@/components/layout/footer';
 
+export const metadata = {
+  title: 'Privacy Policy | AnyTradesman',
+  description: 'How AnyTradesman collects, uses, and protects your personal information.',
+};
+
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen flex flex-col bg-neutral-950">
@@ -14,7 +19,7 @@ export default function PrivacyPage() {
               Privacy Policy
             </h1>
             <p className="mt-4 text-neutral-400">
-              Last updated: December 2024
+              Last updated: April 2026
             </p>
           </div>
         </section>
@@ -116,8 +121,8 @@ export default function PrivacyPage() {
                   <h2 className="text-xl font-semibold text-white mb-4">9. Contact Us</h2>
                   <p className="text-neutral-400">
                     If you have any questions about this Privacy Policy, please contact us at:{' '}
-                    <a href="mailto:privacy@anytradesman.com" className="text-red-400 hover:text-red-300">
-                      privacy@anytradesman.com
+                    <a href="mailto:privacy@anytradesmen.com" className="text-red-400 hover:text-red-300">
+                      privacy@anytradesmen.com
                     </a>
                   </p>
                 </div>

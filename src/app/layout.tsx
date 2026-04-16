@@ -8,6 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://anytradesmen.com"),
   title: {
     default: "AnyTradesman - Find Trusted Local Contractors & Service Pros",
     template: "%s | AnyTradesman",
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://anytradesman.com",
+    url: "https://anytradesmen.com",
     siteName: "AnyTradesman",
     title: "AnyTradesman - Find Trusted Local Contractors & Service Pros",
     description:
