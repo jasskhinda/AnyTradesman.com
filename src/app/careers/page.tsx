@@ -91,7 +91,7 @@ export default async function CareersPage() {
                   We don&apos;t have any open positions right now, but we&apos;re always looking for talented people.
                 </p>
                 <p className="text-neutral-500 mt-2">Send us your resume and we&apos;ll keep you in mind.</p>
-                <Link href="mailto:careers@anytradesmen.com" className="inline-block mt-6">
+                <Link href="mailto:info@anytradesmen.com" className="inline-block mt-6">
                   <Button size="lg">Get in Touch</Button>
                 </Link>
               </div>
@@ -113,7 +113,7 @@ export default async function CareersPage() {
                           <Clock className="w-4 h-4 mr-1" />
                           {job.employment_type}
                         </span>
-                        <a href={job.apply_url || 'mailto:careers@anytradesmen.com'}>
+                        <a href={job.apply_url || 'mailto:info@anytradesmen.com'}>
                           <Button size="sm">Apply</Button>
                         </a>
                       </div>
@@ -135,7 +135,7 @@ export default async function CareersPage() {
                 We&apos;re always looking for talented people. Send us your resume and we&apos;ll
                 keep you in mind for future opportunities.
               </p>
-              <Link href="mailto:careers@anytradesmen.com">
+              <Link href="mailto:info@anytradesmen.com">
                 <Button size="lg">Get in Touch</Button>
               </Link>
             </div>

@@ -453,7 +453,7 @@ export default async function DashboardPage() {
                 {isBusinessOwner && hasActiveSubscription && subscription &&
                   (subscription.tier === 'professional' || subscription.tier === 'enterprise') && (
                   <a
-                    href="mailto:priority-support@anytradesmen.com"
+                    href="mailto:info@anytradesmen.com"
                     className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800 transition-colors"
                   >
                     <span className="text-neutral-300 flex items-center gap-2">
@@ -466,7 +466,7 @@ export default async function DashboardPage() {
                 {/* Dedicated Account Manager (enterprise tier) */}
                 {isBusinessOwner && hasActiveSubscription && subscription?.tier === 'enterprise' && (
                   <a
-                    href="mailto:accounts@anytradesmen.com"
+                    href="mailto:info@anytradesmen.com"
                     className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800 transition-colors"
                   >
                     <span className="text-neutral-300 flex items-center gap-2">

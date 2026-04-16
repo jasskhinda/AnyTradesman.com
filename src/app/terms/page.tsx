@@ -155,8 +155,8 @@ export default function TermsPage() {
                 <h2 className="text-xl font-semibold text-white mb-4">14. Contact Information</h2>
                 <p className="text-neutral-400">
                   For questions about these Terms of Service, please contact us at:{' '}
-                  <a href="mailto:legal@anytradesmen.com" className="text-red-400 hover:text-red-300">
-                    legal@anytradesmen.com
+                  <a href="mailto:info@anytradesmen.com" className="text-red-400 hover:text-red-300">
+                    info@anytradesmen.com
                   </a>
                 </p>
               </div>

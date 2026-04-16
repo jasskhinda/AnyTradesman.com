@@ -121,8 +121,8 @@ export default function PrivacyPage() {
                   <h2 className="text-xl font-semibold text-white mb-4">9. Contact Us</h2>
                   <p className="text-neutral-400">
                     If you have any questions about this Privacy Policy, please contact us at:{' '}
-                    <a href="mailto:privacy@anytradesmen.com" className="text-red-400 hover:text-red-300">
-                      privacy@anytradesmen.com
+                    <a href="mailto:info@anytradesmen.com" className="text-red-400 hover:text-red-300">
+                      info@anytradesmen.com
                     </a>
                   </p>
                 </div>

@@ -24,7 +24,7 @@ export default function PressPage() {
               For press inquiries, interviews, or media partnerships, reach out to our team.
               We&apos;d love to share our story.
             </p>
-            <Link href="mailto:press@anytradesmen.com">
+            <Link href="mailto:info@anytradesmen.com">
               <Button size="lg">Contact Press Team</Button>
             </Link>
           </div>

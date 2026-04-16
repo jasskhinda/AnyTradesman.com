@@ -28,7 +28,7 @@ const faqs = [
   },
   {
     question: 'What if I\'m not satisfied with the service?',
-    answer: 'Reach out to us at support@anytradesmen.com and we\'ll do our best to help resolve any issues between you and the pro.',
+    answer: 'Reach out to us at info@anytradesmen.com and we\'ll do our best to help resolve any issues between you and the pro.',
   },
   {
     question: 'How do I become a pro on AnyTradesman?',
@@ -76,7 +76,7 @@ export default function HelpPage() {
             <p className="text-neutral-400 mb-8">
               Email us and we&apos;ll get back to you within 24 hours.
             </p>
-            <Link href="mailto:support@anytradesmen.com">
+            <Link href="mailto:info@anytradesmen.com">
               <Button size="lg">Contact Support</Button>
             </Link>
           </div>
