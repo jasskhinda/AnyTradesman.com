@@ -144,6 +144,34 @@ export async function sendQuoteReceivedEmail(params: {
   });
 }
 
+export async function sendNewLeadNotification(params: {
+  to: string;
+  businessName: string;
+  requestTitle: string;
+  city: string;
+  state: string;
+  category: string;
+  requestId: string;
+}) {
+  const content = `
+    <p style="color:#404040;font-size:15px;line-height:1.6;margin:0 0 16px 0;">Hi ${params.businessName},</p>
+    <p style="color:#404040;font-size:15px;line-height:1.6;margin:0 0 16px 0;">A new service request matching your category has been posted in your area.</p>
+    <div style="background:#fafafa;border-left:4px solid #dc2626;padding:16px 20px;margin:24px 0;border-radius:4px;">
+      <p style="color:#737373;font-size:12px;margin:0 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">New Lead</p>
+      <p style="color:#0a0a0a;font-size:18px;font-weight:600;margin:0 0 8px 0;">${params.requestTitle}</p>
+      <p style="color:#737373;font-size:14px;margin:0 0 4px 0;">${params.category} &bull; ${params.city}, ${params.state}</p>
+    </div>
+    <p style="color:#404040;font-size:15px;line-height:1.6;margin:0 0 16px 0;">Be one of the first to respond — customers often choose early responders.</p>
+    ${button('View Lead & Send Quote', `${APP_URL}/leads/${params.requestId}`)}
+    <p style="color:#737373;font-size:13px;line-height:1.6;margin:24px 0 0 0;">Once you send a quote, you'll receive the customer's contact info to reach out directly.</p>
+  `;
+  return sendEmail({
+    to: params.to,
+    subject: `New lead: ${params.requestTitle} in ${params.city}, ${params.state}`,
+    html: emailLayout(content, 'New lead in your area!'),
+  });
+}
+
 export async function sendWelcomeEmail(params: {
   to: string;
   name: string;
