@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
-import { User, Bell, Shield, Trash2, Loader2, Mail } from 'lucide-react';
+import { User, Bell, Shield, Trash2, Loader2, Mail, CheckCircle, ArrowLeft } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -29,7 +29,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     phone: initialProfile.phone || '',
   });
   const [newEmail, setNewEmail] = useState('');
-  const [showEmailChange, setShowEmailChange] = useState(false);
+  const [emailStep, setEmailStep] = useState<'view' | 'edit' | 'sent'>('view');
   const [emailChanging, setEmailChanging] = useState(false);
   const [notifications, setNotifications] = useState({
     email_leads: true,
@@ -61,7 +61,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
 
   async function handleEmailChange(e: React.FormEvent) {
     e.preventDefault();
-    if (!newEmail.trim() || newEmail === profile.email) return;
+    if (!newEmail.trim() || newEmail.trim().toLowerCase() === profile.email.toLowerCase()) return;
 
     setEmailChanging(true);
     setMessage(null);
@@ -73,12 +73,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     if (error) {
       setMessage({ type: 'error', text: error.message });
     } else {
-      setMessage({
-        type: 'success',
-        text: `We've sent a confirmation link to ${newEmail}. Click the link to verify your new email address.`,
-      });
-      setShowEmailChange(false);
-      setNewEmail('');
+      setEmailStep('sent');
     }
     setEmailChanging(false);
   }
@@ -94,8 +89,9 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
       <h1 className="text-2xl font-bold text-white mb-8">Account Settings</h1>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-          {message.text}
+        <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${message.type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+          {message.type === 'success' && <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />}
+          <span>{message.text}</span>
         </div>
       )}
 
@@ -116,63 +112,6 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
               onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
               className="bg-neutral-800 border-neutral-700"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-1">
-              Email Address
-            </label>
-            <div className="flex items-center gap-3">
-              <Input
-                type="email"
-                value={profile.email}
-                disabled
-                className="bg-neutral-800 border-neutral-700 opacity-50 flex-1"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowEmailChange(!showEmailChange)}
-              >
-                <Mail className="w-4 h-4 mr-1" />
-                Change
-              </Button>
-            </div>
-            {showEmailChange && (
-              <form onSubmit={handleEmailChange} className="mt-3 p-4 bg-neutral-800 rounded-lg border border-neutral-700 space-y-3">
-                <p className="text-sm text-neutral-400">
-                  Enter your new email address. We&apos;ll send a confirmation link to verify it before making the change.
-                </p>
-                <Input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="New email address"
-                  required
-                  className="bg-neutral-900 border-neutral-600"
-                />
-                <div className="flex gap-2">
-                  <Button type="submit" size="sm" disabled={emailChanging || !newEmail.trim()}>
-                    {emailChanging ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      'Send Confirmation Link'
-                    )}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => { setShowEmailChange(false); setNewEmail(''); }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-400 mb-1">
@@ -197,6 +136,98 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
             )}
           </Button>
         </form>
+      </Card>
+
+      {/* Email Address */}
+      <Card className="bg-neutral-900 border-neutral-800 p-6 mb-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Mail className="w-5 h-5 text-red-400" />
+          <h2 className="text-lg font-semibold text-white">Email Address</h2>
+        </div>
+
+        {emailStep === 'view' && (
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-neutral-400 mb-1">Current email</p>
+              <p className="text-white font-medium">{profile.email}</p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setEmailStep('edit')}
+            >
+              Change Email Address
+            </Button>
+          </div>
+        )}
+
+        {emailStep === 'edit' && (
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-neutral-400 mb-1">Current email</p>
+              <p className="text-white font-medium">{profile.email}</p>
+            </div>
+            <div className="pt-4 border-t border-neutral-800">
+              <label className="block text-sm font-medium text-neutral-400 mb-2">
+                New email address
+              </label>
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="Enter your new email address"
+                className="bg-neutral-800 border-neutral-700"
+                autoFocus
+              />
+              <p className="text-xs text-neutral-500 mt-2">
+                We&apos;ll send a verification link to this email. Your email won&apos;t change until you confirm the link.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={handleEmailChange}
+                disabled={emailChanging || !newEmail.trim() || newEmail.trim().toLowerCase() === profile.email.toLowerCase()}
+              >
+                {emailChanging ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending Verification...
+                  </>
+                ) : (
+                  'Send Verification Link'
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => { setEmailStep('view'); setNewEmail(''); setMessage(null); }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {emailStep === 'sent' && (
+          <div className="text-center py-4">
+            <div className="mx-auto w-14 h-14 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+              <Mail className="w-7 h-7 text-green-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Check your inbox</h3>
+            <p className="text-neutral-400 mb-2">
+              We&apos;ve sent a verification link to:
+            </p>
+            <p className="text-white font-medium mb-4">{newEmail}</p>
+            <p className="text-sm text-neutral-500 mb-6">
+              Click the link in the email to confirm your new address. Your email will remain as <strong className="text-neutral-300">{profile.email}</strong> until you verify.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => { setEmailStep('view'); setNewEmail(''); }}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Settings
+            </Button>
+          </div>
+        )}
       </Card>
 
       {/* Notification Settings */}
