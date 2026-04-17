@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
-import { User, Bell, Shield, Trash2, Loader2, Mail, CheckCircle, ArrowLeft } from 'lucide-react';
+import { User, Bell, Shield, Trash2, Loader2, Mail, CheckCircle } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -29,7 +29,8 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     phone: initialProfile.phone || '',
   });
   const [newEmail, setNewEmail] = useState('');
-  const [emailStep, setEmailStep] = useState<'view' | 'edit' | 'sent'>('view');
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [emailStep, setEmailStep] = useState<'view' | 'edit'>('view');
   const [emailChanging, setEmailChanging] = useState(false);
   const [notifications, setNotifications] = useState({
     email_leads: true,
@@ -73,7 +74,9 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     if (error) {
       setMessage({ type: 'error', text: error.message });
     } else {
-      setEmailStep('sent');
+      setPendingEmail(newEmail.trim().toLowerCase());
+      setEmailStep('view');
+      setNewEmail('');
     }
     setEmailChanging(false);
   }
@@ -149,14 +152,23 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-neutral-400 mb-1">Current email</p>
-              <p className="text-white font-medium">{profile.email}</p>
+              <div className="flex items-center gap-3">
+                <p className="text-white font-medium">{profile.email}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEmailStep('edit')}
+                >
+                  Change
+                </Button>
+              </div>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setEmailStep('edit')}
-            >
-              Change Email Address
-            </Button>
+            {pendingEmail && (
+              <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-sm flex items-start gap-2">
+                <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>New email <strong className="text-yellow-300">{pendingEmail}</strong> is pending confirmation. Check your inbox for the verification link.</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -206,28 +218,6 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
           </div>
         )}
 
-        {emailStep === 'sent' && (
-          <div className="text-center py-4">
-            <div className="mx-auto w-14 h-14 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
-              <Mail className="w-7 h-7 text-green-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-2">Check your inbox</h3>
-            <p className="text-neutral-400 mb-2">
-              We&apos;ve sent a verification link to:
-            </p>
-            <p className="text-white font-medium mb-4">{newEmail}</p>
-            <p className="text-sm text-neutral-500 mb-6">
-              Click the link in the email to confirm your new address. Your email will remain as <strong className="text-neutral-300">{profile.email}</strong> until you verify.
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => { setEmailStep('view'); setNewEmail(''); }}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Settings
-            </Button>
-          </div>
-        )}
       </Card>
 
       {/* Notification Settings */}
