@@ -180,6 +180,18 @@ export function Header({ initialUser }: HeaderProps = {}) {
                   My Business
                 </Link>
               </>
+            ) : user ? (
+              <>
+                <Link href="/search" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  Find a Pro
+                </Link>
+                <Link href="/categories" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  Services
+                </Link>
+                <Link href="/my-requests" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  My Requests
+                </Link>
+              </>
             ) : (
               <>
                 <Link href="/search" className="text-neutral-700 hover:text-neutral-900 font-medium">
@@ -325,16 +337,16 @@ export function Header({ initialUser }: HeaderProps = {}) {
                 >
                   Services
                 </Link>
-                <Link
-                  href="/how-it-works"
-                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  How It Works
-                </Link>
 
                 {user ? (
                   <>
+                    <Link
+                      href="/my-requests"
+                      className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      My Requests
+                    </Link>
                     <Link
                       href="/dashboard"
                       className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
