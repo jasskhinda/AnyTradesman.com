@@ -34,7 +34,7 @@ export default async function MyRequestsPage() {
     .maybeSingle();
 
   // Load service requests with quote counts
-  const { data: requestsData } = await supabase
+  const { data: requestsData, error: requestsError } = await supabase
     .from('service_requests')
     .select(`
       *,
@@ -44,6 +44,11 @@ export default async function MyRequestsPage() {
     `)
     .eq('customer_id', user.id)
     .order('created_at', { ascending: false });
+
+  if (requestsError) {
+    console.error('[my-requests] Fetch error:', requestsError.message, 'user:', user.id);
+  }
+  console.log('[my-requests] User:', user.id, 'Role:', profile?.role, 'Requests found:', requestsData?.length ?? 0);
 
   let requests: ServiceRequest[] = [];
 
