@@ -72,7 +72,10 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     });
 
     if (error) {
-      setMessage({ type: 'error', text: error.message });
+      const msg = error.message.toLowerCase().includes('already') || error.message.toLowerCase().includes('exists')
+        ? 'An account with this email address already exists. Please use a different email.'
+        : error.message;
+      setMessage({ type: 'error', text: msg });
     } else {
       setPendingEmail(newEmail.trim().toLowerCase());
       setEmailStep('view');
