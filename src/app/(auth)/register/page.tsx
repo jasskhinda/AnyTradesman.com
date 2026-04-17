@@ -276,6 +276,7 @@ export default function RegisterPage() {
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
                 disabled={isLoading}
+                required
                 className="mt-1 rounded border-neutral-600 bg-neutral-800 text-red-600 focus:ring-red-500"
               />
               <span className="ml-2 text-sm text-neutral-400">

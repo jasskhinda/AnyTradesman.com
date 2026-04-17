@@ -85,6 +85,7 @@ export default function BusinessRegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Service dropdown state
   const [showServiceDropdown, setShowServiceDropdown] = useState(false);
@@ -130,7 +131,7 @@ export default function BusinessRegisterPage() {
       case 3:
         return businessName.trim().length > 0 && phone.replace(/\D/g, '').length === 10;
       case 4:
-        return email.trim().length > 0 && password.length >= 8 && password === confirmPassword;
+        return email.trim().length > 0 && password.length >= 8 && password === confirmPassword && agreedToTerms;
       default:
         return false;
     }
@@ -518,20 +519,26 @@ export default function BusinessRegisterPage() {
           )}
         </div>
 
-        {/* Terms Text (Step 3 & 4) */}
-        {(currentStep === 3 || currentStep === 4) && (
-          <p className="mt-4 text-xs text-neutral-500 text-center">
-            By clicking {currentStep === 4 ? 'Create Account' : 'Next'}, I agree to the{' '}
-            <Link href="/terms" className="text-red-600 hover:underline">
-              AnyTradesman Terms
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="text-red-600 hover:underline">
-              Privacy Policy
-            </Link>{' '}
-            and authorize AnyTradesman and parties acting on its behalf, to use automated technology
-            to deliver marketing calls and texts to the number I provided. Consent is not a condition of purchase.
-          </p>
+        {/* Terms Checkbox (Step 4) */}
+        {currentStep === 4 && (
+          <div className="mt-4 flex items-start">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-1 rounded border-neutral-600 bg-neutral-800 text-red-600 focus:ring-red-500"
+            />
+            <span className="ml-2 text-xs text-neutral-500">
+              I agree to the{' '}
+              <Link href="/terms" className="text-red-600 hover:underline">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="text-red-600 hover:underline">
+                Privacy Policy
+              </Link>
+            </span>
+          </div>
         )}
 
         {/* Questions */}
