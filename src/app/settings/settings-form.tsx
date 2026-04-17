@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
-import { User, Bell, Shield, Trash2, Loader2 } from 'lucide-react';
+import { User, Bell, Shield, Trash2, Loader2, Mail } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -28,6 +28,9 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     email: initialProfile.email || '',
     phone: initialProfile.phone || '',
   });
+  const [newEmail, setNewEmail] = useState('');
+  const [showEmailChange, setShowEmailChange] = useState(false);
+  const [emailChanging, setEmailChanging] = useState(false);
   const [notifications, setNotifications] = useState({
     email_leads: true,
     email_messages: true,
@@ -54,6 +57,30 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     }
     setSaving(false);
+  }
+
+  async function handleEmailChange(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newEmail.trim() || newEmail === profile.email) return;
+
+    setEmailChanging(true);
+    setMessage(null);
+
+    const { error } = await supabase.auth.updateUser({
+      email: newEmail.trim().toLowerCase(),
+    });
+
+    if (error) {
+      setMessage({ type: 'error', text: error.message });
+    } else {
+      setMessage({
+        type: 'success',
+        text: 'Confirmation emails sent to both your current and new email address. Please confirm both to complete the change.',
+      });
+      setShowEmailChange(false);
+      setNewEmail('');
+    }
+    setEmailChanging(false);
   }
 
   async function handleSignOut() {
@@ -94,13 +121,58 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
             <label className="block text-sm font-medium text-neutral-400 mb-1">
               Email Address
             </label>
-            <Input
-              type="email"
-              value={profile.email}
-              disabled
-              className="bg-neutral-800 border-neutral-700 opacity-50"
-            />
-            <p className="text-xs text-neutral-500 mt-1">Email cannot be changed</p>
+            <div className="flex items-center gap-3">
+              <Input
+                type="email"
+                value={profile.email}
+                disabled
+                className="bg-neutral-800 border-neutral-700 opacity-50 flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEmailChange(!showEmailChange)}
+              >
+                <Mail className="w-4 h-4 mr-1" />
+                Change
+              </Button>
+            </div>
+            {showEmailChange && (
+              <form onSubmit={handleEmailChange} className="mt-3 p-4 bg-neutral-800 rounded-lg border border-neutral-700 space-y-3">
+                <p className="text-sm text-neutral-400">
+                  Enter your new email address. A confirmation will be sent to both your current and new email.
+                </p>
+                <Input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="newemail@example.com"
+                  required
+                  className="bg-neutral-900 border-neutral-600"
+                />
+                <div className="flex gap-2">
+                  <Button type="submit" size="sm" disabled={emailChanging || !newEmail.trim()}>
+                    {emailChanging ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      'Send Confirmation'
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { setShowEmailChange(false); setNewEmail(''); }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-400 mb-1">

@@ -99,6 +99,15 @@ export async function GET(request: Request) {
       }
     }
 
+    // Sync email in profiles table if it changed
+    if (profile && user.email) {
+      await supabase
+        .from('profiles')
+        .update({ email: user.email })
+        .eq('id', user.id)
+        .neq('email', user.email);
+    }
+
     // Redirect to email-verified page with success status
     const verifiedUrl = new URL('/email-verified', origin);
     verifiedUrl.searchParams.set('status', 'success');
