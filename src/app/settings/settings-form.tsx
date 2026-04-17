@@ -60,26 +60,30 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     setSaving(false);
   }
 
-  async function handleEmailChange(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newEmail.trim() || newEmail.trim().toLowerCase() === profile.email.toLowerCase()) return;
+  async function handleEmailChange() {
+    const trimmed = newEmail.trim().toLowerCase();
+    if (!trimmed || trimmed === profile.email.toLowerCase()) return;
 
     setEmailChanging(true);
     setMessage(null);
 
-    const { error } = await supabase.auth.updateUser({
-      email: newEmail.trim().toLowerCase(),
-    });
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: trimmed,
+      });
 
-    if (error) {
-      const msg = error.message.toLowerCase().includes('already') || error.message.toLowerCase().includes('exists')
-        ? 'An account with this email address already exists. Please use a different email.'
-        : error.message;
-      setMessage({ type: 'error', text: msg });
-    } else {
-      setPendingEmail(newEmail.trim().toLowerCase());
-      setEmailStep('view');
-      setNewEmail('');
+      if (error) {
+        const msg = error.message.toLowerCase().includes('already') || error.message.toLowerCase().includes('exists')
+          ? 'An account with this email address already exists. Please use a different email.'
+          : error.message;
+        setMessage({ type: 'error', text: msg });
+      } else {
+        setPendingEmail(trimmed);
+        setEmailStep('view');
+        setNewEmail('');
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Something went wrong. Please try again.' });
     }
     setEmailChanging(false);
   }
