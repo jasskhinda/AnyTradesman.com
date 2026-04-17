@@ -75,7 +75,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     } else {
       setMessage({
         type: 'success',
-        text: 'Confirmation emails sent to both your current and new email address. Please confirm both to complete the change.',
+        text: `We've sent a confirmation link to ${newEmail}. Click the link to verify your new email address.`,
       });
       setShowEmailChange(false);
       setNewEmail('');
@@ -141,13 +141,13 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
             {showEmailChange && (
               <form onSubmit={handleEmailChange} className="mt-3 p-4 bg-neutral-800 rounded-lg border border-neutral-700 space-y-3">
                 <p className="text-sm text-neutral-400">
-                  Enter your new email address. A confirmation will be sent to both your current and new email.
+                  Enter your new email address. We&apos;ll send a confirmation link to verify it before making the change.
                 </p>
                 <Input
                   type="email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="newemail@example.com"
+                  placeholder="New email address"
                   required
                   className="bg-neutral-900 border-neutral-600"
                 />
@@ -159,7 +159,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
                         Sending...
                       </>
                     ) : (
-                      'Send Confirmation'
+                      'Send Confirmation Link'
                     )}
                   </Button>
                   <Button
