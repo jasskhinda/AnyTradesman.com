@@ -11,6 +11,28 @@ import { ArrowRight } from 'lucide-react';
 
 type AccountType = 'customer' | 'business_owner';
 
+// Common email domain typos → likely intended domain
+const EMAIL_TYPO_MAP: Record<string, string> = {
+  'gamil.com': 'gmail.com',
+  'gmial.com': 'gmail.com',
+  'gmali.com': 'gmail.com',
+  'gmaill.com': 'gmail.com',
+  'gmail.co': 'gmail.com',
+  'gmail.cm': 'gmail.com',
+  'hotmial.com': 'hotmail.com',
+  'hotmal.com': 'hotmail.com',
+  'yaho.com': 'yahoo.com',
+  'yahooo.com': 'yahoo.com',
+  'outlok.com': 'outlook.com',
+};
+
+function suggestEmailFix(email: string): string | null {
+  const [local, domain] = email.trim().toLowerCase().split('@');
+  if (!local || !domain) return null;
+  const fixed = EMAIL_TYPO_MAP[domain];
+  return fixed ? `${local}@${fixed}` : null;
+}
+
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -23,6 +45,26 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  const emailSuggestion = suggestEmailFix(email);
+
+  async function handleResend() {
+    setResendState('sending');
+    try {
+      const supabase = createClient();
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
+      });
+      setResendState(resendError ? 'error' : 'sent');
+    } catch {
+      setResendState('error');
+    }
+  }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,8 +156,30 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-neutral-400 text-center">
-              Didn&apos;t receive the email? Check your spam folder or try registering again.
+              Didn&apos;t receive the email? Check your spam folder, or resend it below.
+              Make sure <strong className="text-neutral-300">{email}</strong> is spelled correctly — if not, register again with the right address.
             </p>
+            {resendState === 'sent' && (
+              <p className="text-sm text-green-400 text-center">
+                Confirmation email sent again. Give it a minute to arrive.
+              </p>
+            )}
+            {resendState === 'error' && (
+              <p className="text-sm text-red-400 text-center">
+                Couldn&apos;t resend right now. Wait a minute and try again.
+              </p>
+            )}
+            <Button
+              className="w-full"
+              onClick={handleResend}
+              disabled={resendState === 'sending' || resendState === 'sent'}
+            >
+              {resendState === 'sending'
+                ? 'Resending...'
+                : resendState === 'sent'
+                ? 'Email sent'
+                : 'Resend confirmation email'}
+            </Button>
             <Button
               variant="outline"
               className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white"
@@ -237,16 +301,27 @@ export default function RegisterPage() {
               disabled={isLoading}
             />
 
-            <Input
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              autoComplete="email"
-              disabled={isLoading}
-            />
+            <div>
+              <Input
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                autoComplete="email"
+                disabled={isLoading}
+              />
+              {emailSuggestion && (
+                <button
+                  type="button"
+                  onClick={() => setEmail(emailSuggestion)}
+                  className="mt-1 text-sm text-yellow-400 hover:text-yellow-300"
+                >
+                  Did you mean <strong>{emailSuggestion}</strong>? Tap to fix.
+                </button>
+              )}
+            </div>
 
             <Input
               label="Password"

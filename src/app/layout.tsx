@@ -33,12 +33,21 @@ export const metadata: Metadata = {
     title: "AnyTradesman - Find Trusted Local Contractors & Service Pros",
     description:
       "Connect with verified local contractors, plumbers, electricians, and more. Get free quotes from trusted professionals in your area.",
+    images: [
+      {
+        url: "/banner.png",
+        width: 1536,
+        height: 1024,
+        alt: "AnyTradesman - Any Trade, Any Place, Any Time",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "AnyTradesman - Find Trusted Local Contractors & Service Pros",
     description:
       "Connect with verified local contractors, plumbers, electricians, and more. Get free quotes from trusted professionals in your area.",
+    images: ["/banner.png"],
   },
   robots: {
     index: true,

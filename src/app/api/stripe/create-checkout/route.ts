@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getStripe, PRICING_TIERS, PricingTierId } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
+import { getAppUrl } from '@/lib/appUrl';
 
 export async function POST(request: Request) {
   try {
@@ -51,13 +52,9 @@ export async function POST(request: Request) {
     const tier = PRICING_TIERS[tierId as PricingTierId];
     const customerEmail = business.email || business.profiles?.email;
 
-    if (!process.env.NEXT_PUBLIC_APP_URL) {
-      console.error('NEXT_PUBLIC_APP_URL is not configured');
-      return NextResponse.json(
-        { error: 'Service configuration error' },
-        { status: 500 }
-      );
-    }
+    // Build redirect URLs from the origin the user is actually on, so they return
+    // to the same domain (and keep their auth session) after Stripe checkout.
+    const appUrl = getAppUrl(request);
 
     const stripe = getStripe();
 
@@ -133,8 +130,8 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/business/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/business/subscription`,
+      success_url: `${appUrl}/business/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/business/subscription`,
       metadata: {
         business_id: businessId,
         tier_id: tierId,

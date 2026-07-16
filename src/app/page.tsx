@@ -28,10 +28,10 @@ const popularCategories = [
 ];
 
 const stats = [
-  { value: '50K+', label: 'Verified Professionals' },
-  { value: '1M+', label: 'Projects Completed' },
-  { value: '4.8', label: 'Average Rating' },
-  { value: '24/7', label: 'Customer Support' },
+  { value: '100%', label: 'Verified Businesses' },
+  { value: 'Free', label: 'Quotes for Customers' },
+  { value: 'Fast', label: 'Quote Turnaround' },
+  { value: 'Any Trade', label: 'Any Place, Any Time' },
 ];
 
 const features = [
@@ -256,7 +256,7 @@ export default async function HomePage() {
                   Are You a Service Professional?
                 </h2>
                 <p className="mt-4 text-lg text-red-100">
-                  Join thousands of contractors growing their business with AnyTradesman. Get matched with customers in your area and build your reputation.
+                  Grow your business with AnyTradesman. Get matched with customers in your area and build your reputation.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-4">
                   <div className="flex items-center text-white">

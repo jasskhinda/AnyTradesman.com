@@ -36,28 +36,37 @@ interface MessagesViewProps {
   userId: string;
   userProfile: Profile | null;
   initialConversations: Conversation[];
+  initialSelectedId?: string | null;
 }
 
 export function MessagesView({
   userId,
   userProfile,
   initialConversations,
+  initialSelectedId = null,
 }: MessagesViewProps) {
-  const [conversations] = useState<Conversation[]>(initialConversations);
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(initialSelectedId);
+  const [searchQuery, setSearchQuery] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
   useEffect(() => {
-    if (selectedConversation) {
-      loadMessages(selectedConversation);
-    }
+    if (!selectedConversation) return;
+    loadMessages(selectedConversation, true);
+
+    // Light polling so incoming replies appear without a manual refresh
+    const interval = setInterval(() => {
+      loadMessages(selectedConversation, false);
+    }, 8000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConversation]);
 
-  async function loadMessages(conversationId: string) {
-    setLoadingMessages(true);
+  async function loadMessages(conversationId: string, showSpinner: boolean) {
+    if (showSpinner) setLoadingMessages(true);
     const supabase = createClient();
 
     const { data: msgs, error } = await supabase
@@ -68,14 +77,17 @@ export function MessagesView({
 
     if (!error && msgs) {
       setMessages(msgs);
-      // Mark messages as read
-      await supabase
-        .from('messages')
-        .update({ is_read: true })
-        .eq('conversation_id', conversationId)
-        .neq('sender_id', userId);
+      // Mark the other party's messages as read (server route — RLS blocks client updates)
+      fetch('/api/messages/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversation_id: conversationId }),
+      }).catch(() => {});
+      setConversations((prev) =>
+        prev.map((c) => (c.id === conversationId ? { ...c, unread_count: 0 } : c))
+      );
     }
-    setLoadingMessages(false);
+    if (showSpinner) setLoadingMessages(false);
   }
 
   async function sendMessage(e: React.FormEvent) {
@@ -83,25 +95,45 @@ export function MessagesView({
     if (!newMessage.trim() || !selectedConversation) return;
 
     setSending(true);
-    const supabase = createClient();
+    const content = newMessage.trim();
 
-    const { error } = await supabase.from('messages').insert({
-      conversation_id: selectedConversation,
-      sender_id: userId,
-      content: newMessage.trim(),
-    });
+    try {
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversation_id: selectedConversation, content }),
+      });
+      const data = await response.json();
 
-    if (!error) {
-      setNewMessage('');
-      loadMessages(selectedConversation);
-      // Update last_message_at
-      await supabase
-        .from('conversations')
-        .update({ last_message_at: new Date().toISOString() })
-        .eq('id', selectedConversation);
+      if (response.ok && data.message) {
+        setNewMessage('');
+        setMessages((prev) => [...prev, data.message]);
+        // Reflect the new message in the conversation list and bump it to the top
+        setConversations((prev) => {
+          const updated = prev.map((c) =>
+            c.id === selectedConversation
+              ? { ...c, last_message: content, last_message_at: data.message.created_at }
+              : c
+          );
+          return updated.sort(
+            (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+          );
+        });
+      } else {
+        alert(data.error || 'Failed to send message. Please try again.');
+      }
+    } catch {
+      alert('Failed to send message. Please check your connection and try again.');
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   }
+
+  const visibleConversations = searchQuery.trim()
+    ? conversations.filter((c) =>
+        c.other_party.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      )
+    : conversations;
 
   function formatTime(dateString: string) {
     const date = new Date(dateString);
@@ -134,22 +166,28 @@ export function MessagesView({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search conversations..."
                   className="w-full pl-10 pr-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
             </div>
             <div className="overflow-y-auto h-full">
-              {conversations.length === 0 ? (
+              {visibleConversations.length === 0 ? (
                 <div className="p-8 text-center">
                   <MessageSquare className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
-                  <p className="text-neutral-400">No conversations yet</p>
+                  <p className="text-neutral-400">
+                    {conversations.length === 0 ? 'No conversations yet' : 'No matches found'}
+                  </p>
                   <p className="text-sm text-neutral-500 mt-1">
-                    Start a conversation by responding to a lead or contacting a professional
+                    {conversations.length === 0
+                      ? 'Start a conversation by responding to a lead or contacting a professional'
+                      : 'Try a different search'}
                   </p>
                 </div>
               ) : (
-                conversations.map((convo) => (
+                visibleConversations.map((convo) => (
                   <button
                     key={convo.id}
                     onClick={() => setSelectedConversation(convo.id)}

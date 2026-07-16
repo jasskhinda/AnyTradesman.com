@@ -48,7 +48,6 @@ export default async function MyRequestsPage() {
   if (requestsError) {
     console.error('[my-requests] Fetch error:', requestsError.message, 'user:', user.id);
   }
-  console.log('[my-requests] User:', user.id, 'Role:', profile?.role, 'Requests found:', requestsData?.length ?? 0);
 
   let requests: ServiceRequest[] = [];
 

@@ -134,13 +134,48 @@ export async function sendQuoteReceivedEmail(params: {
       <p style="color:#737373;font-size:12px;margin:0 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Quote Amount</p>
       <p style="color:#16a34a;font-size:24px;font-weight:700;margin:0;">$${params.amount.toFixed(2)}</p>
     </div>
-    ${button('View Quote Details', `${APP_URL}/my-requests/${params.requestId}`)}
+    ${button('View Quote Details', `${APP_URL}/request/${params.requestId}`)}
     <p style="color:#737373;font-size:13px;line-height:1.6;margin:24px 0 0 0;">The pro may also reach out to you directly using the contact details on your account.</p>
   `;
   return sendEmail({
     to: params.to,
     subject: `New quote from ${params.businessName}`,
     html: emailLayout(content, 'You received a quote!'),
+  });
+}
+
+export async function sendQuoteStatusEmail(params: {
+  to: string;
+  businessName: string;
+  requestTitle: string;
+  amount: number;
+  accepted: boolean;
+}) {
+  const content = params.accepted
+    ? `
+    <p style="color:#404040;font-size:15px;line-height:1.6;margin:0 0 16px 0;">Hi ${params.businessName},</p>
+    <p style="color:#404040;font-size:15px;line-height:1.6;margin:0 0 16px 0;">Great news — your quote has been <strong style="color:#16a34a;">accepted</strong> by the customer.</p>
+    <div style="background:#fafafa;border-left:4px solid #16a34a;padding:16px 20px;margin:24px 0;border-radius:4px;">
+      <p style="color:#737373;font-size:12px;margin:0 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Request</p>
+      <p style="color:#0a0a0a;font-size:16px;font-weight:600;margin:0 0 12px 0;">${params.requestTitle}</p>
+      <p style="color:#737373;font-size:12px;margin:0 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Accepted Amount</p>
+      <p style="color:#16a34a;font-size:24px;font-weight:700;margin:0;">$${params.amount.toFixed(2)}</p>
+    </div>
+    ${button('View in Dashboard', `${APP_URL}/my-quotes`)}
+    <p style="color:#737373;font-size:13px;line-height:1.6;margin:24px 0 0 0;">Reach out to the customer through Messages to coordinate the work.</p>
+  `
+    : `
+    <p style="color:#404040;font-size:15px;line-height:1.6;margin:0 0 16px 0;">Hi ${params.businessName},</p>
+    <p style="color:#404040;font-size:15px;line-height:1.6;margin:0 0 16px 0;">The customer has declined your quote for <strong>${params.requestTitle}</strong>.</p>
+    <p style="color:#404040;font-size:15px;line-height:1.6;margin:0 0 16px 0;">Don't be discouraged — new leads are posted regularly. Keep responding quickly to win more work.</p>
+    ${button('Browse New Leads', `${APP_URL}/leads`)}
+  `;
+  return sendEmail({
+    to: params.to,
+    subject: params.accepted
+      ? `Your quote was accepted — ${params.requestTitle}`
+      : `Quote update — ${params.requestTitle}`,
+    html: emailLayout(content, params.accepted ? 'Quote accepted!' : 'Quote update'),
   });
 }
 

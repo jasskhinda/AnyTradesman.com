@@ -179,6 +179,9 @@ export function Header({ initialUser }: HeaderProps = {}) {
                 <Link href="/business" className="text-neutral-700 hover:text-neutral-900 font-medium">
                   My Business
                 </Link>
+                <Link href="/messages" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  Messages
+                </Link>
               </>
             ) : user ? (
               <>
@@ -190,6 +193,9 @@ export function Header({ initialUser }: HeaderProps = {}) {
                 </Link>
                 <Link href="/my-requests" className="text-neutral-700 hover:text-neutral-900 font-medium">
                   My Requests
+                </Link>
+                <Link href="/messages" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                  Messages
                 </Link>
               </>
             ) : (
@@ -305,6 +311,13 @@ export function Header({ initialUser }: HeaderProps = {}) {
                   My Business
                 </Link>
                 <Link
+                  href="/messages"
+                  className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Messages
+                </Link>
+                <Link
                   href="/settings"
                   className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
                   onClick={() => setIsMenuOpen(false)}
@@ -346,6 +359,13 @@ export function Header({ initialUser }: HeaderProps = {}) {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       My Requests
+                    </Link>
+                    <Link
+                      href="/messages"
+                      className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Messages
                     </Link>
                     <Link
                       href="/dashboard"

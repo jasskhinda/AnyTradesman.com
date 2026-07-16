@@ -23,6 +23,9 @@ interface BusinessPageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Accept either a slug or a raw UUID (older links used the business id)
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function generateMetadata({ params }: BusinessPageProps) {
   const { slug } = await params;
   const supabase = await createClient();
@@ -30,7 +33,7 @@ export async function generateMetadata({ params }: BusinessPageProps) {
   const { data: business } = await supabase
     .from('businesses')
     .select('name, description, city, state')
-    .eq('slug', slug)
+    .eq(UUID_RE.test(slug) ? 'id' : 'slug', slug)
     .eq('is_active', true)
     .single();
 
@@ -63,11 +66,11 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     userProfile = profile;
   }
 
-  // Fetch business by slug
+  // Fetch business by slug (or id, for older links)
   const { data: business, error } = await supabase
     .from('businesses')
     .select('*')
-    .eq('slug', slug)
+    .eq(UUID_RE.test(slug) ? 'id' : 'slug', slug)
     .eq('is_active', true)
     .single();
 

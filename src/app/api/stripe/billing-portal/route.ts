@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
+import { getAppUrl } from '@/lib/appUrl';
 
 export async function POST(request: Request) {
   try {
@@ -54,20 +55,14 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!process.env.NEXT_PUBLIC_APP_URL) {
-      console.error('NEXT_PUBLIC_APP_URL is not configured');
-      return NextResponse.json(
-        { error: 'Service configuration error' },
-        { status: 500 }
-      );
-    }
+    const appUrl = getAppUrl(request);
 
     const stripe = getStripe();
 
     // Create billing portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/business/subscription`,
+      return_url: `${appUrl}/business/subscription`,
     });
 
     return NextResponse.json({ url: session.url });

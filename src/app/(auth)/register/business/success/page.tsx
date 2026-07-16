@@ -1,13 +1,33 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Mail } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  async function handleResend() {
+    if (!email) return;
+    setResendState('sending');
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
+      });
+      setResendState(error ? 'error' : 'sent');
+    } catch {
+      setResendState('error');
+    }
+  }
 
   return (
     <div className="min-h-screen bg-neutral-950">
@@ -49,15 +69,41 @@ function SuccessContent() {
 
         <div className="space-y-3">
           <p className="text-sm text-neutral-500">
-            Didn&apos;t receive the email? Check your spam folder or try registering again.
+            Didn&apos;t receive the email? Check your spam folder, make sure the address above is spelled correctly, or resend it below.
           </p>
 
-          <Link
-            href="/login"
-            className="inline-block px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-          >
-            Go to Login
-          </Link>
+          {resendState === 'sent' && (
+            <p className="text-sm text-green-400">
+              Confirmation email sent again. Give it a minute to arrive.
+            </p>
+          )}
+          {resendState === 'error' && (
+            <p className="text-sm text-red-400">
+              Couldn&apos;t resend right now. Wait a minute and try again.
+            </p>
+          )}
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            {email && (
+              <button
+                onClick={handleResend}
+                disabled={resendState === 'sending' || resendState === 'sent'}
+                className="inline-block px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {resendState === 'sending'
+                  ? 'Resending...'
+                  : resendState === 'sent'
+                  ? 'Email sent'
+                  : 'Resend confirmation email'}
+              </button>
+            )}
+            <Link
+              href="/login"
+              className="inline-block px-6 py-3 border border-neutral-700 text-neutral-300 rounded-lg font-medium hover:bg-neutral-800 transition-colors"
+            >
+              Go to Login
+            </Link>
+          </div>
         </div>
 
         {/* Questions */}

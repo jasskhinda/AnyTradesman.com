@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     // Verify the user owns a business
     const { data: business } = await admin
       .from('businesses')
-      .select('id, business_name')
+      .select('id, name')
       .eq('owner_id', user.id)
       .single();
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         service_request_id,
         business_id: business.id,
         amount: parseFloat(String(amount)),
-        message: message || null,
+        description: message || null,
         estimated_duration: estimated_duration || null,
         status: 'pending',
       });
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
           sendQuoteReceivedEmail({
             to: profile.email,
             customerName: profile.full_name || '',
-            businessName: business.business_name,
+            businessName: business.name,
             requestTitle: req.title,
             amount: parseFloat(String(amount)),
             requestId: req.id,

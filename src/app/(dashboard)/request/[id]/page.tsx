@@ -23,13 +23,14 @@ import {
 interface Quote {
   id: string;
   amount: number;
-  message: string;
+  description: string | null;
   estimated_duration: string;
   status: string;
   created_at: string;
   businesses: {
     id: string;
     name: string;
+    slug: string | null;
     rating_average: number;
     rating_count: number;
     is_verified: boolean;
@@ -67,6 +68,7 @@ export default function RequestDetailsPage() {
   const [request, setRequest] = useState<ServiceRequest | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
+  const [respondingTo, setRespondingTo] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadRequestAndQuotes() {
@@ -106,6 +108,7 @@ export default function RequestDetailsPage() {
           businesses (
             id,
             name,
+            slug,
             rating_average,
             rating_count,
             is_verified
@@ -123,6 +126,40 @@ export default function RequestDetailsPage() {
 
     loadRequestAndQuotes();
   }, [params.id, router]);
+
+  async function handleQuoteResponse(quoteId: string, action: 'accept' | 'decline') {
+    const confirmText =
+      action === 'accept'
+        ? 'Accept this quote? The professional will be notified and can start coordinating with you.'
+        : 'Decline this quote?';
+    if (!confirm(confirmText)) return;
+
+    setRespondingTo(quoteId);
+    try {
+      const response = await fetch('/api/quote/respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quote_id: quoteId, action }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || 'Something went wrong. Please try again.');
+        return;
+      }
+
+      setQuotes((prev) =>
+        prev.map((q) => (q.id === quoteId ? { ...q, status: data.status } : q))
+      );
+      if (action === 'accept' && request) {
+        setRequest({ ...request, status: 'in_progress' });
+      }
+    } catch {
+      alert('Something went wrong. Please check your connection and try again.');
+    } finally {
+      setRespondingTo(null);
+    }
+  }
 
   async function handleCancelRequest() {
     if (!request) return;
@@ -167,9 +204,9 @@ export default function RequestDetailsPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}
-        <Link href="/dashboard" className="inline-flex items-center text-neutral-400 hover:text-white mb-6">
+        <Link href="/my-requests" className="inline-flex items-center text-neutral-400 hover:text-white mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
+          Back to My Requests
         </Link>
 
         {/* Request Header */}
@@ -314,18 +351,54 @@ export default function RequestDetailsPage() {
                           </div>
                         </div>
 
-                        {quote.message && (
-                          <p className="text-neutral-300 text-sm mb-4">{quote.message}</p>
+                        {quote.description && (
+                          <p className="text-neutral-300 text-sm mb-4">{quote.description}</p>
                         )}
 
-                        <div className="flex items-center gap-3">
-                          <Link href={`/business/${quote.businesses.id}`}>
+                        {quote.status === 'accepted' && (
+                          <div className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-green-400 bg-green-500/20 mb-4">
+                            <CheckCircle className="w-3 h-3" />
+                            Accepted
+                          </div>
+                        )}
+                        {quote.status === 'rejected' && (
+                          <div className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-neutral-400 bg-neutral-500/20 mb-4">
+                            <XCircle className="w-3 h-3" />
+                            Declined
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-3">
+                          {['pending', 'sent'].includes(quote.status) && request.status !== 'cancelled' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleQuoteResponse(quote.id, 'accept')}
+                                disabled={respondingTo === quote.id}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                {respondingTo === quote.id ? 'Working...' : 'Accept Quote'}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleQuoteResponse(quote.id, 'decline')}
+                                disabled={respondingTo === quote.id}
+                                className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                              >
+                                <XCircle className="w-4 h-4 mr-2" />
+                                Decline
+                              </Button>
+                            </>
+                          )}
+                          <Link href={`/business/${quote.businesses.slug || quote.businesses.id}`}>
                             <Button variant="outline" size="sm" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800">
                               View Profile
                             </Button>
                           </Link>
-                          <Link href={`/messages?business=${quote.businesses.id}`}>
-                            <Button size="sm">
+                          <Link href={`/messages?business=${quote.businesses.id}&request=${request.id}`}>
+                            <Button variant="outline" size="sm" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800">
                               <MessageSquare className="w-4 h-4 mr-2" />
                               Contact
                             </Button>

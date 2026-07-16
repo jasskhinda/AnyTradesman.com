@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         // Get verified businesses with active subscriptions
         const { data: businesses } = await admin
           .from('businesses')
-          .select('id, business_name, owner_id')
+          .select('id, name, owner_id')
           .in('id', businessIds)
           .eq('is_active', true)
           .eq('is_verified', true);
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
           if (owner?.email) {
             sendNewLeadNotification({
               to: owner.email,
-              businessName: biz.business_name,
+              businessName: biz.name,
               requestTitle: title,
               city,
               state,

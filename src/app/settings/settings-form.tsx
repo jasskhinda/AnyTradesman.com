@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,30 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
     email_marketing: false,
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Load saved notification preferences from auth metadata
+  useEffect(() => {
+    supabase.auth.getUser().then((result: { data: { user: { user_metadata?: Record<string, unknown> } | null } }) => {
+      const saved = result.data.user?.user_metadata?.notification_prefs as
+        | { email_leads: boolean; email_messages: boolean; email_marketing: boolean }
+        | undefined;
+      if (saved) {
+        setNotifications((prev) => ({ ...prev, ...saved }));
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist notification preferences whenever a toggle changes
+  async function updateNotifications(next: typeof notifications) {
+    setNotifications(next);
+    const { error } = await supabase.auth.updateUser({
+      data: { notification_prefs: next },
+    });
+    if (error) {
+      setMessage({ type: 'error', text: 'Failed to save notification preferences.' });
+    }
+  }
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -242,7 +266,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
             <input
               type="checkbox"
               checked={notifications.email_leads}
-              onChange={(e) => setNotifications({ ...notifications, email_leads: e.target.checked })}
+              onChange={(e) => updateNotifications({ ...notifications, email_leads: e.target.checked })}
               className="w-5 h-5 rounded bg-neutral-800 border-neutral-700 text-red-500 focus:ring-red-500"
             />
           </label>
@@ -254,7 +278,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
             <input
               type="checkbox"
               checked={notifications.email_messages}
-              onChange={(e) => setNotifications({ ...notifications, email_messages: e.target.checked })}
+              onChange={(e) => updateNotifications({ ...notifications, email_messages: e.target.checked })}
               className="w-5 h-5 rounded bg-neutral-800 border-neutral-700 text-red-500 focus:ring-red-500"
             />
           </label>
@@ -266,7 +290,7 @@ export function SettingsForm({ initialProfile }: SettingsFormProps) {
             <input
               type="checkbox"
               checked={notifications.email_marketing}
-              onChange={(e) => setNotifications({ ...notifications, email_marketing: e.target.checked })}
+              onChange={(e) => updateNotifications({ ...notifications, email_marketing: e.target.checked })}
               className="w-5 h-5 rounded bg-neutral-800 border-neutral-700 text-red-500 focus:ring-red-500"
             />
           </label>
