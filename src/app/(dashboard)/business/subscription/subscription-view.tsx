@@ -30,6 +30,7 @@ interface SubscriptionData {
   plan_id?: string;
   status: string;
   current_period_end?: string;
+  cancel_at_period_end?: boolean;
 }
 
 interface SubscriptionViewProps {
@@ -140,6 +141,21 @@ const tierDisplayNames: Record<string, string> = {
   professional: 'Professional',
   enterprise: 'Enterprise (Annual)',
 };
+
+// Friendly names keyed by the exact plan the customer bought (plan_id).
+const planIdDisplayNames: Record<string, string> = {
+  beta: 'Early Bird',
+  yearly: 'Annual',
+  sixMonth: '6 Month',
+  monthly: 'Monthly',
+};
+
+// Prefer the specific plan name (e.g. "Annual") over the broad tier name
+// (e.g. "Enterprise (Annual)") when we know which plan was purchased.
+function getPlanDisplayName(sub: SubscriptionData): string {
+  if (sub.plan_id && planIdDisplayNames[sub.plan_id]) return planIdDisplayNames[sub.plan_id];
+  return tierDisplayNames[sub.tier] || sub.tier;
+}
 
 function getTierFeatures(tier: string) {
   const allFeatures = [
@@ -346,22 +362,49 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
           </div>
         )}
 
+        {/* Pending-cancellation banner */}
+        {subscription.cancel_at_period_end && (
+          <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-start gap-3">
+            <Zap className="w-5 h-5 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium">Your subscription is set to cancel</p>
+              <p className="text-sm text-amber-300/80 mt-1">
+                You&apos;ll keep full access until{' '}
+                <strong>{formatDate(subscription.current_period_end) || 'the end of your billing period'}</strong>.
+                After that your plan ends and your verified badge is removed. To stay
+                subscribed, open <strong>Manage Billing</strong> and choose &quot;Renew&quot; before that date.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Current Plan Card */}
-        <Card className="mb-8 bg-green-500/10 border-green-500/30">
+        <Card className={`mb-8 ${subscription.cancel_at_period_end ? 'bg-amber-500/10 border-amber-500/30' : 'bg-green-500/10 border-green-500/30'}`}>
           <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Crown className="w-6 h-6 text-green-400" />
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${subscription.cancel_at_period_end ? 'bg-amber-500/20' : 'bg-green-500/20'}`}>
+                  <Crown className={`w-6 h-6 ${subscription.cancel_at_period_end ? 'text-amber-400' : 'text-green-400'}`} />
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-white">
-                    {tierDisplayNames[subscription.tier] || subscription.tier} Plan
+                    {getPlanDisplayName(subscription)} Plan
                   </p>
                   <p className="text-sm text-neutral-400">
-                    <span className="text-green-400 font-medium">Active</span>
-                    {formatDate(subscription.current_period_end) && (
-                      <> &bull; Renews {formatDate(subscription.current_period_end)}</>
+                    {subscription.cancel_at_period_end ? (
+                      <>
+                        <span className="text-amber-400 font-medium">Canceling</span>
+                        {formatDate(subscription.current_period_end) && (
+                          <> &bull; Ends {formatDate(subscription.current_period_end)}</>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-green-400 font-medium">Active</span>
+                        {formatDate(subscription.current_period_end) && (
+                          <> &bull; Renews {formatDate(subscription.current_period_end)}</>
+                        )}
+                      </>
                     )}
                   </p>
                 </div>
@@ -389,7 +432,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
               Your Active Features
             </CardTitle>
             <CardDescription>
-              Features included with your {tierDisplayNames[subscription.tier] || subscription.tier} plan
+              Features included with your {getPlanDisplayName(subscription)} plan
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -541,7 +584,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
                 <div>
                   <p className="font-medium text-white">Priority Support</p>
                   <p className="text-sm text-neutral-400 mt-1">
-                    As a {tierDisplayNames[subscription.tier]} subscriber, you get priority response times.
+                    As a {getPlanDisplayName(subscription)} subscriber, you get priority response times.
                   </p>
                   <a
                     href="mailto:info@anytradesmen.com?subject=Priority%20Support%20Request"
@@ -719,7 +762,7 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
               <Crown className="w-5 h-5 text-yellow-400" />
               <div>
                 <p className="font-medium text-white">
-                  Previous Plan: {tierDisplayNames[subscription.tier] || subscription.tier}
+                  Previous Plan: {getPlanDisplayName(subscription)}
                 </p>
                 <p className="text-sm text-neutral-400">
                   Status: <span className="text-yellow-400">{subscription.status}</span> — Choose a plan below to reactivate.

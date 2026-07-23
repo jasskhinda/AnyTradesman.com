@@ -116,6 +116,10 @@ export async function POST(request: Request) {
             throw new Error('Database error: subscription upsert failed');
           }
 
+          // Best-effort: record cancel flag separately so a not-yet-migrated
+          // column can never fail the critical subscription upsert above.
+          await setCancelAtPeriodEnd(businessId, subscriptionData.cancel_at_period_end ?? false);
+
           // Auto-verify business when subscription activates
           const { error: verifyError } = await getSupabaseAdmin()
             .from('businesses')
@@ -174,7 +178,11 @@ export async function POST(request: Request) {
           throw new Error('Database error: subscription update failed');
         }
 
-        console.info(`[webhook] Subscription updated for business ${existingSub.business_id}, status: ${subscription.status}`);
+        // Best-effort: true after a portal cancellation, false if the customer
+        // resumes ("Don't cancel") before the period ends.
+        await setCancelAtPeriodEnd(existingSub.business_id, subscription.cancel_at_period_end ?? false);
+
+        console.info(`[webhook] Subscription updated for business ${existingSub.business_id}, status: ${subscription.status}, cancel_at_period_end: ${subscription.cancel_at_period_end}`);
         break;
       }
 
@@ -192,6 +200,9 @@ export async function POST(request: Request) {
           .from('subscriptions')
           .update({ status: 'canceled' })
           .eq('business_id', existingSub.business_id);
+
+        // Best-effort: the plan has fully ended, so it's no longer "pending cancel".
+        await setCancelAtPeriodEnd(existingSub.business_id, false);
 
         if (cancelError) {
           console.error(`[webhook] Failed to cancel subscription for business ${existingSub.business_id}:`, cancelError.message);
@@ -250,6 +261,19 @@ export async function POST(request: Request) {
       { error: 'Webhook handler failed' },
       { status: 500 }
     );
+  }
+}
+
+// Best-effort write of the cancel_at_period_end flag. Kept separate from the
+// critical subscription upsert/update so that if this column has not been
+// migrated yet, subscription creation and status updates still succeed.
+async function setCancelAtPeriodEnd(businessId: string, value: boolean) {
+  const { error } = await getSupabaseAdmin()
+    .from('subscriptions')
+    .update({ cancel_at_period_end: value })
+    .eq('business_id', businessId);
+  if (error) {
+    console.warn(`[webhook] Could not set cancel_at_period_end for business ${businessId} (column may be pending migration):`, error.message);
   }
 }
 

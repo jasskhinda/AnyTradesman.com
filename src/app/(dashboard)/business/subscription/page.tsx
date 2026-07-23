@@ -39,39 +39,56 @@ export default async function SubscriptionPage() {
     redirect('/business/setup');
   }
 
-  // Fetch subscription (include stripe fields for portal and backfill)
+  // Fetch subscription (include stripe fields for portal and backfill).
+  // Note: cancel_at_period_end is intentionally NOT selected here — we read it
+  // live from Stripe below, so the page works even before that column's
+  // migration has run.
   const { data: subscription } = await supabase
     .from('subscriptions')
     .select('id, tier, plan_id, status, current_period_end, stripe_customer_id, stripe_subscription_id')
     .eq('business_id', business.id)
     .maybeSingle();
 
-  // Backfill plan_id from Stripe if missing (one-time migration for legacy subscriptions)
   let resolvedPlanId = subscription?.plan_id;
-  if (subscription && !subscription.plan_id && subscription.stripe_subscription_id && subscription.status === 'active') {
+  // Authoritative billing state comes from Stripe, not our DB copy — a missed
+  // webhook must never make the page lie about whether a plan is canceling.
+  let cancelAtPeriodEnd = false;
+  let periodEnd = subscription?.current_period_end ?? undefined;
+
+  // For any active subscription, reconcile against Stripe on load: pick up
+  // cancel_at_period_end, the real period-end date, and backfill plan_id.
+  if (subscription && subscription.stripe_subscription_id && subscription.status === 'active') {
     try {
       const stripe = getStripe();
       const stripeSub = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id, {
         expand: ['items.data'],
       });
+
+      cancelAtPeriodEnd = stripeSub.cancel_at_period_end ?? false;
       const firstItem = stripeSub.items.data[0];
-      if (firstItem) {
-        const detected = detectPlanIdFromStripeItem(firstItem);
-        if (detected) {
-          resolvedPlanId = detected;
-          // Persist to DB so this only runs once
-          const adminUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-          const adminKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-          if (adminUrl && adminKey) {
-            const admin = createAdminClient(adminUrl, adminKey);
-            await admin.from('subscriptions').update({ plan_id: detected }).eq('business_id', business.id);
-            console.info(`[subscription] Backfilled plan_id="${detected}" for business ${business.id}`);
-          }
-        }
+      const stripePeriodEnd = firstItem?.current_period_end;
+      if (stripePeriodEnd) {
+        periodEnd = new Date(stripePeriodEnd * 1000).toISOString();
+      }
+
+      const detected = firstItem ? detectPlanIdFromStripeItem(firstItem) : null;
+      if (detected && !subscription.plan_id) {
+        resolvedPlanId = detected;
+      }
+
+      // Persist any drift back to our DB so lists/emails stay consistent
+      const adminUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const adminKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (adminUrl && adminKey) {
+        const admin = createAdminClient(adminUrl, adminKey);
+        const patch: Record<string, unknown> = { cancel_at_period_end: cancelAtPeriodEnd };
+        if (periodEnd) patch.current_period_end = periodEnd;
+        if (detected && !subscription.plan_id) patch.plan_id = detected;
+        await admin.from('subscriptions').update(patch).eq('business_id', business.id);
       }
     } catch (err) {
-      console.error('[subscription] Failed to backfill plan_id from Stripe:', err);
-      // Continue without plan_id — UI will still work, just won't highlight current plan precisely
+      console.error('[subscription] Failed to reconcile subscription from Stripe:', err);
+      // Fall back to DB values — UI still works, may be slightly stale
     }
   }
 
@@ -85,7 +102,8 @@ export default async function SubscriptionPage() {
           tier: subscription.tier,
           plan_id: resolvedPlanId ?? undefined,
           status: subscription.status,
-          current_period_end: subscription.current_period_end ?? undefined,
+          current_period_end: periodEnd,
+          cancel_at_period_end: cancelAtPeriodEnd,
         } : null}
         hasStripeCustomer={!!subscription?.stripe_customer_id}
       />
