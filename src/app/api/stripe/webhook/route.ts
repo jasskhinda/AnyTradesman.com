@@ -118,7 +118,10 @@ export async function POST(request: Request) {
 
           // Best-effort: record cancel flag separately so a not-yet-migrated
           // column can never fail the critical subscription upsert above.
-          await setCancelAtPeriodEnd(businessId, subscriptionData.cancel_at_period_end ?? false);
+          await setCancelAtPeriodEnd(
+            businessId,
+            subscriptionData.cancel_at_period_end === true || subscriptionData.cancel_at != null
+          );
 
           // Auto-verify business when subscription activates
           const { error: verifyError } = await getSupabaseAdmin()
@@ -178,11 +181,12 @@ export async function POST(request: Request) {
           throw new Error('Database error: subscription update failed');
         }
 
-        // Best-effort: true after a portal cancellation, false if the customer
-        // resumes ("Don't cancel") before the period ends.
-        await setCancelAtPeriodEnd(existingSub.business_id, subscription.cancel_at_period_end ?? false);
+        // Best-effort: true after a portal cancellation (classic flag OR the
+        // next-gen portal's scheduled cancel_at), false if the customer resumes.
+        const isCanceling = subscription.cancel_at_period_end === true || subscription.cancel_at != null;
+        await setCancelAtPeriodEnd(existingSub.business_id, isCanceling);
 
-        console.info(`[webhook] Subscription updated for business ${existingSub.business_id}, status: ${subscription.status}, cancel_at_period_end: ${subscription.cancel_at_period_end}`);
+        console.info(`[webhook] Subscription updated for business ${existingSub.business_id}, status: ${subscription.status}, canceling: ${isCanceling}`);
         break;
       }
 

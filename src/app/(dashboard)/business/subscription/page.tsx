@@ -64,11 +64,19 @@ export default async function SubscriptionPage() {
         expand: ['items.data'],
       });
 
-      cancelAtPeriodEnd = stripeSub.cancel_at_period_end ?? false;
       const firstItem = stripeSub.items.data[0];
-      const stripePeriodEnd = firstItem?.current_period_end;
-      if (stripePeriodEnd) {
-        periodEnd = new Date(stripePeriodEnd * 1000).toISOString();
+
+      // A subscription is "canceling" if the classic cancel_at_period_end flag
+      // is set OR (with the next-gen billing portal) a cancel_at timestamp is
+      // scheduled. Either way the plan will NOT renew.
+      const scheduledCancelTs = stripeSub.cancel_at ?? null;
+      cancelAtPeriodEnd = stripeSub.cancel_at_period_end === true || scheduledCancelTs != null;
+
+      // Show the date the plan actually ends (cancel_at) when canceling,
+      // otherwise the next renewal date (period end).
+      const endTs = scheduledCancelTs ?? firstItem?.current_period_end;
+      if (endTs) {
+        periodEnd = new Date(endTs * 1000).toISOString();
       }
 
       const detected = firstItem ? detectPlanIdFromStripeItem(firstItem) : null;
