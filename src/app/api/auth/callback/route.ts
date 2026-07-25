@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { sendWelcomeEmail } from '@/lib/email';
+import { ensureProfileAndWelcome } from '@/lib/auth/post-verify';
 
 // Allowed redirect paths (security: prevent open redirects)
 const ALLOWED_REDIRECTS = [
@@ -39,7 +39,8 @@ export async function GET(request: Request) {
   if (!code) {
     const errorUrl = new URL('/email-verified', origin);
     errorUrl.searchParams.set('status', 'error');
-    errorUrl.searchParams.set('error', 'Missing authentication code. The link may be invalid.');
+    errorUrl.searchParams.set('error', 'This link is invalid or has expired. If you already confirmed your email, just sign in. Otherwise, request a new confirmation email below.');
+    errorUrl.searchParams.set('reason', 'expired');
     return NextResponse.redirect(errorUrl.toString());
   }
 
@@ -55,57 +56,13 @@ export async function GET(request: Request) {
       return NextResponse.redirect(errorUrl.toString());
     }
 
-    // Get the authenticated user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const user = await ensureProfileAndWelcome(supabase);
 
-    if (userError || !user) {
-      console.error('Get user error:', userError);
+    if (!user) {
       const errorUrl = new URL('/email-verified', origin);
       errorUrl.searchParams.set('status', 'error');
       errorUrl.searchParams.set('error', 'Could not verify your account. Please try again.');
       return NextResponse.redirect(errorUrl.toString());
-    }
-
-    // Check if profile exists
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    // Create profile if it doesn't exist
-    if (!profile && user.email) {
-      const role = user.user_metadata?.role || 'customer';
-      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || null;
-
-      const { error: insertError } = await supabase.from('profiles').insert({
-        id: user.id,
-        email: user.email,
-        full_name: fullName,
-        avatar_url: user.user_metadata?.avatar_url || null,
-        role,
-      });
-
-      if (insertError) {
-        console.error('Profile creation error:', insertError);
-        // Continue anyway - user is authenticated, profile can be created later
-      } else {
-        // First-time profile - send welcome email (don't block callback)
-        sendWelcomeEmail({
-          to: user.email,
-          name: fullName || '',
-          role: role === 'business_owner' ? 'business_owner' : 'customer',
-        }).catch((err) => console.error('Welcome email failed:', err));
-      }
-    }
-
-    // Sync email in profiles table if it changed
-    if (profile && user.email) {
-      await supabase
-        .from('profiles')
-        .update({ email: user.email })
-        .eq('id', user.id)
-        .neq('email', user.email);
     }
 
     // Redirect to email-verified page with success status

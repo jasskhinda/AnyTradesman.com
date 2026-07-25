@@ -20,7 +20,7 @@ function SuccessContent() {
         type: 'signup',
         email: email.trim().toLowerCase(),
         options: {
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/business/setup`,
         },
       });
       setResendState(error ? 'error' : 'sent');

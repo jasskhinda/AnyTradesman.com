@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Suspense } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 function EmailVerifiedContent() {
   const router = useRouter();
@@ -13,8 +14,27 @@ function EmailVerifiedContent() {
   const next = searchParams.get('next') || '/dashboard';
   const error = searchParams.get('error');
   const [countdown, setCountdown] = useState(5);
+  const [resendEmail, setResendEmail] = useState('');
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   const isSuccess = status === 'success';
+
+  async function handleResend() {
+    const email = resendEmail.trim().toLowerCase();
+    if (!email) return;
+    setResendState('sending');
+    try {
+      const supabase = createClient();
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
+      });
+      setResendState(resendError ? 'error' : 'sent');
+    } catch {
+      setResendState('error');
+    }
+  }
 
   useEffect(() => {
     if (isSuccess) {
@@ -95,10 +115,43 @@ function EmailVerifiedContent() {
               {error || 'We couldn\'t verify your email. The link may have expired or already been used.'}
             </p>
 
+            {/* Resend confirmation email */}
+            <div className="bg-neutral-900 rounded-xl p-6 mb-6 text-left">
+              <p className="text-sm font-medium text-neutral-300 mb-3">
+                Need a new confirmation link? Enter your email:
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  value={resendEmail}
+                  onChange={(e) => setResendEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="flex-1 rounded-lg border border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                <button
+                  onClick={handleResend}
+                  disabled={resendState === 'sending' || resendState === 'sent' || !resendEmail.trim()}
+                  className="px-5 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {resendState === 'sending' ? 'Sending...' : resendState === 'sent' ? 'Email sent' : 'Resend email'}
+                </button>
+              </div>
+              {resendState === 'sent' && (
+                <p className="text-sm text-green-400 mt-3">
+                  Confirmation email sent. Give it a minute to arrive, and check your spam folder.
+                </p>
+              )}
+              {resendState === 'error' && (
+                <p className="text-sm text-red-400 mt-3">
+                  Couldn&apos;t resend right now. Wait a minute and try again, or the email may already be confirmed — try signing in.
+                </p>
+              )}
+            </div>
+
             <div className="space-y-3">
               <Link
                 href="/login"
-                className="inline-block px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                className="inline-block px-6 py-3 border border-neutral-700 text-neutral-300 rounded-lg font-medium hover:bg-neutral-800 transition-colors"
               >
                 Go to Login
               </Link>
