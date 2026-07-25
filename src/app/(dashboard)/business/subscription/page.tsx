@@ -66,11 +66,16 @@ export default async function SubscriptionPage() {
 
       const firstItem = stripeSub.items.data[0];
 
+      // If Stripe says the subscription is no longer live (e.g. a missed
+      // customer.subscription.deleted webhook left a stale 'active' row),
+      // persist the real status so the whole app locks paid features.
+      const stripeSaysDead = ['canceled', 'incomplete_expired', 'unpaid'].includes(stripeSub.status);
+
       // A subscription is "canceling" if the classic cancel_at_period_end flag
       // is set OR (with the next-gen billing portal) a cancel_at timestamp is
       // scheduled. Either way the plan will NOT renew.
       const scheduledCancelTs = stripeSub.cancel_at ?? null;
-      cancelAtPeriodEnd = stripeSub.cancel_at_period_end === true || scheduledCancelTs != null;
+      cancelAtPeriodEnd = !stripeSaysDead && (stripeSub.cancel_at_period_end === true || scheduledCancelTs != null);
 
       // Show the date the plan actually ends (cancel_at) when canceling,
       // otherwise the next renewal date (period end).
@@ -92,7 +97,13 @@ export default async function SubscriptionPage() {
         const patch: Record<string, unknown> = { cancel_at_period_end: cancelAtPeriodEnd };
         if (periodEnd) patch.current_period_end = periodEnd;
         if (detected && !subscription.plan_id) patch.plan_id = detected;
+        if (stripeSaysDead) patch.status = 'canceled';
         await admin.from('subscriptions').update(patch).eq('business_id', business.id);
+      }
+
+      if (stripeSaysDead) {
+        // Reflect immediately in this render, not just the next one
+        subscription.status = 'canceled';
       }
     } catch (err) {
       console.error('[subscription] Failed to reconcile subscription from Stripe:', err);

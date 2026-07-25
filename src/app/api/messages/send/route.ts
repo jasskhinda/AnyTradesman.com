@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { isSubscriptionCurrent } from '@/lib/subscription';
 
 // Sends a message in a conversation the caller participates in.
 // Uses the admin client because RLS has no UPDATE policy for
@@ -45,6 +46,26 @@ export async function POST(request: Request) {
 
     if (!isParticipant) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Messaging customers is a paid feature for businesses. When the sender is
+    // acting as the business (not the customer on this conversation), require a
+    // currently-valid subscription. Customers are never blocked.
+    const isBusinessSender =
+      business?.owner_id === user.id && conversation.customer_id !== user.id;
+    if (isBusinessSender) {
+      const { data: subRow } = await admin
+        .from('subscriptions')
+        .select('status, current_period_end')
+        .eq('business_id', conversation.business_id)
+        .maybeSingle();
+
+      if (!isSubscriptionCurrent(subRow)) {
+        return NextResponse.json(
+          { error: 'Your subscription has ended. Renew your plan to reply to customers.' },
+          { status: 403 }
+        );
+      }
     }
 
     const { data: message, error: insertError } = await admin

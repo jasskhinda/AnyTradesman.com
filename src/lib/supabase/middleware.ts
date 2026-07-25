@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isSubscriptionCurrent } from '@/lib/subscription';
 
 // Check if request is from admin subdomain
 function isAdminSubdomain(request: NextRequest): boolean {
@@ -141,15 +142,15 @@ export async function updateSession(request: NextRequest) {
             .maybeSingle();
 
           if (business) {
-            // Check for active subscription
+            // Check for a currently-valid subscription (status active AND the
+            // paid period has not lapsed — guards against missed webhooks)
             const { data: subscription } = await supabase
               .from('subscriptions')
-              .select('status')
+              .select('status, current_period_end')
               .eq('business_id', business.id)
-              .eq('status', 'active')
               .maybeSingle();
 
-            if (!subscription) {
+            if (!isSubscriptionCurrent(subscription)) {
               const url = request.nextUrl.clone();
               url.pathname = '/business/subscription';
               return NextResponse.redirect(url);

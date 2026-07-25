@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { sendQuoteReceivedEmail } from '@/lib/email';
+import { isSubscriptionCurrent } from '@/lib/subscription';
 
 export async function POST(request: Request) {
   try {
@@ -35,6 +36,20 @@ export async function POST(request: Request) {
 
     if (!business) {
       return NextResponse.json({ error: 'Business account required.' }, { status: 403 });
+    }
+
+    // Sending quotes is a paid feature — require a currently-valid subscription
+    const { data: subRow } = await admin
+      .from('subscriptions')
+      .select('status, current_period_end')
+      .eq('business_id', business.id)
+      .maybeSingle();
+
+    if (!isSubscriptionCurrent(subRow)) {
+      return NextResponse.json(
+        { error: 'An active subscription is required to send quotes. Renew your plan to continue.' },
+        { status: 403 }
+      );
     }
 
     // Insert the quote
