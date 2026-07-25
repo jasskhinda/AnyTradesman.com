@@ -10,6 +10,7 @@ interface AddCredentialData {
   issuing_authority: string;
   issue_date: string;
   expiry_date: string;
+  document_url?: string;
 }
 
 export async function addCredential(data: AddCredentialData): Promise<{ error?: string }> {
@@ -43,6 +44,7 @@ export async function addCredential(data: AddCredentialData): Promise<{ error?: 
       issuing_authority: data.issuing_authority || null,
       issue_date: data.issue_date || null,
       expiry_date: data.expiry_date || null,
+      document_url: data.document_url || null,
       verification_status: 'pending',
     });
 

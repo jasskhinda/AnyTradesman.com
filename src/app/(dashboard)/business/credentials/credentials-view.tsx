@@ -48,6 +48,8 @@ export function CredentialsView({
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+
   const [newCredential, setNewCredential] = useState({
     credential_type: 'license',
     credential_number: '',
@@ -57,8 +59,38 @@ export function CredentialsView({
   });
 
   async function handleAddCredential() {
+    if (!documentFile) {
+      setError('Please attach a copy of the document so our team can verify it.');
+      return;
+    }
+
     setSaving(true);
     setError(null);
+
+    // Upload the document first — a credential without proof can't be verified
+    let documentPath: string;
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', documentFile);
+      uploadData.append('businessId', business.id);
+
+      const uploadRes = await fetch('/api/credentials/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
+      const uploadJson = await uploadRes.json();
+
+      if (!uploadRes.ok) {
+        setError(uploadJson.error || 'Could not upload the document. Please try again.');
+        setSaving(false);
+        return;
+      }
+      documentPath = uploadJson.path;
+    } catch {
+      setError('Could not upload the document. Please check your connection and try again.');
+      setSaving(false);
+      return;
+    }
 
     const result = await addCredential({
       businessId: business.id,
@@ -67,6 +99,7 @@ export function CredentialsView({
       issuing_authority: newCredential.issuing_authority,
       issue_date: newCredential.issue_date,
       expiry_date: newCredential.expiry_date,
+      document_url: documentPath,
     });
 
     if (result.error) {
@@ -83,6 +116,7 @@ export function CredentialsView({
       issue_date: '',
       expiry_date: '',
     });
+    setDocumentFile(null);
     setShowAddForm(false);
     setSaving(false);
 
@@ -227,16 +261,38 @@ export function CredentialsView({
                 />
               </div>
 
+              {/* Document upload — required, this is what our team verifies */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-1">
+                  Document *
+                </label>
+                <input
+                  type="file"
+                  accept="application/pdf,image/jpeg,image/png,image/webp,image/heic"
+                  onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-neutral-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-medium hover:file:bg-red-700 file:cursor-pointer"
+                />
+                <p className="text-xs text-neutral-500 mt-1">
+                  {documentFile
+                    ? `Selected: ${documentFile.name}`
+                    : 'Upload a clear copy or photo of the document (PDF or image, max 10 MB). Our team reviews this to verify your business.'}
+                </p>
+              </div>
+
               <div className="flex justify-end gap-2 pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setDocumentFile(null);
+                    setError(null);
+                  }}
                   className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
                 >
                   Cancel
                 </Button>
                 <Button onClick={handleAddCredential} disabled={saving}>
-                  {saving ? 'Adding...' : 'Add Credential'}
+                  {saving ? 'Uploading...' : 'Add Credential'}
                 </Button>
               </div>
             </CardContent>
