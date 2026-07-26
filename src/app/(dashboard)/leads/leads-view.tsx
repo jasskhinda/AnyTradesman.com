@@ -40,7 +40,7 @@ interface LeadsViewProps {
   tab: 'available' | 'quoted';
   search: string;
   categoryFilter: string;
-  areaFilter: 'mine' | 'all';
+  areaFilter: 'mine' | 'nearby' | 'all';
   page: number;
   pageSize: number;
   totalCount: number;
@@ -110,11 +110,11 @@ export function LeadsView({
             {hasCategories ? (
               <>
                 Jobs matching your services
-                {areaFilter === 'mine'
-                  ? businessArea
-                    ? ` near ${businessArea}`
-                    : ' in your service area'
-                  : ' everywhere'}
+                {areaFilter === 'all'
+                  ? ' everywhere'
+                  : businessArea
+                  ? ` near ${businessArea}`
+                  : ' in your service area'}
               </>
             ) : (
               'Add the services you offer to start receiving leads'
@@ -219,10 +219,13 @@ export function LeadsView({
 
               <select
                 value={areaFilter}
-                onChange={(e) => updateParams({ area: e.target.value === 'all' ? 'all' : null })}
+                onChange={(e) =>
+                  updateParams({ area: e.target.value === 'nearby' ? null : e.target.value })
+                }
                 className="px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500"
               >
-                <option value="mine">My service area</option>
+                <option value="nearby">My area + nearby</option>
+                <option value="mine">My area only</option>
                 <option value="all">All areas</option>
               </select>
             </div>
@@ -238,8 +241,8 @@ export function LeadsView({
                   <p className="text-sm text-neutral-400 mt-1">
                     {tab === 'quoted'
                       ? 'Quotes you send will appear here so you can track them.'
-                      : areaFilter === 'mine'
-                      ? 'Try widening to All areas, or check back soon — new jobs arrive daily.'
+                      : areaFilter !== 'all'
+                      ? 'Try widening the area filter, or check back soon — new jobs arrive daily.'
                       : 'New jobs in your trades will show up here as customers post them.'}
                   </p>
                 </CardContent>
@@ -266,6 +269,11 @@ export function LeadsView({
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-500/20 text-green-400">
                                   <Sparkles className="w-3 h-3" />
                                   Local
+                                </span>
+                              )}
+                              {lead.tier === 'extended' && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-500/20 text-amber-400">
+                                  Just outside your area
                                 </span>
                               )}
                               {lead.has_quoted && (

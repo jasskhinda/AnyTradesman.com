@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { sendServiceRequestConfirmation, sendNewLeadNotification } from '@/lib/email';
-import { findMatchingBusinesses } from '@/lib/leads/matching';
+import { findMatchingBusinesses, selectBusinessesToNotify } from '@/lib/leads/matching';
 import { geocodeAddress } from '@/lib/geocoding';
 
 export async function POST(request: Request) {
@@ -124,15 +124,20 @@ export async function POST(request: Request) {
           .eq('id', category_id)
           .single();
 
+        // Email businesses whose own area covers this job; if none do, fall
+        // back to the nearest ones just outside so the request still reaches
+        // someone.
+        const toNotify = selectBusinessesToNotify(matches);
+
         const { data: owners } = await admin
           .from('profiles')
           .select('id, email')
-          .in('id', Array.from(new Set(matches.map((b) => b.owner_id))));
+          .in('id', Array.from(new Set(toNotify.map((b) => b.owner_id))));
 
         const emailByOwner = new Map((owners || []).map((o) => [o.id, o.email]));
 
         await Promise.all(
-          matches.map((biz) => {
+          toNotify.map((biz) => {
             const to = emailByOwner.get(biz.owner_id);
             if (!to) return Promise.resolve();
             return sendNewLeadNotification({

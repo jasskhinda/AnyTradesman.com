@@ -21,6 +21,26 @@ import { distanceMiles, toCoordinates, type Coordinates } from '@/lib/geocoding'
 
 export const DEFAULT_SERVICE_RADIUS_MILES = 25;
 
+// A strict radius strands real work: a handyman in Fishers would never see a
+// job in Trafalgar (37 mi) even though they'd happily drive it, and if nobody
+// is inside the radius the customer gets no quotes at all. So area matching
+// has two tiers:
+//   - "primary"  : inside the business's own radius
+//   - "extended" : beyond the radius but still realistically drivable
+// Extended leads appear in the feed clearly labelled with their distance, and
+// are only emailed when nothing matched inside the radius, so nobody is
+// spammed but no request goes nowhere.
+export const EXTENDED_AREA_MULTIPLIER = 2.5;
+export const EXTENDED_AREA_MIN_MILES = 60;
+export const EXTENDED_AREA_MAX_MILES = 150;
+
+export function extendedRadiusFor(radiusMiles: number): number {
+  return Math.min(
+    EXTENDED_AREA_MAX_MILES,
+    Math.max(EXTENDED_AREA_MIN_MILES, radiusMiles * EXTENDED_AREA_MULTIPLIER)
+  );
+}
+
 export function normalizeLocation(value: string | null | undefined): string {
   return (value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
@@ -51,8 +71,12 @@ export interface LocatableRequest {
   longitude?: number | null;
 }
 
+export type AreaTier = 'primary' | 'extended' | 'out_of_area';
+
 export interface AreaMatch {
+  /** True for primary or extended — i.e. the business may see this lead. */
   matches: boolean;
+  tier: AreaTier;
   /** Distance in miles when both sides are geocoded, otherwise null. */
   distance: number | null;
   /** How the decision was made — useful for UI copy and debugging. */
@@ -69,10 +93,24 @@ export function evaluateServiceArea(
   if (bCoords && rCoords) {
     const distance = distanceMiles(bCoords, rCoords);
     const radius = business.service_radius_miles ?? DEFAULT_SERVICE_RADIUS_MILES;
-    return { matches: distance <= radius, distance, basis: 'distance' };
+    const tier: AreaTier =
+      distance <= radius
+        ? 'primary'
+        : distance <= extendedRadiusFor(radius)
+        ? 'extended'
+        : 'out_of_area';
+    return { matches: tier !== 'out_of_area', tier, distance, basis: 'distance' };
   }
 
-  return { matches: statesMatch(business, request), distance: null, basis: 'state' };
+  // No coordinates: fall back to state, treated as primary so behaviour
+  // matches what it was before geocoding existed.
+  const sameState = statesMatch(business, request);
+  return {
+    matches: sameState,
+    tier: sameState ? 'primary' : 'out_of_area',
+    distance: null,
+    basis: 'state',
+  };
 }
 
 /** Kept for callers that only need a boolean. */
@@ -104,6 +142,8 @@ export interface MatchableBusiness {
   is_active: boolean | null;
   /** Distance from the request, when both are geocoded. */
   distance: number | null;
+  /** 'primary' = inside their radius, 'extended' = drivable but further out. */
+  tier: AreaTier;
 }
 
 /**
@@ -134,7 +174,7 @@ export async function findMatchingBusinesses(
   const inArea: MatchableBusiness[] = [];
   for (const b of businesses) {
     const area = evaluateServiceArea(b, request);
-    if (area.matches) inArea.push({ ...b, distance: area.distance });
+    if (area.matches) inArea.push({ ...b, distance: area.distance, tier: area.tier });
   }
   if (!inArea.length) return [];
 
@@ -151,11 +191,25 @@ export async function findMatchingBusinesses(
   return inArea
     .filter((b) => subscribed.has(b.id))
     .sort((a, b) => {
+      if (a.tier !== b.tier) return a.tier === 'primary' ? -1 : 1;
       if (a.distance == null && b.distance == null) return 0;
       if (a.distance == null) return 1; // known distances rank first
       if (b.distance == null) return -1;
       return a.distance - b.distance;
     });
+}
+
+/**
+ * Who should actually be emailed about a new request: everyone whose own
+ * service area covers it, or — when that is nobody — the nearest businesses
+ * just outside it, so a request is never left with no one to answer it.
+ */
+export function selectBusinessesToNotify(
+  matches: MatchableBusiness[]
+): MatchableBusiness[] {
+  const primary = matches.filter((b) => b.tier === 'primary');
+  if (primary.length) return primary;
+  return matches.filter((b) => b.tier === 'extended');
 }
 
 /**

@@ -21,6 +21,7 @@ export interface LeadRow {
   quote_count: number;
   is_local: boolean;
   distance: number | null;
+  tier: 'primary' | 'extended' | 'out_of_area';
 }
 
 const PAGE_SIZE = 12;
@@ -35,7 +36,8 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
   const tab = params.tab === 'quoted' ? 'quoted' : 'available';
   const search = (params.q || '').trim();
   const categoryFilter = params.category || '';
-  const areaFilter = params.area === 'all' ? 'all' : 'mine';
+  const areaFilter: 'mine' | 'nearby' | 'all' =
+    params.area === 'all' ? 'all' : params.area === 'mine' ? 'mine' : 'nearby';
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -112,14 +114,22 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
       area: evaluateServiceArea(business, r),
     }));
 
-    const inArea = withArea.filter((x) => (areaFilter === 'all' ? true : x.area.matches));
+    // "mine"     = inside their radius only
+    // "nearby"    = radius + realistically drivable jobs just outside (default)
+    // "all"       = anything in their trades, anywhere
+    const inArea = withArea.filter((x) => {
+      if (areaFilter === 'all') return true;
+      if (areaFilter === 'mine') return x.area.tier === 'primary';
+      return x.area.matches; // 'nearby'
+    });
 
     const scoped = inArea.filter((x) =>
       tab === 'quoted' ? quotedIds.has(x.request.id) : !quotedIds.has(x.request.id)
     );
 
-    // Nearest first when we know distances, newest first otherwise
+    // Jobs inside the radius first, then nearest, then newest
     scoped.sort((a, b) => {
+      if (a.area.tier !== b.area.tier) return a.area.tier === 'primary' ? -1 : 1;
       const da = a.area.distance;
       const db = b.area.distance;
       if (da != null && db != null) return da - db;
@@ -170,6 +180,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
         quote_count: quoteCounts.get(r.id) || 0,
         is_local: isSameCity(business, r),
         distance: area.distance,
+        tier: area.tier,
       };
     });
   }
