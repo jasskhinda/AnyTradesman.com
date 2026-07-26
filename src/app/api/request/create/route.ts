@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { sendServiceRequestConfirmation, sendNewLeadNotification } from '@/lib/email';
 import { findMatchingBusinesses } from '@/lib/leads/matching';
+import { geocodeAddress } from '@/lib/geocoding';
 
 export async function POST(request: Request) {
   try {
@@ -41,6 +42,10 @@ export async function POST(request: Request) {
 
     const admin = createAdminClient(adminUrl, adminKey);
 
+    // Resolve the job location so matching can use real distance. Best effort:
+    // if this fails, matching falls back to comparing states.
+    const coords = await geocodeAddress({ city, state, zip_code });
+
     const { data: serviceRequest, error: insertError } = await admin
       .from('service_requests')
       .insert({
@@ -52,6 +57,8 @@ export async function POST(request: Request) {
         city,
         state,
         zip_code,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
         preferred_date: preferred_date || null,
         budget_min: budget_min ? parseFloat(budget_min) : null,
         budget_max: budget_max ? parseFloat(budget_max) : null,
@@ -93,6 +100,8 @@ export async function POST(request: Request) {
         category_id,
         city,
         state,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
       });
       matchedCount = matches.length;
 

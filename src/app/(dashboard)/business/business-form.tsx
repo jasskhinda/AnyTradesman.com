@@ -101,6 +101,14 @@ export function BusinessForm({ initialBusiness, categories, initialBusinessCateg
       .eq('id', business.id);
 
     if (!error) {
+      // Refresh coordinates so lead matching stays accurate if the address
+      // changed (best effort — matching falls back to state if this fails)
+      fetch('/api/business/geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId: business.id }),
+      }).catch(() => {});
+
       // Update categories
       await supabase
         .from('business_categories')

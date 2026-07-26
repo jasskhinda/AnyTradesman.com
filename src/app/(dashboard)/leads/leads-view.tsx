@@ -110,7 +110,11 @@ export function LeadsView({
             {hasCategories ? (
               <>
                 Jobs matching your services
-                {areaFilter === 'mine' && businessArea ? ` in ${businessArea}` : ' everywhere'}
+                {areaFilter === 'mine'
+                  ? businessArea
+                    ? ` near ${businessArea}`
+                    : ' in your service area'
+                  : ' everywhere'}
               </>
             ) : (
               'Add the services you offer to start receiving leads'
@@ -284,6 +288,14 @@ export function LeadsView({
                               <span className="flex items-center gap-1">
                                 <MapPin className="w-4 h-4" />
                                 {lead.city}, {lead.state}
+                                {lead.distance != null && (
+                                  <span className="text-neutral-500">
+                                    &nbsp;&middot;&nbsp;
+                                    {lead.distance < 1
+                                      ? 'under 1 mile'
+                                      : `${Math.round(lead.distance)} mi away`}
+                                  </span>
+                                )}
                               </span>
                               <span className="flex items-center gap-1">
                                 <DollarSign className="w-4 h-4" />

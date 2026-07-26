@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { LeadsView } from './leads-view';
 import { isSubscriptionCurrent } from '@/lib/subscription';
-import { getBusinessCategoryIds, serviceAreaMatches, isSameCity } from '@/lib/leads/matching';
+import { getBusinessCategoryIds, evaluateServiceArea, isSameCity } from '@/lib/leads/matching';
 import type { Profile } from '@/types/database';
 
 export interface LeadRow {
@@ -20,6 +20,7 @@ export interface LeadRow {
   is_new: boolean;
   quote_count: number;
   is_local: boolean;
+  distance: number | null;
 }
 
 const PAGE_SIZE = 12;
@@ -50,7 +51,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
 
   const { data: business } = await supabase
     .from('businesses')
-    .select('id, city, state')
+    .select('id, city, state, latitude, longitude, service_radius_miles')
     .eq('owner_id', user.id)
     .maybeSingle();
 
@@ -90,7 +91,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
     let query = supabase
       .from('service_requests')
       .select(
-        'id, title, description, city, state, budget_min, budget_max, preferred_date, created_at, categories(id, name)'
+        'id, title, description, city, state, latitude, longitude, budget_min, budget_max, preferred_date, created_at, categories(id, name)'
       )
       .eq('status', 'open')
       .in('category_id', wantedCategories)
@@ -103,21 +104,35 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
 
     const { data: requests } = await query.limit(300);
 
-    // Service-area + tab filtering. Location lives in messy free-text columns,
-    // so this is done in code with normalization rather than SQL equality.
-    const inArea = (requests || []).filter((r) =>
-      areaFilter === 'all' ? true : serviceAreaMatches(business, r)
+    // Service-area filtering: real distance when both sides are geocoded,
+    // state comparison otherwise. Done in code because the location columns
+    // are free text and distance needs a computation.
+    const withArea = (requests || []).map((r) => ({
+      request: r,
+      area: evaluateServiceArea(business, r),
+    }));
+
+    const inArea = withArea.filter((x) => (areaFilter === 'all' ? true : x.area.matches));
+
+    const scoped = inArea.filter((x) =>
+      tab === 'quoted' ? quotedIds.has(x.request.id) : !quotedIds.has(x.request.id)
     );
 
-    const scoped = inArea.filter((r) =>
-      tab === 'quoted' ? quotedIds.has(r.id) : !quotedIds.has(r.id)
-    );
+    // Nearest first when we know distances, newest first otherwise
+    scoped.sort((a, b) => {
+      const da = a.area.distance;
+      const db = b.area.distance;
+      if (da != null && db != null) return da - db;
+      if (da != null) return -1;
+      if (db != null) return 1;
+      return new Date(b.request.created_at).getTime() - new Date(a.request.created_at).getTime();
+    });
 
     totalCount = scoped.length;
     const pageItems = scoped.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     // Competition signal + "new" flag, batched rather than N+1
-    const ids = pageItems.map((r) => r.id);
+    const ids = pageItems.map((x) => x.request.id);
     const [{ data: quoteRows }, { data: leadRows }] = await Promise.all([
       ids.length
         ? supabase.from('quotes').select('service_request_id').in('service_request_id', ids)
@@ -137,7 +152,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
     }
     const viewedMap = new Map((leadRows || []).map((l) => [l.service_request_id, l.is_viewed]));
 
-    leads = pageItems.map((r) => {
+    leads = pageItems.map(({ request: r, area }) => {
       const category = Array.isArray(r.categories) ? r.categories[0] : r.categories;
       return {
         id: r.id,
@@ -154,6 +169,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
         is_new: viewedMap.get(r.id) === false,
         quote_count: quoteCounts.get(r.id) || 0,
         is_local: isSameCity(business, r),
+        distance: area.distance,
       };
     });
   }

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { geocodeAddress } from '@/lib/geocoding';
 
 interface CreateBusinessData {
   userId: string;
@@ -62,6 +63,14 @@ export async function createBusiness(data: CreateBusinessData): Promise<{ error?
     slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
   }
 
+  // Resolve the business location so leads can be matched by real distance.
+  // Best effort — matching falls back to state comparison if this fails.
+  const coords = await geocodeAddress({
+    city: data.city,
+    state: data.state,
+    zip_code: data.zip_code,
+  });
+
   // Create business
   const { data: business, error: businessError } = await supabase
     .from('businesses')
@@ -77,6 +86,8 @@ export async function createBusiness(data: CreateBusinessData): Promise<{ error?
       city: data.city || null,
       state: data.state || null,
       zip_code: data.zip_code || null,
+      latitude: coords?.latitude ?? null,
+      longitude: coords?.longitude ?? null,
       service_radius_miles: data.service_radius_miles,
       is_verified: false,
       verification_status: 'pending',
