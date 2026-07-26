@@ -42,6 +42,11 @@ export default async function MessagesPage({ searchParams }: MessagesPageProps) 
     redirect('/login');
   }
 
+  // Realtime needs the access token to pass RLS. Read it here rather than in
+  // the browser, where the client-side session lookup can hang.
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token ?? null;
+
   // Get user's profile
   const { data: profile } = await supabase
     .from('profiles')
@@ -176,6 +181,7 @@ export default async function MessagesPage({ searchParams }: MessagesPageProps) 
       initialConversations={conversations}
       initialSelectedId={openingId}
       initialMessages={initialMessages}
+      accessToken={accessToken}
     />
   );
 }

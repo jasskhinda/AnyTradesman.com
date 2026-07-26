@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -37,6 +38,7 @@ interface MessagesViewProps {
   initialConversations: Conversation[];
   initialSelectedId?: string | null;
   initialMessages?: Message[];
+  accessToken?: string | null;
 }
 
 export function MessagesView({
@@ -45,6 +47,7 @@ export function MessagesView({
   initialConversations,
   initialSelectedId = null,
   initialMessages = [],
+  accessToken = null,
 }: MessagesViewProps) {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(initialSelectedId);
@@ -53,18 +56,92 @@ export function MessagesView({
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [liveConnected, setLiveConnected] = useState(false);
+  const selectedRef = useRef<string | null>(initialSelectedId);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    selectedRef.current = selectedConversation;
+  }, [selectedConversation, liveConnected]);
+
+  // Keep the thread pinned to the newest message
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages]);
+
+  // Live delivery over the realtime websocket. The access token comes from the
+  // server so RLS applies without a browser-side session lookup (which can
+  // hang). Polling below stays as a fallback if the socket can't connect.
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const client = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    client.realtime.setAuth(accessToken);
+
+    const channel = client
+      .channel('messages-live')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const msg = payload.new as Message;
+          if (!msg?.conversation_id) return;
+
+          // Append to the open thread (skip our own — already shown on send)
+          if (msg.conversation_id === selectedRef.current && msg.sender_id !== userId) {
+            setMessages((prev) =>
+              prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]
+            );
+            fetch('/api/messages/read', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ conversation_id: msg.conversation_id }),
+            }).catch(() => {});
+          }
+
+          // Update the conversation list preview / unread count
+          setConversations((prev) => {
+            const next = prev.map((c) =>
+              c.id === msg.conversation_id
+                ? {
+                    ...c,
+                    last_message: msg.content,
+                    last_message_at: msg.created_at,
+                    unread_count:
+                      msg.sender_id !== userId && msg.conversation_id !== selectedRef.current
+                        ? c.unread_count + 1
+                        : c.unread_count,
+                  }
+                : c
+            );
+            return next.sort(
+              (a, b) =>
+                new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+            );
+          });
+        }
+      )
+      .subscribe((status) => setLiveConnected(status === 'SUBSCRIBED'));
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [accessToken, userId]);
 
   useEffect(() => {
     if (!selectedConversation) return;
     loadMessages(selectedConversation, true);
 
-    // Light polling so incoming replies appear without a manual refresh
+    // Fallback refresh for when the realtime socket isn't connected
     const interval = setInterval(() => {
-      loadMessages(selectedConversation, false);
+      if (!liveConnected) loadMessages(selectedConversation, false);
     }, 8000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedConversation]);
+  }, [selectedConversation, liveConnected]);
 
   // Loaded through an API route rather than the browser Supabase client:
   // the client-side auth call can hang, which left this stuck on its spinner.
@@ -254,6 +331,7 @@ export function MessagesView({
                       </div>
                     ))
                   )}
+                  <div ref={bottomRef} />
                 </div>
 
                 {/* Message Input */}
