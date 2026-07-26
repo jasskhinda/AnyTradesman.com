@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { sendServiceRequestConfirmation, sendNewLeadNotification } from '@/lib/email';
+import { findMatchingBusinesses } from '@/lib/leads/matching';
 
 export async function POST(request: Request) {
   try {
@@ -84,73 +85,66 @@ export async function POST(request: Request) {
         }
       });
 
-    // Notify matching business owners (don't block response)
-    (async () => {
-      try {
-        // Get category name
+    // Match the request to businesses, record the leads, and notify them.
+    // Awaited so the work completes before the serverless function freezes.
+    let matchedCount = 0;
+    try {
+      const matches = await findMatchingBusinesses(admin, {
+        category_id,
+        city,
+        state,
+      });
+      matchedCount = matches.length;
+
+      if (matches.length) {
+        // Materialize the leads so businesses have an inbox and customers can
+        // see how many pros their request reached.
+        const { error: leadsError } = await admin.from('leads').insert(
+          matches.map((b) => ({
+            business_id: b.id,
+            service_request_id: serviceRequest.id,
+          }))
+        );
+        if (leadsError) {
+          console.error('[request/create] Lead insert failed:', leadsError.message);
+        }
+
         const { data: category } = await admin
           .from('categories')
           .select('name')
           .eq('id', category_id)
           .single();
 
-        // Find businesses with matching category + active subscription
-        const { data: businessCategories } = await admin
-          .from('business_categories')
-          .select('business_id')
-          .eq('category_id', category_id);
+        const { data: owners } = await admin
+          .from('profiles')
+          .select('id, email')
+          .in('id', Array.from(new Set(matches.map((b) => b.owner_id))));
 
-        if (!businessCategories?.length) return;
+        const emailByOwner = new Map((owners || []).map((o) => [o.id, o.email]));
 
-        const businessIds = businessCategories.map((bc) => bc.business_id);
-
-        // Get verified businesses with active subscriptions
-        const { data: businesses } = await admin
-          .from('businesses')
-          .select('id, name, owner_id')
-          .in('id', businessIds)
-          .eq('is_active', true)
-          .eq('is_verified', true);
-
-        if (!businesses?.length) return;
-
-        // Check subscriptions and get owner emails
-        for (const biz of businesses) {
-          const { data: sub } = await admin
-            .from('subscriptions')
-            .select('id')
-            .eq('business_id', biz.id)
-            .eq('status', 'active')
-            .gte('current_period_end', new Date().toISOString())
-            .limit(1)
-            .single();
-
-          if (!sub) continue;
-
-          const { data: owner } = await admin
-            .from('profiles')
-            .select('email')
-            .eq('id', biz.owner_id)
-            .single();
-
-          if (owner?.email) {
-            sendNewLeadNotification({
-              to: owner.email,
+        await Promise.all(
+          matches.map((biz) => {
+            const to = emailByOwner.get(biz.owner_id);
+            if (!to) return Promise.resolve();
+            return sendNewLeadNotification({
+              to,
               businessName: biz.name,
               requestTitle: title,
               city,
               state,
               category: category?.name || '',
               requestId: serviceRequest.id,
-            }).catch((err) => console.error('[request/create] Lead notification failed:', err));
-          }
-        }
-      } catch (err) {
-        console.error('[request/create] Lead matching failed:', err);
+            }).catch((err) =>
+              console.error('[request/create] Lead notification failed:', err)
+            );
+          })
+        );
       }
-    })();
+    } catch (err) {
+      console.error('[request/create] Lead matching failed:', err);
+    }
 
-    return NextResponse.json({ id: serviceRequest.id });
+    return NextResponse.json({ id: serviceRequest.id, matched: matchedCount });
   } catch (error) {
     console.error('[request/create] Unexpected error:', error);
     return NextResponse.json(

@@ -72,18 +72,6 @@ export const PRICING_TIERS = {
       'Dedicated account manager',
     ],
   },
-  payPerLead: {
-    id: 'payPerLead',
-    name: 'Pay Per Lead',
-    price: 19.99,
-    type: 'one_time' as const,
-    features: [
-      'No monthly commitment',
-      'Pay only for leads you want',
-      'View lead details before purchase',
-      'Ideal for starting out',
-    ],
-  },
   beta: {
     id: 'beta',
     name: 'Early Bird',

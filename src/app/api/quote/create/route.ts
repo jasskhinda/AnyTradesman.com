@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { sendQuoteReceivedEmail } from '@/lib/email';
 import { isSubscriptionCurrent } from '@/lib/subscription';
+import { getBusinessCategoryIds } from '@/lib/leads/matching';
 
 export async function POST(request: Request) {
   try {
@@ -52,6 +53,32 @@ export async function POST(request: Request) {
       );
     }
 
+    // The request must still be open, and must be in a trade this business
+    // serves — the same rule that decides what appears in their leads feed.
+    const { data: targetRequest } = await admin
+      .from('service_requests')
+      .select('id, status, category_id')
+      .eq('id', service_request_id)
+      .maybeSingle();
+
+    if (!targetRequest) {
+      return NextResponse.json({ error: 'This request no longer exists.' }, { status: 404 });
+    }
+    if (targetRequest.status !== 'open') {
+      return NextResponse.json(
+        { error: 'This request is no longer accepting quotes.' },
+        { status: 400 }
+      );
+    }
+
+    const myCategoryIds = await getBusinessCategoryIds(admin, business.id);
+    if (!myCategoryIds.includes(targetRequest.category_id)) {
+      return NextResponse.json(
+        { error: 'This job is outside the services your business offers.' },
+        { status: 403 }
+      );
+    }
+
     // Insert the quote
     const { error: insertError } = await admin
       .from('quotes')
@@ -68,6 +95,17 @@ export async function POST(request: Request) {
       console.error('[quote/create] Insert error:', insertError);
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
+
+    // Record that this business responded to the lead (best effort)
+    await admin.from('leads').upsert(
+      {
+        business_id: business.id,
+        service_request_id,
+        is_viewed: true,
+        is_contacted: true,
+      },
+      { onConflict: 'business_id,service_request_id' }
+    );
 
     // Fetch request + customer details for email (don't block response)
     admin

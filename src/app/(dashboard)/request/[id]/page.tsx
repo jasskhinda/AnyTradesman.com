@@ -69,6 +69,7 @@ export default function RequestDetailsPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
+  const [reach, setReach] = useState<{ notified: number; viewed: number } | null>(null);
 
   useEffect(() => {
     async function loadRequestAndQuotes() {
@@ -119,6 +120,21 @@ export default function RequestDetailsPage() {
 
       if (quotesData) {
         setQuotes(quotesData);
+      }
+
+      // How far the request actually reached (RLS lets customers read the
+      // reach of their own request, not which businesses they are)
+      const { data: reachData } = await supabase
+        .from('leads')
+        .select('is_viewed')
+        .eq('service_request_id', params.id);
+
+      if (reachData) {
+        const rows = reachData as { is_viewed: boolean | null }[];
+        setReach({
+          notified: rows.length,
+          viewed: rows.filter((l) => l.is_viewed).length,
+        });
       }
 
       setLoading(false);
@@ -319,11 +335,22 @@ export default function RequestDetailsPage() {
                     <AlertCircle className="w-12 h-12 mx-auto mb-4 text-neutral-600" />
                     <p className="text-neutral-400">No quotes yet</p>
                     <p className="text-sm text-neutral-500 mt-1">
-                      Professionals are being notified. Quotes will appear here.
+                      {reach && reach.notified > 0
+                        ? `Sent to ${reach.notified} matching ${
+                            reach.notified === 1 ? 'professional' : 'professionals'
+                          }${reach.viewed > 0 ? ` · ${reach.viewed} viewed so far` : ''}. Quotes will appear here.`
+                        : 'Matching professionals are being notified. Quotes will appear here.'}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
+                    {reach && reach.notified > 0 && (
+                      <p className="text-sm text-neutral-500">
+                        Sent to {reach.notified} matching{' '}
+                        {reach.notified === 1 ? 'professional' : 'professionals'}
+                        {reach.viewed > 0 && ` · ${reach.viewed} viewed`}
+                      </p>
+                    )}
                     {quotes.map((quote) => (
                       <div
                         key={quote.id}

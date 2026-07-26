@@ -122,19 +122,6 @@ const pricingTiers = [
   },
 ];
 
-const payPerLeadTier = {
-  id: 'payPerLead',
-  name: 'Pay Per Lead',
-  price: 19.99,
-  period: '/lead',
-  description: 'No subscription required',
-  features: [
-    'No monthly commitment',
-    'Pay only for leads you want',
-    'View lead details before purchase',
-    'Perfect for getting started',
-  ],
-};
 
 const tierDisplayNames: Record<string, string> = {
   basic: 'Early Bird',
@@ -853,46 +840,6 @@ export function SubscriptionView({ businessId, subscription, hasStripeCustomer }
             </CardContent>
           </Card>
         ))}
-      </div>
-
-      {/* Pay Per Lead Section */}
-      <div className="mb-12">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <CreditCard className="w-5 h-5" />
-          Or Pay Per Lead
-        </h2>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div className="mb-4 md:mb-0">
-                <h3 className="text-lg font-semibold text-white">{payPerLeadTier.name}</h3>
-                <p className="text-neutral-400 mt-1">{payPerLeadTier.description}</p>
-                <div className="mt-3">
-                  <span className="text-3xl font-bold text-white">${payPerLeadTier.price}</span>
-                  <span className="text-neutral-400">{payPerLeadTier.period}</span>
-                </div>
-              </div>
-              <div className="md:text-right">
-                <ul className="space-y-2 mb-4">
-                  {payPerLeadTier.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm text-neutral-300 md:justify-end">
-                      <Check className="w-4 h-4 text-green-400 mr-2" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  variant="outline"
-                  className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
-                  onClick={() => handleSubscribe(payPerLeadTier.id)}
-                  disabled={!!processing}
-                >
-                  {processing === payPerLeadTier.id ? 'Processing...' : 'Get Started'}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* FAQ Section */}
