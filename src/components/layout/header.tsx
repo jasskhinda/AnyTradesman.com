@@ -20,7 +20,36 @@ export function Header({ initialUser }: HeaderProps = {}) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [user, setUser] = useState<Profile | null>(initialUser ?? null);
   const [isLoading, setIsLoading] = useState(initialUser === undefined);
+  const [unreadCount, setUnreadCount] = useState(0);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Unread message badge. Polls a server route (rather than querying Supabase
+  // from the browser) and refreshes when the tab regains focus.
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+    let cancelled = false;
+    async function refreshUnread() {
+      try {
+        const res = await fetch('/api/messages/unread-count');
+        const data = await res.json();
+        if (!cancelled) setUnreadCount(Number(data.count) || 0);
+      } catch {
+        // keep the previous value
+      }
+    }
+    refreshUnread();
+    const interval = setInterval(refreshUnread, 30000);
+    const onFocus = () => refreshUnread();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [user]);
 
   // Close profile menu when clicking outside
   useEffect(() => {
@@ -179,8 +208,16 @@ export function Header({ initialUser }: HeaderProps = {}) {
                 <Link href="/business" className="text-neutral-700 hover:text-neutral-900 font-medium">
                   My Business
                 </Link>
-                <Link href="/messages" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                <Link
+                  href="/messages"
+                  className="relative inline-flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-medium"
+                >
                   Messages
+                  {unreadCount > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-semibold">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
               </>
             ) : user ? (
@@ -194,8 +231,16 @@ export function Header({ initialUser }: HeaderProps = {}) {
                 <Link href="/my-requests" className="text-neutral-700 hover:text-neutral-900 font-medium">
                   My Requests
                 </Link>
-                <Link href="/messages" className="text-neutral-700 hover:text-neutral-900 font-medium">
+                <Link
+                  href="/messages"
+                  className="relative inline-flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-medium"
+                >
                   Messages
+                  {unreadCount > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-semibold">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
               </>
             ) : (
@@ -315,7 +360,14 @@ export function Header({ initialUser }: HeaderProps = {}) {
                   className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Messages
+                  <span className="inline-flex items-center gap-2">
+                    Messages
+                    {unreadCount > 0 && (
+                      <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-semibold">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </span>
                 </Link>
                 <Link
                   href="/settings"
@@ -365,7 +417,14 @@ export function Header({ initialUser }: HeaderProps = {}) {
                       className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Messages
+                      <span className="inline-flex items-center gap-2">
+                        Messages
+                        {unreadCount > 0 && (
+                          <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-semibold">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
+                      </span>
                     </Link>
                     <Link
                       href="/dashboard"

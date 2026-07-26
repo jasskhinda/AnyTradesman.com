@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { getBusinessCategoryIds, serviceAreaMatches } from '@/lib/leads/matching';
 import { HeaderWrapper } from '@/components/layout/header-wrapper';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -85,13 +86,21 @@ export default async function DashboardPage() {
   const isBusinessOwner = profile.role === 'business_owner';
 
   // Fetch business and subscription for business owners
-  let business: { id: string } | null = null;
+  let business: {
+    id: string;
+    city: string | null;
+    state: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    service_radius_miles: number | null;
+  } | null = null;
+  let unreadMessageCount = 0;
   let subscription: { tier: string; status: string; current_period_end: string | null } | null = null;
 
   if (isBusinessOwner) {
     const { data: biz } = await supabase
       .from('businesses')
-      .select('id')
+      .select('id, city, state, latitude, longitude, service_radius_miles')
       .eq('owner_id', user.id)
       .maybeSingle();
     business = biz;
@@ -113,7 +122,6 @@ export default async function DashboardPage() {
   // Fetch actual counts with error handling
   let serviceRequestCount = 0;
   let quoteCount = 0;
-  const messageCount = 0;
 
   // Analytics data for subscribed business owners
   let analyticsData: {
@@ -125,14 +133,48 @@ export default async function DashboardPage() {
     totalMessages: number;
   } | null = null;
 
+  // Unread messages addressed to this user, across their conversations
+  {
+    const { data: convos } = business
+      ? await supabase
+          .from('conversations')
+          .select('id')
+          .or(`customer_id.eq.${user.id},business_id.eq.${business.id}`)
+      : await supabase.from('conversations').select('id').eq('customer_id', user.id);
+
+    const convoIds = (convos || []).map((c: { id: string }) => c.id);
+    if (convoIds.length) {
+      const { count } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .in('conversation_id', convoIds)
+        .eq('is_read', false)
+        .neq('sender_id', user.id);
+      unreadMessageCount = count || 0;
+    }
+  }
+
   try {
     if (isBusinessOwner) {
-      // For business owners, count leads (open service requests in their area)
-      const { count: leadCount } = await supabase
-        .from('service_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'open');
-      serviceRequestCount = leadCount || 0;
+      // Leads actually available to THIS business: open requests in the
+      // trades it serves and inside its service area — the same rule the
+      // /leads feed uses. Counting every open request platform-wide made the
+      // dashboard promise leads that were never shown.
+      if (business) {
+        const myCategoryIds = await getBusinessCategoryIds(supabase, business.id);
+        if (myCategoryIds.length) {
+          const { data: openRequests } = await supabase
+            .from('service_requests')
+            .select('id, city, state, latitude, longitude')
+            .eq('status', 'open')
+            .in('category_id', myCategoryIds)
+            .limit(300);
+
+          serviceRequestCount = (openRequests || []).filter((r) =>
+            serviceAreaMatches(business, r)
+          ).length;
+        }
+      }
 
       // Fetch analytics for subscribed business owners
       if (business && hasActiveSubscription) {
@@ -165,7 +207,7 @@ export default async function DashboardPage() {
             ? Math.round(((acceptedQuotes.count || 0) / totalQuotes.count) * 100)
             : 0,
           leadsViewed: serviceRequestCount,
-          totalMessages: 0,
+          totalMessages: unreadMessageCount,
         };
       }
     } else {
@@ -314,7 +356,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-neutral-400">Messages</p>
-                    <p className="text-lg font-semibold text-white">{messageCount}</p>
+                    <p className="text-lg font-semibold text-white">{unreadMessageCount}</p>
                   </div>
                 </div>
               </CardContent>

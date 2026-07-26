@@ -18,6 +18,15 @@ interface Conversation {
   unread_count: number;
 }
 
+interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 interface MessagesPageProps {
   searchParams: Promise<{ business?: string; request?: string }>;
 }
@@ -147,12 +156,26 @@ export default async function MessagesPage({ searchParams }: MessagesPageProps) 
     });
   }
 
+  // Preload the opening conversation's messages so the pane renders with
+  // content instead of a spinner.
+  let initialMessages: Message[] = [];
+  const openingId = initialSelectedId ?? conversations[0]?.id ?? null;
+  if (openingId) {
+    const { data: msgs } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', openingId)
+      .order('created_at', { ascending: true });
+    initialMessages = (msgs as Message[]) ?? [];
+  }
+
   return (
     <MessagesView
       userId={user.id}
       userProfile={profile as Profile | null}
       initialConversations={conversations}
-      initialSelectedId={initialSelectedId}
+      initialSelectedId={openingId}
+      initialMessages={initialMessages}
     />
   );
 }

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { createClient } from '@/lib/supabase/client';
 import { MessageSquare, Search, Loader2, Send } from 'lucide-react';
 import type { Profile } from '@/types/database';
 
@@ -37,6 +36,7 @@ interface MessagesViewProps {
   userProfile: Profile | null;
   initialConversations: Conversation[];
   initialSelectedId?: string | null;
+  initialMessages?: Message[];
 }
 
 export function MessagesView({
@@ -44,11 +44,12 @@ export function MessagesView({
   userProfile,
   initialConversations,
   initialSelectedId = null,
+  initialMessages = [],
 }: MessagesViewProps) {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(initialSelectedId);
   const [searchQuery, setSearchQuery] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -65,29 +66,27 @@ export function MessagesView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConversation]);
 
+  // Loaded through an API route rather than the browser Supabase client:
+  // the client-side auth call can hang, which left this stuck on its spinner.
+  // The route also marks the other party's messages as read.
   async function loadMessages(conversationId: string, showSpinner: boolean) {
     if (showSpinner) setLoadingMessages(true);
-    const supabase = createClient();
-
-    const { data: msgs, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true });
-
-    if (!error && msgs) {
-      setMessages(msgs);
-      // Mark the other party's messages as read (server route — RLS blocks client updates)
-      fetch('/api/messages/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversation_id: conversationId }),
-      }).catch(() => {});
-      setConversations((prev) =>
-        prev.map((c) => (c.id === conversationId ? { ...c, unread_count: 0 } : c))
+    try {
+      const res = await fetch(
+        `/api/messages/list?conversation_id=${encodeURIComponent(conversationId)}`
       );
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.messages)) {
+        setMessages(data.messages);
+        setConversations((prev) =>
+          prev.map((c) => (c.id === conversationId ? { ...c, unread_count: 0 } : c))
+        );
+      }
+    } catch {
+      // leave whatever is on screen; the poll will retry
+    } finally {
+      if (showSpinner) setLoadingMessages(false);
     }
-    if (showSpinner) setLoadingMessages(false);
   }
 
   async function sendMessage(e: React.FormEvent) {
